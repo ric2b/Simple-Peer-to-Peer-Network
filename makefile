@@ -1,5 +1,12 @@
 #makefile
 
-test: lab1.c
-	gcc lab1.c -o lab1
+UDP: lab1_UDP.c
+	gcc lab1_UDP.c -o lab1_UDP
+
+TCP: lab1_TCP.c
+	gcc lab1_TCP.c -o lab1_TCP
+
+clean: 
+	rm lab1_UDP
+	rm lab1_TCP
 
