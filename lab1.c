@@ -2,6 +2,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
@@ -9,13 +13,17 @@ extern int errno;
 
 int main(void)
 {
-	char buffer[128];
+	struct hostent *h;
+	struct in_addr *a;
 
-	if(gethostname(buffer,128)==-1)
+	if((h = gethostbyname("www.google.com"))==NULL)
 	{
-		printf("error: %s\n", strerror(errno));
+		exit(1);
 	}
 
-	else printf("host name: %s\n", buffer);
+	printf("official host name: %s\n", h->h_name);
+
+	a = (struct in_addr*)h->h_addr_list[0];
+	printf("internet address: %s (%08lX)\n", inet_ntoa(*a), (long unsigned int)ntohl(a->s_addr));
 	exit(0);
 }
