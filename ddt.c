@@ -58,5 +58,6 @@ int main(int argc, char **argv)
 
   printf("\n");
   printf("You can type the following commands: \n");
+  printf("\n");
 
 }
