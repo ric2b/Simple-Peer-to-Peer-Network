@@ -11,7 +11,8 @@ int main(int argc, char **argv)
   //Ringport is the TCP server port used for establishing a TCP session in the ring
 
   char* bootIP;
-  int bootport,ringport,option;
+  char userInput[64], cmd[20];
+  int bootport,ringport,option,exitProgram,cmdlen;
 
   //By default, bootIP="tejo.ist.utl.pt" and bootport=58000
   bootIP="tejo.ist.utl.pt\0";
@@ -57,7 +58,62 @@ int main(int argc, char **argv)
   printf("\tSelected bootport: %i\n",bootport);
 
   printf("\n");
-  printf("You can type the following commands: \n");
+
+  printf("Type 'help' to show the available commands.\n");
+
   printf("\n");
+
+  exitProgram = 0;
+
+  while(exitProgram == 0)
+  {
+
+    fgets(userInput,63,stdin);
+
+    sscanf(userInput,"%s",cmd);
+
+    if(strcmp(cmd,"exit") == 0)
+    {
+      exitProgram = 1;
+
+      printf("\n");
+      printf("You have closed the application.\n");
+      printf("\n");
+    }
+    else if(strcmp(cmd,"leave") == 0)
+    {
+      printf("\n");
+      printf("You removed your node from the current ring.\n");
+      printf("\n");
+    }
+    else if(strcmp(cmd,"show") == 0)
+    {
+      printf("\n");
+      printf("Showing ring number, node identifier and predi/succi identifiers.\n");
+      printf("\n");
+    }
+    else if(strcmp(cmd,"search") == 0)
+    {
+      printf("\n");
+      printf("Searching the identifier and localization of the node responsible for the identifier k.\n");
+      printf("\n");
+    }
+    else if(strcmp(cmd,"join") == 0)
+    {
+      printf("\n");
+      printf("Joining stuff!\n");
+      printf("\n");
+    }
+    else
+    {
+      printf("\n");
+      printf("The command you have inserted is non existent.\n");
+      printf("\n");
+      printf("Type 'help' to show the available commands.\n");
+      printf("\n");
+    }
+
+
+  }
 
 }
