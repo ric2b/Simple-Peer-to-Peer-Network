@@ -4,15 +4,15 @@
 #include <string.h>
 
 
-int main(int argc, char **argv)
+void main(int argc, char **argv)
 {
   //bootIP and bootport are the IP adress e UDP port of the starting server
 
   //Ringport is the TCP server port used for establishing a TCP session in the ring
 
   char* bootIP;
-  char userInput[64], cmd[20];
-  int bootport,ringport,option,exitProgram,cmdlen;
+  char userInput[64], cmd[20],succiIP[70];
+  int bootport,ringport,option,exitProgram,identifier,ringx,succi,succiTCP;
 
   //By default, bootIP="tejo.ist.utl.pt" and bootport=58000
   bootIP="tejo.ist.utl.pt\0";
@@ -67,6 +67,10 @@ int main(int argc, char **argv)
 
   while(exitProgram == 0)
   {
+    ringx = 0;
+    identifier = -1;
+    succi = -1;
+    succiTCP = -1;
 
     fgets(userInput,63,stdin);
 
@@ -94,15 +98,39 @@ int main(int argc, char **argv)
     }
     else if(strcmp(cmd,"search") == 0)
     {
-      printf("\n");
-      printf("Searching the identifier and localization of the node responsible for the identifier k.\n");
-      printf("\n");
+
+      sscanf(userInput,"%s %i",cmd,&identifier);
+      //corrigir o caso para o qual o utilizador nao insere o argumento
+
+      if(identifier > -1 && identifier < 64)
+      {
+        printf("\n");
+        printf("Searching the identifier and localization of the node responsible for the identifier %i.\n",identifier);
+        printf("\n");
+      }
+      else
+      {
+        printf("\n");
+        printf("You didn't specify an identifier k or it isn't on the specified interval.\n");
+        printf("\n");
+      }
     }
     else if(strcmp(cmd,"join") == 0)
     {
-      printf("\n");
-      printf("Joining stuff!\n");
-      printf("\n");
+      sscanf(userInput,"%s %i %i %i %s %i",cmd,&ringx,&identifier,&succi,succiIP,&succiTCP);
+
+      if(ringx > 0 && identifier > -1 && identifier < 64 && succi > -1 && succi < 64 && succiTCP > -1)
+      {
+        printf("\n");
+        printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n",ringx,identifier,succi,succiIP,succiTCP);
+        printf("\n");
+      }
+      else
+      {
+        printf("\n");
+        printf("Your joining command doesn't have the correct arguments.\n");
+        printf("\n");
+      }
     }
     else
     {
