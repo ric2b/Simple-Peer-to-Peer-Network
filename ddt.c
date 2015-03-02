@@ -17,10 +17,10 @@ void main(int argc, char **argv)
   //By default, bootIP="tejo.ist.utl.pt" and bootport=58000
   bootIP="tejo.ist.utl.pt\0";
   bootport=58000;
-
-  if(argc % 2 == 0 && argc != 1)
+  if(argc != 7 || argc == 1)
     {
-      printf("The function doesn't have enough arguments or it has more arguments than it can handle.\n");
+      printf("\nThe program doesn't have enough arguments or it has more arguments than it can handle.\n\n");
+      printf("Invoke the program as the following: ./ddt - t ringport -i bootIP -p bootport\n\n");
       exit(1);
     }
 
@@ -65,83 +65,81 @@ void main(int argc, char **argv)
 
   exitProgram = 0;
 
-  while(exitProgram == 0)
-  {
-    ringx = 0;
-    identifier = -1;
-    succi = -1;
-    succiTCP = -1;
+  while(exitProgram == 0){
+      ringx = 0;
+      identifier = -1;
+      succi = -1;
+      succiTCP = -1;
+      printf(">");
+      fgets(userInput,63,stdin);
 
-    fgets(userInput,63,stdin);
+      sscanf(userInput,"%s",cmd);
 
-    sscanf(userInput,"%s",cmd);
-
-    if(strcmp(cmd,"exit") == 0)
-    {
-      exitProgram = 1;
-
-      printf("\n");
-      printf("You have closed the application.\n");
-      printf("\n");
-    }
-    else if(strcmp(cmd,"leave") == 0)
-    {
-      printf("\n");
-      printf("You removed your node from the current ring.\n");
-      printf("\n");
-    }
-    else if(strcmp(cmd,"show") == 0)
-    {
-      printf("\n");
-      printf("Showing ring number, node identifier and predi/succi identifiers.\n");
-      printf("\n");
-    }
-    else if(strcmp(cmd,"search") == 0)
-    {
-
-      sscanf(userInput,"%s %i",cmd,&identifier);
-      //corrigir o caso para o qual o utilizador nao insere o argumento
-
-      if(identifier > -1 && identifier < 64)
-      {
+      if(strcmp(cmd,"exit") == 0){
+        exitProgram = 1;
         printf("\n");
-        printf("Searching the identifier and localization of the node responsible for the identifier %i.\n",identifier);
+        printf("You have closed the application.\n");
         printf("\n");
+      }else{
+          if(strcmp(cmd,"leave") == 0){
+              printf("\n");
+              printf("You removed your node from the current ring.\n");
+              printf("\n");
+          }else{ 
+              if(strcmp(cmd,"show") == 0){
+                  printf("\n");
+                  printf("Showing ring number, node identifier and predi/succi identifiers.\n");
+                  printf("\n");
+              }else{ 
+                  if(strcmp(cmd,"search") == 0){
+                      sscanf(userInput,"%s %i",cmd,&identifier);
+                      //corrigir o caso para o qual o utilizador nao insere o argumento
+
+                      if(identifier > -1 && identifier < 64){
+                          printf("\n");
+                          printf("Searching the identifier and localization of the node responsible for the identifier %i.\n",identifier);
+                          printf("\n");
+                      }else{
+                          printf("\n");
+                          printf("You didn't specify an identifier k or it isn't on the specified interval.\n");
+                          printf("\n");
+                      }
+                  }else{ 
+                      if(strcmp(cmd,"join") == 0){
+                          sscanf(userInput,"%s %i %i %i %s %i",cmd,&ringx,&identifier,&succi,succiIP,&succiTCP);
+
+                          if(ringx > 0 && identifier > -1 && identifier < 64 && succi > -1 && succi < 64 && succiTCP > -1){
+                              printf("\n");
+                              printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n",ringx,identifier,succi,succiIP,succiTCP);
+                              printf("\n");
+                          }else{
+                              printf("\n");
+                              printf("Your joining command doesn't have the correct arguments.\n");
+                              printf("\n");
+                          }
+                      }else{
+                          if(strcmp(cmd,"help") == 0){
+                              printf("\n");
+                              printf("> join x i\n");
+                              printf("> join x i succi succi.IP succ i.TCP\n");
+                              printf("> leave\n");
+                              printf("> show \n");
+                              printf("> search k\n");
+                              printf("> exit\n");
+                              printf("\n");
+                          }else{
+                              printf("\n");
+                              printf("The command you have inserted is non existent.\n");
+                              printf("\n");
+                              printf("Type 'help' to show the available commands.\n");
+                              printf("\n");
+                          }
+                      }
+                  }
+              }
+          }
       }
-      else
-      {
-        printf("\n");
-        printf("You didn't specify an identifier k or it isn't on the specified interval.\n");
-        printf("\n");
-      }
-    }
-    else if(strcmp(cmd,"join") == 0)
-    {
-      sscanf(userInput,"%s %i %i %i %s %i",cmd,&ringx,&identifier,&succi,succiIP,&succiTCP);
-
-      if(ringx > 0 && identifier > -1 && identifier < 64 && succi > -1 && succi < 64 && succiTCP > -1)
-      {
-        printf("\n");
-        printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n",ringx,identifier,succi,succiIP,succiTCP);
-        printf("\n");
-      }
-      else
-      {
-        printf("\n");
-        printf("Your joining command doesn't have the correct arguments.\n");
-        printf("\n");
-      }
-    }
-    else
-    {
-      printf("\n");
-      printf("The command you have inserted is non existent.\n");
-      printf("\n");
-      printf("Type 'help' to show the available commands.\n");
-      printf("\n");
-    }
-
-
   }
 
+  exit(0);
 }
