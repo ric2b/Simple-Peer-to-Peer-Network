@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+
+
+int main(void)
+{
+  struct hostent *h;
+  struct in_addr *a;
+  struct sockaddr_in addr;
+  int fd, n, addrlen;
+  char buffer[128];
+
+/* --------------------------< GetHostByName >--------------------------------- */
+
+  if((h=gethostbyname("tejo.tecnico.ulisboa.pt"))==NULL) //substituir por bootIP
+  {
+    exit(0);//error
+  }
+
+  a=(struct in_addr*)h->h_addr_list[0];
+
+/* --------------------------< SendingToUDP >--------------------------------- */
+
+  fd=socket(AF_INET,SOCK_DGRAM,0);
+
+  if(fd == -1)
+  {
+    exit(1);
+  }
+
+  memset((void*)&addr,(int)'\0',sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_addr = *a;
+  addr.sin_port = htons(58000);
+
+  n=sendto(fd,"BQRY 69\n",7,0,(struct sockaddr*)&addr,sizeof(addr));
+
+  if(n==-1)
+  {
+  exit(2);
+  }
+
+/* ----------------------------< ReceivingFromUDP >------------------------------- */
+
+  addrlen = sizeof(addr);
+
+  n = recvfrom(fd,buffer,128,0,(struct sockaddr*)&addr,&addrlen);
+
+  if(n==-1)
+  {
+  exit(3);//error
+  }
+
+
+  write(1,"> [server]: ",12);//stdout
+  write(1,buffer,n);
+  printf("\n");
+
+  close(fd);
+  exit(4);
+
+
+}

@@ -13,7 +13,7 @@
 extern int errno;
 
 int main(void)
-{	
+{
 	struct hostent *h;
 	struct in_addr *a;
 	struct sockaddr_in addr;
@@ -24,7 +24,7 @@ int main(void)
 		exit(1);
 
 	a = (struct in_addr*)h->h_addr_list[0];
-	
+
 	fd=socket(AF_INET,SOCK_DGRAM,0);
 	if(fd==-1)
 	{
@@ -32,18 +32,18 @@ int main(void)
 	}
 
 	addrlen=sizeof(addr);
-	
+
 	memset((void*)&addr,(int)'\0',addrlen);
 
 	addr.sin_family = AF_INET;
 	addr.sin_addr = *a;
-	addr.sin_port = htons(8000);
-	
+	addr.sin_port = htons(58001);
+
 	n=sendto(fd,"Hello!\n",7,0,(struct sockaddr*)&addr,addrlen);
-	
+
 	if(n==-1) exit(1);
-	
-	
+
+
 	n=recvfrom(fd,buffer,128,0,(struct sockaddr *)&addr,&addrlen);
 
 	if(n==-1) exit(1);
@@ -53,5 +53,5 @@ int main(void)
 
 	close(fd);
 	exit(0);
-	
+
 }
