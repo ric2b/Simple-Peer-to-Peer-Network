@@ -4,13 +4,13 @@ CFLAGS = -Wall -g
 all: ddt 
 
 # ddt
-ddt: ddt.o configuration.o
+ddt: ddt.o interface.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-ddt.o: ddt.c configuration.h
+ddt.o: ddt.c interface.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-configuration.o: configuration.c
+interface.o: interface.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
