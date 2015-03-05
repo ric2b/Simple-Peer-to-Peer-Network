@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
 	struct sockaddr_in addr;
 	int socketFD = setupSocket(bootIP, bootport, &addr);
-	int addrlen = sizeof(addr);
+	socklen_t addrlen = sizeof(addr);
 	
 	char buffer[128];
 	memset(buffer,0,128);
