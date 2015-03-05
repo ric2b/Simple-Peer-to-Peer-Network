@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
   memset((void*)&addr,(int)'\0',sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr = *a;
-  addr.sin_port = htons(58001);
+  addr.sin_port = htons(58000);
 
   n=sendto(fd,arguments,strlen(arguments),0,(struct sockaddr*)&addr,sizeof(addr));
 
