@@ -14,7 +14,7 @@ int main(int argc, char ** argv)
   struct hostent *h;
   struct in_addr *a;
   struct sockaddr_in addr;
-  int fd, n, addrlen;
+  int fd, n;
   char buffer[128];
 
   int i;
@@ -51,12 +51,14 @@ int main(int argc, char ** argv)
     exit(1);
   }
 
-  memset((void*)&addr,(int)'\0',sizeof(addr));
+  socklen_t addrlen = sizeof(addr);
+
+  memset((void*)&addr,(int)'\0',addrlen);
   addr.sin_family = AF_INET;
   addr.sin_addr = *a;
   addr.sin_port = htons(58000);
 
-  n=sendto(fd,arguments,strlen(arguments),0,(struct sockaddr*)&addr,sizeof(addr));
+  n=sendto(fd,arguments,strlen(arguments),0,(struct sockaddr*)&addr,addrlen);
 
   if(n==-1)
   {
@@ -64,8 +66,6 @@ int main(int argc, char ** argv)
   }
 
 /* ----------------------------< ReceivingFromUDP >------------------------------- */
-
-  addrlen = sizeof(addr);
 
   n = recvfrom(fd,buffer,128,0,(struct sockaddr*)&addr,&addrlen);
 

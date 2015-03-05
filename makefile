@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g
 
-all: ddt 
+all: ddt testTejo
 
 # ddt
 ddt: ddt.o interface.o network.o
@@ -16,6 +16,14 @@ interface.o: interface.c
 network.o: network.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+#testTejo
+testTejo: testTejo.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+testTejo.o: testTejo.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+#clean
 clean:
 	clear
 	rm *.o
