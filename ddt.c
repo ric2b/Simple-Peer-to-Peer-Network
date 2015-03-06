@@ -7,17 +7,16 @@
 
 int main(int argc, char **argv)
 {
-	char * bootIP;
+	char *bootIP;
 	int	bootport, ringport;
 	char 	userInput[64], cmd[20],succiIP[70];
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
 	requestUDP* startUDP;
-	//By default, bootIP="tejo.ist.utl.pt" and bootport=58000
-	bootIP = "tejo.ist.utl.pt\0";
-	bootport = 58000;
+	
+	bootIP = (char*) malloc(128*sizeof(char));
 
-	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
+	bootIP = (char*) check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
 
 	printf("\nWelcome to your favorite p2p client! You have chosen the following specifications: \n\n");
 	
