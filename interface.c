@@ -4,6 +4,7 @@
 #include <string.h>
 
 //#include "interface.h"
+#include "joining.h"
 
 int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
 {
@@ -42,45 +43,50 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 	return 0;
 }
 
-int run_commands(char * userInput, char * cmd, char * succiIP, int * identifier, int * ringx, int* succi, int * succiTCP)
+int run_commands(char * userInput, char * cmd, char * succiIP,int * exitProgram, int * identifier, int * ringx, int* succi, int * succiTCP, int bootport, char* bootIP, int ringport, requestUDP* start)
 {
+
    printf("> ");
    fgets(userInput,63,stdin);
 
    sscanf(userInput,"%s",cmd);
 
    if(strcmp(cmd,"exit") == 0)
-	{
+   {
 		printf("\nYou have closed the application.\n\n");
 		return 1;
    }
 	else if(strcmp(cmd,"leave") == 0)
 	{
            printf("\nYou removed your node from the current ring.\n\n");
-   }
+    }
 	else if(strcmp(cmd,"show") == 0)
 	{
          printf("\nShowing ring number, node identifier and predi/succi identifiers.\n\n");
-   }
-	else	if(strcmp(cmd,"search") == 0)
+    }
+	else if(strcmp(cmd,"search") == 0)
 	{
-       sscanf(userInput,"%s %i",cmd, identifier);
-       //corrigir o caso para o qual o utilizador nao insere o argumento
+       if(sscanf(userInput,"%s %i",cmd, identifier)!=2)
+       {
+       	 printf("\nInvalid command, use: search [k]\n\n");
+         return 0;
+       }
 
        if(* identifier > -1 && * identifier < 64)
-		 {
+	   {
            printf("\nSearching the identifier and localization of the node responsible for the identifier %i.\n\n", * identifier);
        }
-		 else
-		 {
+	   else
+	   {
            printf("\nYou didn't specify an identifier k or it isn't on the specified interval.\n\n");
-    	 }
+       }
    }
 	else if(strcmp(cmd,"join") == 0)
 	{
-		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, ringx, identifier, succi, succiIP, succiTCP) ==3)
+		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, ringx, identifier, succi, succiIP, succiTCP) == 3)
 		{
 			printf("Joining ring number %i with an identifier %i.\n", * ringx, * identifier);
+			process_join(*ringx, *identifier, ringport, bootport, bootIP, start); 
 		}
 
 		else if(* ringx > 0 && * identifier > -1 && * identifier < 64 && * succi > -1 && * succi < 64 && * succiTCP > -1)
@@ -91,7 +97,7 @@ int run_commands(char * userInput, char * cmd, char * succiIP, int * identifier,
 		{
          printf("\nYour joining command doesn't have the correct arguments.\n\n");
   		}
-   }
+    }
 	else if(strcmp(cmd,"help") == 0)
 	{
          printf("\n\t- join [x] [i]\n");
@@ -100,11 +106,11 @@ int run_commands(char * userInput, char * cmd, char * succiIP, int * identifier,
          printf("\t- show \n");
          printf("\t- search [k]\n");
          printf("\t- exit\n\n");
-   }
+    }
 	else
 	{
          printf("\nThe command you have inserted is non existent.\n");
          printf("\nType 'help' to show the available commands.\n\n");
-   }
+    }
 	return 0;
 }

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "interface.h"
 #include "network.h"
@@ -13,11 +12,9 @@ int main(int argc, char **argv)
 	char 	userInput[64], cmd[20],succiIP[70];
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
-
-	
-
+	requestUDP* startUDP;
 	//By default, bootIP="tejo.ist.utl.pt" and bootport=58000
-	bootIP = "tejo.ist.utl.pt";
+	bootIP = "tejo.ist.utl.pt\0";
 	bootport = 58000;
 
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
@@ -30,23 +27,7 @@ int main(int argc, char **argv)
 
 	printf("Type 'help' to show the available commands.\n\n");
 	
-
-	/* exemplo de sendto e recvfrom directamente do main, se de jeito */
-
-	struct sockaddr_in addr;
-	int socketFD = setupSocket(bootIP, bootport, &addr);
-	socklen_t addrlen = sizeof(addr);
-	
-	char buffer[128];
-	memset(buffer,0,128);
-	
-	sendto(socketFD,"BQRY 2\n",7,0,(struct sockaddr*)&addr,addrlen);
-	recvfrom(socketFD,buffer,128,0,(struct sockaddr*)&addr,&addrlen);
-	printf("%s\n", buffer);
-	
-	close(socketFD);
-
-	/* end example */
+	startUDP = createUDP(bootIP, bootport, 0, NULL,0);
 
 	do
 	{
@@ -55,8 +36,7 @@ int main(int argc, char **argv)
    		succi = -1;
    		succiTCP = -1;
 		memset(succiIP,0,70);	
-	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP));	
+	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP, bootport, bootIP, ringport, startUDP));	
 
-	
   	exit(0);
 }

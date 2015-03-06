@@ -1,12 +1,14 @@
 #ifndef _NETWORK_H
 #define _NETWORK_H
 
-#include <netdb.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+typedef struct requestUDP
+{
+  char request[128];
+  int fdUDP;
+}requestUDP;
 
-int setupSocket(char * servidorArranque, int port, struct sockaddr_in * addr);
+
+requestUDP* createUDP(char* , int , int , char* , int );
+
 
 #endif
