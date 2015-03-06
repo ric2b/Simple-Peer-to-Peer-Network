@@ -21,7 +21,7 @@ int main(int argc, char ** argv)
   char arguments[1024];
 
   if(argc <= 1)
-  { 
+  {
     printf("Introduza a mensagem a enviar ao tejo\n");
     exit(-1);
   }

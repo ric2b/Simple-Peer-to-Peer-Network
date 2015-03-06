@@ -27,7 +27,8 @@ testTejo.o: testTejo.c
 clean:
 	clear
 	rm *.o
-
+	rm ddt
+	rm testTejo
 
 
 # $@ reffers to named before :
