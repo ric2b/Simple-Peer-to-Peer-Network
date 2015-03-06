@@ -14,12 +14,19 @@ typedef struct requestUDP
   int fdUDP;
 }requestUDP;
 
+typedef struct requestTCP
+{
+  char request[128];
+  int fdTCP;
+}requestTCP;
+
 requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int socketUDP)
 {
   struct hostent *h;
   struct in_addr *a;
   struct sockaddr_in addr;
-  int fd, n, addrlen;
+  int fd, n;
+  socklen_t addrlen;
   char buffer[128];
   requestUDP* response;
 
@@ -29,7 +36,7 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
 
   response = (requestUDP*) malloc(sizeof(requestUDP));
 /* --------------------------< GetHostByName >--------------------------------- */
-
+  printf("BootIp: %s\n",bootIP);
   if((h=gethostbyname(bootIP))==NULL) //substituir por bootIP
   {
     printf("\n%s isn't a valid host name \n",bootIP);
@@ -54,12 +61,18 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
   addr.sin_family = AF_INET;
   addr.sin_addr = *a;
   addr.sin_port = htons(bootport);
-
+  printf("Bootport: %d\n",bootport);
+  printf("Status: %d\n",status);
   if(status == 1)
   {
     response->fdUDP = socketUDP;
-    n=sendto(socketUDP,command,sizeof(command),0,(struct sockaddr*)&addr,sizeof(addr));
+    printf("Command sent in function: %s\n",command);
+    printf("Socket sent: %d\n", socketUDP);
+    printf("Command size: %d\n",strlen(command));
 
+    n=sendto(socketUDP,command,strlen(command),0,(struct sockaddr*)&addr,sizeof(addr));
+
+    printf("Bytes sent: %d\n",n);
     if(n==-1)
     {
       printf("\nImpossible to send message to the socket\n");
@@ -69,9 +82,9 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
   /* ----------------------------< ReceivingFromUDP >------------------------------- */
 
     addrlen = sizeof(addr);
-
     n = recvfrom(socketUDP,buffer,128,0,(struct sockaddr*)&addr,&addrlen);
-
+    printf("Bytes received: %d\n",n);
+    printf("Received: %s\n",buffer);
     if(n==-1)
     {
       printf("\nCan't create socket\n");
@@ -85,6 +98,51 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
   }
   return response;
 }
+
+requestTCP* TCPconnection(char* linkIP,int TCPport)
+{
+	struct sockaddr_in addr;
+	int fd,n;
+	socklen_t addrlen;
+	requestTCP* temp = NULL;
+	struct hostent *host;
+	   
+	fd=socket(AF_INET,SOCK_STREAM,0);
+	
+	if(fd==-1)
+	{
+		printf("Can create socket TCP\n");
+		exit(1);
+	}
+	
+	host = gethostbyname(linkIP);
+	
+    if(host == NULL) {
+        printf("Unknown host %s\n", linkIP);
+        exit(1);
+    }
+	
+    memset((void*)&addr,(int)'\0',sizeof(addr));
+	
+	addr.sin_family = AF_INET;
+	bcopy(host->h_addr, &addr.sin_addr, host->h_length);
+	addr.sin_port = htons(TCPport);
+	
+	addrlen=sizeof(addr);
+	printf("Preparing to connect to TCP %s\n",linkIP);
+	n=connect(fd,(struct sockaddr*)&addr,addrlen);
+	if(n==-1)
+	{
+		printf("TCP connection to %s not available\n",linkIP);
+		exit(1);
+	}
+	printf("Connected to TCP %s\n",linkIP);
+	temp = (requestTCP*) malloc(sizeof(requestTCP));
+	temp->fdTCP = fd;
+	strcmp(temp->request,"\0");
+	return temp;
+}	
+
 
 /*requestUDP* createTCP(char* bootIP, int bootport, int status, char* command, int socketUDP) //rever tudo
 {

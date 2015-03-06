@@ -7,8 +7,14 @@ typedef struct requestUDP
   int fdUDP;
 }requestUDP;
 
+typedef struct requestTCP
+{
+  char requestTCP[128];
+  int fdTCP;
+}requestTCP;
+
 
 requestUDP* createUDP(char* , int , int , char* , int );
-
+requestTCP* TCPconnection(char* ,int);
 
 #endif
