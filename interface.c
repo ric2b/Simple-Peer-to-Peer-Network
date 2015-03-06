@@ -6,7 +6,7 @@
 //#include "interface.h"
 #include "joining.h"
 
-int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
+char* check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
 {
   	//bootIP and bootport are the IP adress e UDP port of the starting server
 
@@ -40,7 +40,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 				exit(2);
 		 }
 	}
-	return 0;
+	return bootIP;
 }
 
 int run_commands(char * userInput, char * cmd, char * succiIP,int * exitProgram, int * identifier, int * ringx, int* succi, int * succiTCP, int bootport, char* bootIP, int ringport, requestUDP* start)
