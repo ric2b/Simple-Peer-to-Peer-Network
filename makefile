@@ -5,7 +5,7 @@ EXECUTABLES		= ddt testTejo
 S_DIR 			= source
 O_DIR 			= obj
 
-all: ddt testTejo
+all: makefolders ddt testTejo
 
 # ddt
 ddt: ddt.o interface.o network.o
@@ -26,6 +26,10 @@ testTejo: testTejo.o
 
 testTejo.o: $(S_DIR)/testTejo.c
 	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
+
+#makefolders
+makefolders: 
+	mkdir -p $(O_DIR)
 
 #clean
 clean:
