@@ -19,7 +19,8 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
   struct hostent *h;
   struct in_addr *a;
   struct sockaddr_in addr;
-  int fd, n, addrlen;
+  int fd, n;
+  socklen_t addrlen;
   char buffer[128];
   requestUDP* response;
 
@@ -65,7 +66,7 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
       printf("\nImpossible to send message to the socket\n");
       exit(1);
     }
-    
+
   /* ----------------------------< ReceivingFromUDP >------------------------------- */
 
     addrlen = sizeof(addr);
@@ -95,7 +96,7 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
 
   if((fd = socket(AF_INET,SOCK_STREAM,0)) ==-1)
     exit(1); //error
-  
+
   memset((void*)&addr,(int)'\0',sizeof(addr));
   addr.sin_family=AF_INET;
   addr.sin_addr.s_addr=htonl(INADDR_ANY);
@@ -110,7 +111,7 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
   while(1)
   {
     addrlen=sizeof(addr);
-    
+
     if((newfd=accept(fd,(struct sockaddr*)&addr,&addrlen))==-1)
       exit(1);//error
 
@@ -131,6 +132,6 @@ requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int
     }
     close(newfd);
   }
-  close(fd); 
-  exit(0); 
+  close(fd);
+  exit(0);
 }*/
