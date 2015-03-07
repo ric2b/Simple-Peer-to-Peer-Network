@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
 	char * bootIP;
 	int	bootport, ringport;
-	char 	userInput[64], cmd[20],succiIP[70];
+	char 	userInput[64], cmd[20],succiIP[70], buffer[128];
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
 
@@ -28,22 +28,12 @@ int main(int argc, char **argv)
 
 	printf("Type 'help' to show the available commands.\n\n");
 
-
-	/* exemplo de sendto e recvfrom directamente do main, se de jeito */
-
-
 	socketUDP socketCFG;
 	socketCFG = setupSocket(bootIP, bootport);
 
-	char buffer[128];
-
 	sendUDP("BQRY 2\n",7,socketCFG);
 	recvUDP(buffer, socketCFG);
-	printf("%s\n", buffer);
-
-	close(socketCFG.socketFD);
-
-	/* end example */
+	printf("%s\n", buffer);	
 
 	do
 	{
@@ -54,6 +44,6 @@ int main(int argc, char **argv)
 		memset(succiIP,0,70);
 	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP));
 
-
+	close(socketCFG.socketFD);
   	exit(0);
 }

@@ -16,26 +16,22 @@ int main(int argc, char ** argv)
   struct sockaddr_in addr;
   int fd, n;
   char buffer[128];
+  char host[128];  
+  char message[128];
+  int port;
 
-  int i;
-  char arguments[1024];
-
-  if(argc <= 1)
+  if(argc != 3)
   {
-    printf("Introduza a mensagem a enviar ao tejo\n");
+    printf("Introduza o host e a porta\n");
     exit(-1);
   }
 
-  strcpy(arguments, argv[1]);
-  for (i = 2; i < argc; ++i)
-  {
-    strcat(arguments, " ");
-    strcat(arguments, argv[i]);
-  }
+  strcpy(host, argv[1]);
+  sscanf(argv[2], " %d ", &port);
 
 /* --------------------------< GetHostByName >--------------------------------- */
 
-  if((h=gethostbyname("tejo.tecnico.ulisboa.pt"))==NULL) //substituir por bootIP
+  if((h=gethostbyname(host))==NULL) //substituir por bootIP
   {
     exit(0);//error
   }
@@ -53,34 +49,36 @@ int main(int argc, char ** argv)
 
   socklen_t addrlen = sizeof(addr);
 
-  memset((void*)&addr,(int)'\0',addrlen);
-  addr.sin_family = AF_INET;
-  addr.sin_addr = *a;
-  addr.sin_port = htons(58000);
-
-  n=sendto(fd,arguments,strlen(arguments),0,(struct sockaddr*)&addr,addrlen);
-
-  if(n==-1)
+  while(1)
   {
-  exit(2);
+    memset((void*)&addr,(int)'\0',addrlen);
+    addr.sin_family = AF_INET;
+    addr.sin_addr = *a;
+    addr.sin_port = htons(port);
+
+    printf("> ");
+    fgets(message, 128, stdin);
+    n=sendto(fd,message,strlen(message),0,(struct sockaddr*)&addr,addrlen);
+
+    if(n==-1)
+    {
+      printf("erro a enviar\n");
+      exit(2);
+    }
+
+    memset(buffer, 0, 128);
+    n = recvfrom(fd,buffer,128,0,(struct sockaddr*)&addr,&addrlen);
+
+    if(n==-1)
+    {
+      printf("erro a receber\n");
+      exit(3);//error
+    }
+
+    printf("[server]: %s\n", buffer);
+
+
   }
-
-/* ----------------------------< ReceivingFromUDP >------------------------------- */
-
-  n = recvfrom(fd,buffer,128,0,(struct sockaddr*)&addr,&addrlen);
-
-  if(n==-1)
-  {
-  exit(3);//error
-  }
-
-
-  write(1,"> [server]: ",12);//stdout
-  write(1,buffer,n);
-  printf("\n");
-
   close(fd);
   exit(4);
-
-
 }

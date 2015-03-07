@@ -18,5 +18,6 @@ int sendUDP(char * msg, int msg_length, socketUDP socketCFG);
 int recvUDP(char * buffer,socketUDP socketCFG);
 
 socketUDP setupSocket(char * servidorArranque, int port);
+void closeSocket(socketUDP socketCFG);
 
 #endif
