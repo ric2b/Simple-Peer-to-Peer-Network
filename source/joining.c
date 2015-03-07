@@ -3,8 +3,8 @@
 //#include <string.h>
 
 
-
-void joinspecific()
+ringStruct joinRing_KnownSucci(socketStruct startServerSocket, int succiID, char * succiIP)
 {
-  
+  ringStruct ringData;
+  return ringData;
 }

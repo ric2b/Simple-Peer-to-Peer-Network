@@ -42,8 +42,6 @@ int recvTCP(char * buffer,socketStruct socketCFG)
   return read(socketCFG.socketFD, buffer, 128);
 }
 
-
-
 /* --------------------------< SocketCreation >--------------------------------- */
 
 socketStruct setupSocket(char * servidorArranque, int port, char protocol)

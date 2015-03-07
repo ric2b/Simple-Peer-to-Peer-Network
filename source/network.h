@@ -14,11 +14,25 @@ typedef struct socketStruct
   socklen_t addrlen;
 } socketStruct;
 
+typedef struct ringStruct
+{	
+  int ringID;
+  int myID;
+  int succiID;
+  char * succiIP;
+  int succiPort;
+  int prediID;
+  char * prediIP;
+  int prediPort;
+} ringStruct;
+
 int sendUDP(char * msg, int msg_length, socketStruct socketCFG);
 int recvUDP(char * buffer,socketStruct socketCFG);
 
 void sendTCP(char * msg, int msg_length, socketStruct socketCFG);
 int recvTCP(char * buffer,socketStruct socketCFG);
+
+ringStruct joinRing_KnownSucci(socketStruct startServerSocket, int succiID, char * succiIP);
 
 socketStruct setupSocket(char * servidorArranque, int port, char protocol);
 void closeSocket(socketStruct socketCFG);
