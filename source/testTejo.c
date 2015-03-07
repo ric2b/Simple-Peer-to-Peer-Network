@@ -1,24 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "network.h"
+#define buffersize 128
 
 int main(int argc, char ** argv)
 {
-  int n;
-  char buffer[128];
-  char host[128];  
-  char message[128];
-  char mode[128];
   int port;
-
+  char buffer[buffersize], host[buffersize], message[buffersize], mode[buffersize];
   socketStruct socketcfg;
 
   if(argc != 4)
@@ -29,54 +20,33 @@ int main(int argc, char ** argv)
 
   strcpy(host, argv[1]);
   sscanf(argv[2], " %d ", &port);
-  strcpy(mode, argv[3]);
+  strcpy(mode, argv[3]); 
 
   while(1)
   {
+    printf("> ");
+    fgets(message, buffersize, stdin);
     /* --------------------------< UDP >--------------------------------- */
     if(strcmp("UDP", mode) == 0)
     {
-
-      socketcfg = setupSocket(host, port, 'U');     
-
-      printf("> ");
-      fgets(message, 128, stdin);
-      n=sendUDP(message,strlen(message),socketcfg);
-      if(n==-1)
-      {
-        printf("erro a enviar\n");
-        exit(2);
-      }
-
-      n = recvUDP(buffer, socketcfg);
-      if(n==-1)
-      {
-        printf("erro a receber\n");
-        exit(3);//error
-      }
-
-      printf("[server]: %s\n", buffer);
+      socketcfg = setupSocket(host, port, 'U');
+      sendUDP(message,strlen(message),socketcfg);
+      recvUDP(buffer, socketcfg);
     }
     /* --------------------------< TCP >--------------------------------- */
     else if(strcmp("TCP", mode) == 0)
     {
-
-      socketcfg = setupSocket(host, port, 'T');
-      
-      printf("> ");
-      fgets(message, 128, stdin);
+      socketcfg = setupSocket(host, port, 'T');      
       sendTCP(message, strlen(message), socketcfg);
       recvTCP(buffer, socketcfg);
-      printf("%s\n", buffer);
-
     }
-
     else
     {
       printf("modo inválido, TCP ou UDP\n");
-      exit(-1);
+      exit(-1); 
     }
+    printf("[server]: %s\n", buffer);
   }
 
-  exit(4);
+  exit(0);
 }
