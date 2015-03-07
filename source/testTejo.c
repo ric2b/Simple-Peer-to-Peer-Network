@@ -19,7 +19,7 @@ int main(int argc, char ** argv)
   char mode[128];
   int port;
 
-  socketUDP socketUDPcfg;
+  socketStruct socketcfg;
 
   if(argc != 4)
   {
@@ -33,21 +33,22 @@ int main(int argc, char ** argv)
 
   while(1)
   {
+    /* --------------------------< UDP >--------------------------------- */
     if(strcmp("UDP", mode) == 0)
     {
 
-      socketUDPcfg = setupSocket(host, port);     
+      socketcfg = setupSocket(host, port, 'U');     
 
       printf("> ");
       fgets(message, 128, stdin);
-      n=sendUDP(message,strlen(message),socketUDPcfg);
+      n=sendUDP(message,strlen(message),socketcfg);
       if(n==-1)
       {
         printf("erro a enviar\n");
         exit(2);
       }
 
-      n = recvUDP(buffer, socketUDPcfg);
+      n = recvUDP(buffer, socketcfg);
       if(n==-1)
       {
         printf("erro a receber\n");
@@ -56,12 +57,20 @@ int main(int argc, char ** argv)
 
       printf("[server]: %s\n", buffer);
     }
-
+    /* --------------------------< TCP >--------------------------------- */
     else if(strcmp("TCP", mode) == 0)
     {
 
+      socketcfg = setupSocket(host, port, 'T');
+      
+      printf("> ");
+      fgets(message, 128, stdin);
+      sendTCP(message, strlen(message), socketcfg);
+      recvTCP(buffer, socketcfg);
+      printf("%s\n", buffer);
+
     }
-    
+
     else
     {
       printf("modo inválido, TCP ou UDP\n");

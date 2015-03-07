@@ -7,17 +7,20 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-typedef struct socketUDP
+typedef struct socketStruct
 {
   int socketFD;
   struct sockaddr_in * addr;
   socklen_t addrlen;
-} socketUDP;
+} socketStruct;
 
-int sendUDP(char * msg, int msg_length, socketUDP socketCFG);
-int recvUDP(char * buffer,socketUDP socketCFG);
+int sendUDP(char * msg, int msg_length, socketStruct socketCFG);
+int recvUDP(char * buffer,socketStruct socketCFG);
 
-socketUDP setupSocket(char * servidorArranque, int port);
-void closeSocket(socketUDP socketCFG);
+void sendTCP(char * msg, int msg_length, socketStruct socketCFG);
+int recvTCP(char * buffer,socketStruct socketCFG);
+
+socketStruct setupSocket(char * servidorArranque, int port, char protocol);
+void closeSocket(socketStruct socketCFG);
 
 #endif

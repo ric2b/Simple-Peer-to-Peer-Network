@@ -27,7 +27,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 				break;
 
 			case 'i':
-				bootIP = optarg;
+				strcpy(bootIP, optarg);
 				break;
 
 			case 'p':

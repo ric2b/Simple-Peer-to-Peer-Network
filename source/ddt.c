@@ -8,14 +8,14 @@
 
 int main(int argc, char **argv)
 {
-	char * bootIP;
-	int	bootport, ringport;
+	char  	bootIP[1024];
+	int		bootport, ringport;
 	char 	userInput[64], cmd[20],succiIP[70], buffer[128];
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
 
 	//By default, bootIP="tejo.ist.utl.pt" and bootport=58000
-	bootIP = "tejo.ist.utl.pt";
+	strcpy(bootIP,"tejo.ist.utl.pt");
 	bootport = 58000;
 
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
@@ -28,8 +28,8 @@ int main(int argc, char **argv)
 
 	printf("Type 'help' to show the available commands.\n\n");
 
-	socketUDP socketCFG;
-	socketCFG = setupSocket(bootIP, bootport);
+	socketStruct socketCFG;
+	socketCFG = setupSocket(bootIP, bootport, 'U');
 
 	sendUDP("BQRY 2\n",7,socketCFG);
 	recvUDP(buffer, socketCFG);
