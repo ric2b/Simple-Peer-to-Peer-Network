@@ -44,6 +44,6 @@ int main(int argc, char **argv)
 		memset(succiIP,0,70);
 	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP));
 
-	close(socketCFG.socketFD);
+	closeSocket(socketCFG);
   	exit(0);
 }

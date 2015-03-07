@@ -8,77 +8,66 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "network.h"
 
 int main(int argc, char ** argv)
 {
-  struct hostent *h;
-  struct in_addr *a;
-  struct sockaddr_in addr;
-  int fd, n;
+  int n;
   char buffer[128];
   char host[128];  
   char message[128];
+  char mode[128];
   int port;
 
-  if(argc != 3)
+  socketUDP socketUDPcfg;
+
+  if(argc != 4)
   {
-    printf("Introduza o host e a porta\n");
+    printf("Introduza o host, a porta e o modo [TCP/UDP]\n");
     exit(-1);
   }
 
   strcpy(host, argv[1]);
   sscanf(argv[2], " %d ", &port);
-
-/* --------------------------< GetHostByName >--------------------------------- */
-
-  if((h=gethostbyname(host))==NULL) //substituir por bootIP
-  {
-    exit(0);//error
-  }
-
-  a=(struct in_addr*)h->h_addr_list[0];
-
-/* --------------------------< SendingToUDP >--------------------------------- */
-
-  fd=socket(AF_INET,SOCK_DGRAM,0);
-
-  if(fd == -1)
-  {
-    exit(1);
-  }
-
-  socklen_t addrlen = sizeof(addr);
+  strcpy(mode, argv[3]);
 
   while(1)
   {
-    memset((void*)&addr,(int)'\0',addrlen);
-    addr.sin_family = AF_INET;
-    addr.sin_addr = *a;
-    addr.sin_port = htons(port);
-
-    printf("> ");
-    fgets(message, 128, stdin);
-    n=sendto(fd,message,strlen(message),0,(struct sockaddr*)&addr,addrlen);
-
-    if(n==-1)
+    if(strcmp("UDP", mode) == 0)
     {
-      printf("erro a enviar\n");
-      exit(2);
+
+      socketUDPcfg = setupSocket(host, port);     
+
+      printf("> ");
+      fgets(message, 128, stdin);
+      n=sendUDP(message,strlen(message),socketUDPcfg);
+      if(n==-1)
+      {
+        printf("erro a enviar\n");
+        exit(2);
+      }
+
+      n = recvUDP(buffer, socketUDPcfg);
+      if(n==-1)
+      {
+        printf("erro a receber\n");
+        exit(3);//error
+      }
+
+      printf("[server]: %s\n", buffer);
     }
 
-    memset(buffer, 0, 128);
-    n = recvfrom(fd,buffer,128,0,(struct sockaddr*)&addr,&addrlen);
-
-    if(n==-1)
+    else if(strcmp("TCP", mode) == 0)
     {
-      printf("erro a receber\n");
-      exit(3);//error
+
     }
-
-    printf("[server]: %s\n", buffer);
-
-
+    
+    else
+    {
+      printf("modo inválido, TCP ou UDP\n");
+      exit(-1);
+    }
   }
-  close(fd);
+
   exit(4);
 }

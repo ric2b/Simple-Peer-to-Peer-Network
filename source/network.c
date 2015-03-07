@@ -57,3 +57,9 @@ socketUDP setupSocket(char * servidorArranque, int port)
 
   return socketCFG;
 }
+
+void closeSocket(socketUDP socketCFG)
+{
+  free(socketCFG.addr);
+  closeSocket(socketCFG);
+}

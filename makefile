@@ -21,8 +21,8 @@ network.o: $(S_DIR)/network.c
 	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
 
 #testTejo
-testTejo: testTejo.o
-	$(CC) $(CFLAGS) $(O_DIR)/$^ -o $@
+testTejo: testTejo.o network.o
+	$(CC) $(CFLAGS) $(addprefix $(O_DIR)/,$^) -o $@
 
 testTejo.o: $(S_DIR)/testTejo.c
 	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
