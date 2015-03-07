@@ -103,3 +103,10 @@ void closeSocket(socketStruct socketCFG)
   free(socketCFG.addr);
   close(socketCFG.socketFD);
 }
+
+int bindTCPToPort(socketStruct socketCFG, int port)
+{
+  if(bind(socketCFG.port, (struct sockaddr*) socketCFG.addr, ))
+
+  return 0;
+}

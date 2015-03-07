@@ -1,3 +1,6 @@
+#ifndef _RINGOPS_H
+#define _RINGOPS_H
+
 #include "network.h"
 
 typedef struct ringStruct
@@ -12,4 +15,6 @@ typedef struct ringStruct
   int prediPort;
 } ringStruct;
 
-ringStruct joinRing_KnownSucci(socketStruct startServerSocket, int succiID, char * succiIP);
+ringStruct joinRing_KnownSucci(socketStruct ServerSocket, int ringID, int myID, int succiID, char * succiIP, int succiPort);
+
+#endif

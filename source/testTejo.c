@@ -8,7 +8,7 @@
 
 int main(int argc, char ** argv)
 {
-  int port;
+  int hostPort;
   char buffer[buffersize], host[buffersize], message[buffersize], mode[buffersize];
   socketStruct socketcfg;
 
@@ -19,7 +19,7 @@ int main(int argc, char ** argv)
   }
 
   strcpy(host, argv[1]);
-  sscanf(argv[2], " %d ", &port);
+  sscanf(argv[2], " %d ", &hostPort);
   strcpy(mode, argv[3]); 
 
   while(1)
@@ -29,14 +29,14 @@ int main(int argc, char ** argv)
     /* --------------------------< UDP >--------------------------------- */
     if(strcmp("UDP", mode) == 0)
     {
-      socketcfg = setupSocket(host, port, 'U');
+      socketcfg = setupSocket(host, hostPort, 'U');
       sendUDP(message,strlen(message),socketcfg);
       recvUDP(buffer, socketcfg);
     }
     /* --------------------------< TCP >--------------------------------- */
     else if(strcmp("TCP", mode) == 0)
     {
-      socketcfg = setupSocket(host, port, 'T');      
+      socketcfg = setupSocket(host, hostPort, 'T');      
       sendTCP(message, strlen(message), socketcfg);
       recvTCP(buffer, socketcfg);
     }
