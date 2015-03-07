@@ -1,35 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 //#include <string.h>
 
 #include "ringOps.h"
 #include "network.h"
 
-typedef struct ringStruct
-{	
-  int ringID;
-  int myID;
-  char myIP[128];
-  int myPort
-  int succiID;
-  char succiIP[128];
-  int succiPort;
-  int prediID;
-  char * prediIP[128];
-  int prediPort;
-} ringStruct;
+#define MAXPENDING 10
 
-ringStruct setupListenSocket(int ringID, char * myIP, int myPort)
+ringStruct setupListenSocket()
 {
-  ringStruct ringData;
+  ringStruct ringInitial;
 
-  ringData.ringID = ringID;
-  ringData.myID = myID;
-  gethostname(ringData.myIP, 128);
+  ringInitial.ListenSocket = setupSocket("NULL", 0, 'T');
 
+  if(listen(ringInitial.ListenSocket.socketFD, MAXPENDING) != 0)
+  {
+    printf("erro a fazer listen\n");
+    exit(-1);
+  }
+  
+  getsockname(ringInitial.ListenSocket.socketFD, (struct sockaddr *) ringInitial.ListenSocket.addr, &(ringInitial.ListenSocket.addrlen));
+  
+  if(bind(ringInitial.ListenSocket.socketFD, (struct sockaddr *) ringInitial.ListenSocket.addr, ringInitial.ListenSocket.addrlen) < 0)
+  {
+    printf("erro a fazer bind\n");
+    exit(-1);
+  }
+
+  ringInitial.ringID = -1;
+  ringInitial.myID = -1;
+  gethostname(ringInitial.myIP, 128);
+  ringInitial.myPort = ntohs(ringInitial.ListenSocket.addr->sin_port);
+
+  return ringInitial;
 }
 
-ringStruct joinRing_KnownSucci(socketStruct ServerSocket, int ringID, int myID, int succiID, char * succiIP, int succiPort)
+/*
+ringStruct joinRing_KnownSucci(ringStruct ringInitial, int ringID, int myID, int succiID, char * succiIP, int succiPort)
 {
   ringStruct ringData;
   
@@ -49,3 +57,4 @@ ringStruct joinRing_KnownSucci(socketStruct ServerSocket, int ringID, int myID, 
 
   return ringData;
 }
+*/

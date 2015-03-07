@@ -68,7 +68,7 @@ socketStruct setupSocket(char * servidorArranque, int port, char protocol)
     socketFD = socket(AF_INET,SOCK_STREAM,0);
   else
   {
-    printf("protocolo é U ou T\n");
+    printf("protocolo é U (USP), T (TCP)\n");
     exit(-1);
   }
 
@@ -88,13 +88,13 @@ socketStruct setupSocket(char * servidorArranque, int port, char protocol)
   socketCFG.socketFD = socketFD;
   socketCFG.addr = addr;
   socketCFG.addrlen = sizeof(*addr);
-
+  /* Isto só é feito se quisermos fazer a ligação ao cliente/peer
   if(protocol == 'T')
   {
     int n = connect(socketFD,(struct sockaddr*)addr, sizeof(*addr));
     if(n==-1) exit(1);
   }
-
+  */
   return socketCFG;
 }
 
@@ -102,11 +102,4 @@ void closeSocket(socketStruct socketCFG)
 {
   free(socketCFG.addr);
   close(socketCFG.socketFD);
-}
-
-int bindTCPToPort(socketStruct socketCFG, int port)
-{
-  if(bind(socketCFG.port, (struct sockaddr*) socketCFG.addr, ))
-
-  return 0;
 }

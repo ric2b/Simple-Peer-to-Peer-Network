@@ -8,16 +8,19 @@ O_DIR 			= obj
 all: makefolders ddt testTejo
 
 # ddt
-ddt: ddt.o interface.o network.o
+ddt: ddt.o interface.o network.o ringOps.o
 	$(CC) $(CFLAGS) $(addprefix $(O_DIR)/,$^) -o $@
 
-ddt.o: $(S_DIR)/ddt.c $(S_DIR)/interface.h $(S_DIR)/network.h
+ddt.o: $(S_DIR)/ddt.c $(S_DIR)/interface.h $(S_DIR)/network.h $(S_DIR)/ringOps.h
 	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
 
 interface.o: $(S_DIR)/interface.c
 	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
 
 network.o: $(S_DIR)/network.c
+	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
+
+ringOps.o: $(S_DIR)/ringOps.c
 	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
 
 #testTejo
