@@ -3,7 +3,7 @@
 
 #include "network.h"
 
-int check_arguments(int , char **, char* , int * , int* , char * );
-int run_commands(char * , char * , char * , int* , int * , int * , int* , int * , int , char* ,int, requestUDP* );
+char* check_arguments(int , char **, char* , int * , int* , char * );
+int run_commands(char * , char * , char * , int * , int * , int * , int* , int * ,int , socketStruct);
 
 #endif

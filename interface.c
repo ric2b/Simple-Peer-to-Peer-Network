@@ -3,7 +3,7 @@
 #include <getopt.h>
 #include <string.h>
 
-//#include "interface.h"
+#include "interface.h"
 #include "joining.h"
 
 char* check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
@@ -11,6 +11,7 @@ char* check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* 
   	//bootIP and bootport are the IP adress e UDP port of the starting server
 
   	//Ringport is the TCP server port used for establishing a TCP session in the ring
+	char tmp[128];
 
 	if((argc % 2 == 0) || (argc > 7)  || (argc <= 1))
 	{
@@ -28,7 +29,7 @@ char* check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* 
 				break;
 
 			case 'i':
-				bootIP = optarg;
+				snprintf(tmp,128,"%s",optarg);
 				break;
 
 			case 'p':
@@ -40,10 +41,11 @@ char* check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* 
 				exit(2);
 		 }
 	}
+	strcpy(bootIP,tmp);
 	return bootIP;
 }
 
-int run_commands(char * userInput, char * cmd, char * succiIP,int * exitProgram, int * identifier, int * ringx, int* succi, int * succiTCP, int bootport, char* bootIP, int ringport, requestUDP* start)
+int run_commands(char * userInput, char * cmd, char * succiIP,int * exitProgram, int * identifier, int * ringx, int* succi, int * succiTCP,int ringport, socketStruct arranque)
 {
 
    printf("> ");
@@ -86,7 +88,7 @@ int run_commands(char * userInput, char * cmd, char * succiIP,int * exitProgram,
 		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, ringx, identifier, succi, succiIP, succiTCP) == 3)
 		{
 			printf("Joining ring number %i with an identifier %i.\n", * ringx, * identifier);
-			process_join(*ringx, *identifier, ringport, bootport, bootIP, start); 
+			process_join(*ringx, *identifier, ringport, arranque); 
 		}
 
 		else if(* ringx > 0 && * identifier > -1 && * identifier < 64 && * succi > -1 && * succi < 64 && * succiTCP > -1)
