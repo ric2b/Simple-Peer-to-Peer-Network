@@ -7,6 +7,8 @@
 #include "network.h"
 #include "ringOps.h"
 
+#define STDIN 0
+
 int main(int argc, char **argv)
 {
 	char  	bootIP[1024];
@@ -26,21 +28,36 @@ int main(int argc, char **argv)
 	listenFD = listenSocket(ringport);	
 
 	fd_set fds;	// isto são tretas para o select
-	FD_ZERO(&fds);
-	FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
+	int maxfd;
+	
 
 	while(1)
 	{	//bloqueia no select até haver algo para ler num dos sockets que estão em fds
-		if (select(listenFD+1, &fds, NULL, NULL, NULL) > 0) {
+		FD_ZERO(&fds);
+		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
+		FD_SET(STDIN, &fds); // stdin
+		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 
-			int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
-			
-			memset(buffer,0,128); // the usual stuff
-			read(nodeFD, buffer, 128);
-			write(nodeFD, "OK", 2);
-			printf("%s: %s", clientIP, buffer);
-			
-			close(nodeFD); // fecha o file descriptor do nó cliente
+		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
+			memset(buffer,0,128);
+
+			if(FD_ISSET(listenFD, &fds))
+			{
+				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
+				
+				// the usual stuff
+				read(nodeFD, buffer, 128);
+				write(nodeFD, "OK", 2);
+				printf("%s: %s", clientIP, buffer);
+				
+				close(nodeFD); // fecha o file descriptor do nó cliente	
+			}
+			if(FD_ISSET(STDIN, &fds))
+			{
+				read(STDIN, buffer, 128);
+				printf("teclado: %s", buffer);
+			}
+
 		}
 	}
 
