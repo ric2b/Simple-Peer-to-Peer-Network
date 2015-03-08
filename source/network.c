@@ -42,27 +42,10 @@ int recvTCP(char * buffer,socketStruct socketCFG)
   return read(socketCFG.socketFD, buffer, 128);
 }
 
-/* --------------------------< SocketCreation >--------------------------------- */
+/* --------------------------< Listening >--------------------------------- */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int listenSocket(){
+int listenSocket(int listen_port){
   
-  int listen_port = 8080;;
   int server_socket;
   struct sockaddr_in server_addr;
   
@@ -78,14 +61,13 @@ int listenSocket(){
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   server_addr.sin_port = htons(listen_port);
-  
-  listen_port--;
-  
-  do{
+    
+  while(bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
+  {
+    printf("porta %d ocupada, a tentar a próxima\n", listen_port);
     listen_port++;
     server_addr.sin_port = htons(listen_port);
-    //perror("impossível associar porto: erro na função bind()\n");
-  } while(bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0);
+  }
   
   printf("port - %d\n", listen_port);
     
@@ -111,35 +93,18 @@ int aceita_cliente(int server_socket, char * remote_address)
   unsigned int client_lenght = sizeof(client_addr);
   
   /* espera por ligação do cliente */
-  if ((client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &client_lenght)) < 0) { // aceita o pedido do cliente e a cada cliente associa um file descriptor - client_socket
+  if ((client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &client_lenght)) < 0) 
+  { // aceita o pedido do cliente e a cada cliente associa um file descriptor - client_socket
         perror("impossível aceitar ligação do cliente: erro na função client_socket()\n");
     exit(1);
-    }
+  }
     
-    sprintf(remote_address, "%s", inet_ntoa(client_addr.sin_addr));   
+  sprintf(remote_address, "%s", inet_ntoa(client_addr.sin_addr));   
     
   return client_socket; // função devolve o file descriptor da socket do cliente
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* --------------------------< Tejo Communication >--------------------------------- */
 
 socketStruct setupSocket(char * servidor, int port, char protocol)
 {

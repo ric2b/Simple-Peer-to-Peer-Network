@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define MAX_PENDING 128
+#define MAX_PENDING 10
 
 typedef struct socketStruct
 {
@@ -24,7 +24,7 @@ int recvTCP(char * buffer,socketStruct socketCFG);
 
 
 
-int listenSocket();
+int listenSocket(int listen_port);
 
 int aceita_cliente(int server_socket, char * remote_address);
 

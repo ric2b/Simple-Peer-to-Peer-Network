@@ -23,23 +23,25 @@ int main(int argc, char **argv)
 
 
 
-
-
 	char clientIP[128];
-	listenFD = listenSocket();	
+	listenFD = listenSocket(ringport);	
+
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(listenFD, &fds);
 
 	while(1)
 	{
-		int tempFD = aceita_cliente(listenFD, clientIP);
-		memset(buffer,0,128);
-		read(tempFD, buffer, 128);
-		write(tempFD, "OK", 2);
-		printf("%s: %s %d\n", clientIP, buffer, tempFD);
-		close(tempFD);	
+		if (select(listenFD+1, &fds, NULL, NULL, NULL) > 0) {
+
+			int nodeFD = aceita_cliente(listenFD, clientIP);
+			memset(buffer,0,128);
+			read(nodeFD, buffer, 128);
+			write(nodeFD, "OK", 2);
+			printf("%s: %s", clientIP, buffer);
+			close(nodeFD);	
+		}
 	}
-
-
-
 
 	do
 	{
