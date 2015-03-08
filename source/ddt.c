@@ -5,6 +5,7 @@
 
 #include "interface.h"
 #include "network.h"
+#include "ringOps.h"
 
 int main(int argc, char **argv)
 {
@@ -13,27 +14,32 @@ int main(int argc, char **argv)
 	char 	userInput[64], cmd[20],succiIP[70], buffer[128];
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
+	int 	listenFD = 8080;
 
 	//By default, bootIP="tejo.ist.utl.pt" and bootport=58000
 	strcpy(bootIP,"tejo.ist.utl.pt");
 	bootport = 58000;
-
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
 
-	printf("\nWelcome to your favorite p2p client! You have chosen the following specifications: \n\n");
 
-	printf("\tSelected ringport: %i\n",ringport);
-	printf("\tSelected bootIP: %s\n",bootIP);
-	printf("\tSelected bootport: %i\n\n",bootport);
 
-	printf("Type 'help' to show the available commands.\n\n");
 
-	socketStruct socketCFG;
-	socketCFG = setupSocket(bootIP, bootport, 'U');
 
-	sendUDP("BQRY 2\n",7,socketCFG);
-	recvUDP(buffer, socketCFG);
-	printf("%s\n", buffer);	
+	char clientIP[128];
+	listenFD = listenSocket();	
+
+	while(1)
+	{
+		int tempFD = aceita_cliente(listenFD, clientIP);
+		memset(buffer,0,128);
+		read(tempFD, buffer, 128);
+		write(tempFD, "OK", 2);
+		printf("%s: %s %d\n", clientIP, buffer, tempFD);
+		close(tempFD);	
+	}
+
+
+
 
 	do
 	{
@@ -44,6 +50,6 @@ int main(int argc, char **argv)
 		memset(succiIP,0,70);
 	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP));
 
-	closeSocket(socketCFG);
+	//closeSocket(socketCFG);
   	exit(0);
 }

@@ -39,6 +39,15 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 				exit(2);
 		 }
 	}
+
+	printf("\nWelcome to your favorite p2p client! You have chosen the following specifications: \n\n");
+
+	printf("\tSelected ringport: %i\n",*ringport);
+	printf("\tSelected bootIP: %s\n",bootIP);
+	printf("\tSelected bootport: %i\n\n", *bootport);
+
+	printf("Type 'help' to show the available commands.\n\n");
+
 	return 0;
 }
 

@@ -18,7 +18,9 @@ typedef struct ringStruct
   int prediPort;
 } ringStruct;
 
-ringStruct setupListenSocket();
-ringStruct joinRing_KnownSucci(socketStruct ServerSocket, int ringID, int myID, int succiID, char * succiIP, int succiPort);
 
+/*
+socketStruct setupListenSocket(char * myIP, int myPort);
+int joinRing_KnownSucci(ringStruct * ringData, int ringID, int myID, int succiID, char * succiIP, int succiPort);
+*/
 #endif

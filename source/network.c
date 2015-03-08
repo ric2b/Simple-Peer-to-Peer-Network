@@ -44,11 +44,109 @@ int recvTCP(char * buffer,socketStruct socketCFG)
 
 /* --------------------------< SocketCreation >--------------------------------- */
 
-socketStruct setupSocket(char * servidorArranque, int port, char protocol)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int listenSocket(){
+  
+  int listen_port = 8080;;
+  int server_socket;
+  struct sockaddr_in server_addr;
+  
+  /* criar socket do servidor */
+  if ((server_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) 
+  {
+    perror("impossível criar socket: erro na função socket()\n");
+    exit(1);
+  }
+    
+  /* estrutura que contém o endereço IP */
+  bzero((char *) &server_addr, sizeof(server_addr));
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_addr.sin_port = htons(listen_port);
+  
+  listen_port--;
+  
+  do{
+    listen_port++;
+    server_addr.sin_port = htons(listen_port);
+    //perror("impossível associar porto: erro na função bind()\n");
+  } while(bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0);
+  
+  printf("port - %d\n", listen_port);
+    
+    /* socket do servidor a escutar pedidos */
+    if (listen(server_socket, MAX_PENDING) < 0) { // fila de espera de escuta pela parte da socket do servidor é de 128 clientes, valor definido pelo MAX_PENDING
+        perror("impossível criar socket: erro na função listen()\n");
+    exit(1);
+    }
+
+    char buffer[128];
+    
+    gethostname(buffer,128);
+    printf("%s\n", buffer);
+
+    return server_socket; // função devolve o file descriptor da socket do servidor
+}
+
+int aceita_cliente(int server_socket, char * remote_address)
+{
+
+  int client_socket; // file descriptor que irá ser associado a cada cliente
+  struct sockaddr_in client_addr;
+  unsigned int client_lenght = sizeof(client_addr);
+  
+  /* espera por ligação do cliente */
+  if ((client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &client_lenght)) < 0) { // aceita o pedido do cliente e a cada cliente associa um file descriptor - client_socket
+        perror("impossível aceitar ligação do cliente: erro na função client_socket()\n");
+    exit(1);
+    }
+    
+    sprintf(remote_address, "%s", inet_ntoa(client_addr.sin_addr));   
+    
+  return client_socket; // função devolve o file descriptor da socket do cliente
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+socketStruct setupSocket(char * servidor, int port, char protocol)
 {
   struct hostent *h;
   struct in_addr *a;
   int socketFD;
+  int ignoreAddr = 0;
 
   socketStruct socketCFG;
 
@@ -56,9 +154,9 @@ socketStruct setupSocket(char * servidorArranque, int port, char protocol)
 
   /* --------------------------< GetHostByName >--------------------------------- */
 
-  if((h=gethostbyname(servidorArranque))==NULL) //substituir por bootIP
+  if((h=gethostbyname(servidor))==NULL) //substituir por bootIP
   {
-    exit(-1);//error
+    ignoreAddr = 1;
   }
 
   /* --------------------------< SetupSocket >--------------------------------- */
@@ -72,29 +170,33 @@ socketStruct setupSocket(char * servidorArranque, int port, char protocol)
     exit(-1);
   }
 
-
   if(socketFD == -1)
   {
+    printf("erro a criar o socket\n");
     exit(1);
   }
 
-  a=(struct in_addr*)h->h_addr_list[0];
+  if(ignoreAddr == 0)
+  {
+    a=(struct in_addr*)h->h_addr_list[0];
 
-  memset((void*)addr,(int)'\0',sizeof(*addr));
-  addr->sin_family = AF_INET;
-  addr->sin_addr = *a;
-  addr->sin_port = htons(port);
+    memset((void*)addr,(int)'\0',sizeof(*addr));
+    addr->sin_family = AF_INET;
+    addr->sin_addr = *a;
+    addr->sin_port = htons(port);
+
+    socketCFG.addr = addr;
+    socketCFG.addrlen = sizeof(*addr);
+  }
 
   socketCFG.socketFD = socketFD;
-  socketCFG.addr = addr;
-  socketCFG.addrlen = sizeof(*addr);
-  /* Isto só é feito se quisermos fazer a ligação ao cliente/peer
+  
   if(protocol == 'T')
   {
     int n = connect(socketFD,(struct sockaddr*)addr, sizeof(*addr));
     if(n==-1) exit(1);
   }
-  */
+  
   return socketCFG;
 }
 

@@ -22,6 +22,7 @@ int main(int argc, char ** argv)
   sscanf(argv[2], " %d ", &hostPort);
   strcpy(mode, argv[3]); 
 
+  int first = 1;
   while(1)
   {
     printf("> ");
@@ -36,7 +37,7 @@ int main(int argc, char ** argv)
     /* --------------------------< TCP >--------------------------------- */
     else if(strcmp("TCP", mode) == 0)
     {
-      socketcfg = setupSocket(host, hostPort, 'T');      
+      if(first) socketcfg = setupSocket(host, hostPort, 'T');      
       sendTCP(message, strlen(message), socketcfg);
       recvTCP(buffer, socketcfg);
     }
@@ -47,6 +48,6 @@ int main(int argc, char ** argv)
     }
     printf("[server]: %s\n", buffer);
   }
-
+  first = 0; 
   exit(0);
 }
