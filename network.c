@@ -7,144 +7,150 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
+#include "network.h"
 
-typedef struct requestUDP
+/* --------------------------< UDP >--------------------------------- */
+
+int sendUDP(char * msg, int msg_length, socketStruct socketCFG)
 {
-  char request[128];
-  int fdUDP;
-}requestUDP;
+  return sendto(socketCFG.socketFD,msg,msg_length,0,(struct sockaddr*)socketCFG.addr,socketCFG.addrlen);
+}
 
-typedef struct requestTCP
+int recvUDP(char * buffer,socketStruct socketCFG)
 {
-  char request[128];
-  int fdTCP;
-}requestTCP;
+  memset(buffer,0,128);
+  return recvfrom(socketCFG.socketFD,buffer,128,0,(struct sockaddr*)socketCFG.addr,&(socketCFG.addrlen));
+}
 
-requestUDP* createUDP(char* bootIP, int bootport, int status, char* command, int socketUDP)
+
+
+/* --------------------------< TCP >--------------------------------- */
+
+void sendTCP(char * msg, int msg_length, socketStruct socketCFG)
+{
+  int nwritten;
+  int nleft = strlen(msg);
+  while(nleft > 0)
+  {
+    nwritten = write(socketCFG.socketFD, msg, msg_length);
+    nleft -= nwritten;
+    msg += nwritten;
+  }
+}
+
+int recvTCP(char * buffer,socketStruct socketCFG)
+{
+  memset(buffer,0,128);
+  return read(socketCFG.socketFD, buffer, 128);
+}
+
+/* --------------------------< SocketCreation >--------------------------------- */
+
+socketStruct setupSocket(char * servidorArranque, int port, char protocol)
 {
   struct hostent *h;
   struct in_addr *a;
-  struct sockaddr_in addr;
-  int fd, n;
-  socklen_t addrlen;
-  char buffer[128];
-  requestUDP* response;
+  int socketFD;
+  const int       optVal = 1;
+  const socklen_t optLen = sizeof(optVal);
+  socketStruct socketCFG;
 
-  // 0 inicializaçao do socket para o servidor de arranque
-  // 1 envio de uma mensagem para o servidor
-  // pode ser melhorado no futuro
+  struct sockaddr_in * addr = (struct sockaddr_in *) malloc(sizeof(struct sockaddr_in));
 
-  response = (requestUDP*) malloc(sizeof(requestUDP));
-/* --------------------------< GetHostByName >--------------------------------- */
-  printf("BootIp: %s\n",bootIP);
-  if((h=gethostbyname(bootIP))==NULL) //substituir por bootIP
+  /* --------------------------< GetHostByName >--------------------------------- */
+
+  if(protocol == 'U')
   {
-    printf("\n%s isn't a valid host name \n",bootIP);
-    exit(0);//error
-  }
-
-  a=(struct in_addr*)h->h_addr_list[0];
-
-/* --------------------------< SendingToUDP >--------------------------------- */
-  if(status == 0)
-  {
-    fd=socket(AF_INET,SOCK_DGRAM,0);
-    response->fdUDP = fd;
-    if(fd == -1)
+    if((h=gethostbyname(servidorArranque))==NULL) 
     {
-      printf("\nCan't create socket\n");
-      exit(1);
+      exit(-1);//error
     }
   }
 
-  memset((void*)&addr,(int)'\0',sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_addr = *a;
-  addr.sin_port = htons(bootport);
-  printf("Bootport: %d\n",bootport);
-  printf("Status: %d\n",status);
-  if(status == 1)
+  /* --------------------------< SetupSocket >--------------------------------- */
+  if(protocol == 'U')
   {
-    response->fdUDP = socketUDP;
-    printf("Command sent in function: %s\n",command);
-    printf("Socket sent: %d\n", socketUDP);
-    printf("Command size: %d\n",strlen(command));
+    printf("Socket %c\n",protocol);
+    socketFD = socket(AF_INET,SOCK_DGRAM,0);
+  }
+  else if(protocol == 'T' || protocol == 'S')
+  {
+    printf("Socket %c\n",protocol);
+    socketFD = socket(AF_INET,SOCK_STREAM,0);
+  }
+  else
+  {
+    printf("protocolo é U ou T. S para criar servidor TCP\n");
+    exit(-1);
+  }
+  if(socketFD == -1)
+  {
+    printf("Can´t create socket %x",protocol);
+    exit(1);
+  }
+  printf("1 %s\n",strerror(errno));
+  if(protocol == 'U')
+    a=(struct in_addr*)h->h_addr_list[0];
 
-    n=sendto(socketUDP,command,strlen(command),0,(struct sockaddr*)&addr,sizeof(addr));
+  memset((void*)addr,(int)'\0',sizeof(*addr));
 
-    printf("Bytes sent: %d\n",n);
+  addr->sin_family = AF_INET;
+
+  if(protocol == 'T')
+    addr->sin_addr.s_addr = inet_addr(servidorArranque);
+  if(protocol == 'U')
+    addr->sin_addr = *a;
+  if(protocol == 'S')
+    addr->sin_addr.s_addr = INADDR_ANY;
+
+  addr->sin_port = htons(port);
+
+  socketCFG.socketFD = socketFD;
+  socketCFG.addr = addr;
+  socketCFG.addrlen = sizeof(*addr);
+
+  setsockopt(socketFD, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
+
+  printf("2 %s\n",strerror(errno));
+
+  if(protocol == 'T')
+  {
+    int n = connect(socketFD,(struct sockaddr*)addr, sizeof(*addr));
     if(n==-1)
     {
-      printf("\nImpossible to send message to the socket\n");
+      printf("Can´t establish TCP connection with %s\n", servidorArranque);
       exit(1);
-    }
-    
-  /* ----------------------------< ReceivingFromUDP >------------------------------- */
-
-    addrlen = sizeof(addr);
-    n = recvfrom(socketUDP,buffer,128,0,(struct sockaddr*)&addr,&addrlen);
-    printf("Bytes received: %d\n",n);
-    printf("Received: %s\n",buffer);
-    if(n==-1)
-    {
-      printf("\nCan't create socket\n");
-      exit(3);//error
-    }
-
-    write(1,"> [server]: ",12);//stdout
-    write(1,buffer,n);
-    printf("\n");
-    strcpy(response->request,buffer);
+    } 
   }
-  return response;
+  if(protocol == 'S')
+  {
+    printf("3 %s\n",strerror(errno));
+    if(bind(socketFD,(struct sockaddr*)addr,sizeof(*addr))==-1)
+    {
+      printf("4 %s\n",strerror(errno));
+      printf("Port %d already binded\n\n",port);
+      exit(1);//error
+    }
+    if(listen(socketFD,5)==-1)
+    {
+      printf("Reached maximum queue on listen\n\n");
+      exit(1); //error
+    }
+    printf("Establish TCP connection server \n\n", servidorArranque);
+  }
+  printf("Finished socket creation (%c), exiting\n\n", protocol);
+  return socketCFG;
 }
 
-requestTCP* TCPconnection(char* linkIP,int TCPport)
+void closeSocket(socketStruct socketCFG)
 {
-	struct sockaddr_in addr;
-	int fd,n;
-	socklen_t addrlen;
-	requestTCP* temp = NULL;
-	struct hostent *host;
-	   
-	fd=socket(AF_INET,SOCK_STREAM,0);
-	
-	if(fd==-1)
-	{
-		printf("Can create socket TCP\n");
-		exit(1);
-	}
-	
-	host = gethostbyname(linkIP);
-	
-    if(host == NULL) {
-        printf("Unknown host %s\n", linkIP);
-        exit(1);
-    }
-	
-    memset((void*)&addr,(int)'\0',sizeof(addr));
-	
-	addr.sin_family = AF_INET;
-	bcopy(host->h_addr, &addr.sin_addr, host->h_length);
-	addr.sin_port = htons(TCPport);
-	
-	addrlen=sizeof(addr);
-	printf("Preparing to connect to TCP %s\n",linkIP);
-	n=connect(fd,(struct sockaddr*)&addr,addrlen);
-	if(n==-1)
-	{
-		printf("TCP connection to %s not available\n",linkIP);
-		exit(1);
-	}
-	printf("Connected to TCP %s\n",linkIP);
-	temp = (requestTCP*) malloc(sizeof(requestTCP));
-	temp->fdTCP = fd;
-	strcmp(temp->request,"\0");
-	return temp;
-}	
+  free(socketCFG.addr);
+  close(socketCFG.socketFD);
+}
 
 
-/*requestUDP* createTCP(char* bootIP, int bootport, int status, char* command, int socketUDP) //rever tudo
+/*requestUDP* setupTCPserver(char* bootIP, int bootport, int status, char* command, int socketUDP) //rever tudo
 {
   int fd,addrlen,newfd;
   struct sockaddr_in addr;
@@ -164,8 +170,8 @@ requestTCP* TCPconnection(char* linkIP,int TCPport)
 
   if(listen(fd,5)==-1)
     exit(1); //error
-
-  while(1)
+}*/
+  /*while(1)
   {
     addrlen=sizeof(addr);
     

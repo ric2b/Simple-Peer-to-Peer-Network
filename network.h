@@ -1,20 +1,24 @@
 #ifndef _NETWORK_H
 #define _NETWORK_H
 
-typedef struct requestUDP
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+typedef struct socketStruct
 {
-  char request[128];
-  int fdUDP;
-}requestUDP;
+  int socketFD;
+  struct sockaddr_in * addr;
+  socklen_t addrlen;
+} socketStruct;
 
-typedef struct requestTCP
-{
-  char requestTCP[128];
-  int fdTCP;
-}requestTCP;
+int sendUDP(char * , int , socketStruct );
+int recvUDP(char * ,socketStruct );
 
+void sendTCP(char * , int , socketStruct );
+int recvTCP(char * ,socketStruct );
 
-requestUDP* createUDP(char* , int , int , char* , int );
-requestTCP* TCPconnection(char* ,int);
+socketStruct setupSocket(char * , int , char );
+void closeSocket(socketStruct );
 
 #endif
