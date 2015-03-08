@@ -10,51 +10,60 @@
 
 #include "network.h"
 
-void process_join(int ring, int identifier, int ringport,int bootport,char* bootIP, requestUDP* start)
+void process_join(int ring, int identifier, int ringport, socketStruct start)
 {
 	char msg[128];
 	char buffer[128];
+	char localmachine[128];
 	char cmd[10],idIP[20];
 	int startid,startTCP,ringx;
 	struct hostent *h;
 	struct in_addr *a;
-	requestUDP* temp = NULL;
-	requestTCP* temp2 = NULL;
+	int temp;
+	socketStruct PeerTCP;
+
 
 	sprintf(msg,"BQRY %d\n",ring);
 	printf("Command sent: %s\n",msg);
-	printf("Socket: %d\n",start->fdUDP);
-	temp = createUDP(bootIP,bootport, 1, msg, start->fdUDP);
-	printf("Command recieved: %s\n",temp->request);
+	printf("Socket: %d\n",start.socketFD);
+	if((temp = sendUDP(msg,strlen(msg),start)) == -1)
+		exit(1);
+	if((temp = recvUDP(buffer,start)) == -1)
+		exit(1);
+	
+	printf("Command recieved: %s\n",buffer);
 
-	if(strcmp(temp->request,"EMPTY") == 0)
+	if(strcmp(buffer,"EMPTY") == 0)
 	{
-		if(gethostname(buffer,128) == -1)
+		if(gethostname(localmachine,128) == -1)
 		{
 			printf("\nError during hostname query\n\n");
 			exit(1);
 		}
-	  if((h=gethostbyname(buffer))==NULL)
+	  if((h=gethostbyname(localmachine))==NULL)
 	    {
-		    printf("\n%s isn't a valid host name \n",bootIP);
+		    
 		    exit(1);//error
 	    }
-		printf("Hostname: %s\n",buffer);
+		printf("Hostname: %s\n",localmachine);
 		a = (struct in_addr*)h->h_addr_list[0];
 	
 	  sprintf(msg,"REG %d %d %s %d\n",ring, identifier,inet_ntoa(*a), ringport);
 	  printf("%s\n",msg);
 	  
-	  temp = createUDP(bootIP, bootport, 1, msg, start->fdUDP);
+	  if((temp = sendUDP(msg,strlen(msg),start)) == -1)
+		exit(1);
+	  if((temp = recvUDP(buffer,start)) == -1)
+		exit(1);
+
+	  printf("Temp: %s\n",buffer);
 	  
-	  printf("Temp: %s\n",temp->request);
-	  
-	  if(strcmp(temp->request,"OK") == 0)
+	  if(strcmp(buffer,"OK") == 0)
 	  	return;
 	}
 	else
 	{
-		if(sscanf(temp->request,"%s %d %d %s %d",cmd,&ringx,&startid,idIP,&startTCP) != 5)
+		if(sscanf(buffer,"%s %d %d %s %d",cmd,&ringx,&startid,idIP,&startTCP) != 5)
 		{
 			printf("Bad Response from start server\n");
 			exit(1);
@@ -66,7 +75,7 @@ void process_join(int ring, int identifier, int ringport,int bootport,char* boot
 				printf("Can't use identifier %d, please choose a different one: ",identifier);
 				scanf("%d",&identifier);
 			}
-			temp2 = (requestTCP*) TCPconnection(idIP,startTCP);
+			PeerTCP = setupSocket(idIP, startTCP, 'T');
 		}
 	}
    

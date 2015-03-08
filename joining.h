@@ -3,6 +3,6 @@
 
 #include "network.h"
 
-void process_join(int , int , int , int, char*, requestUDP* );
+void process_join(int , int , int , socketStruct);
 
 #endif
