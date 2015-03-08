@@ -7,16 +7,18 @@
 
 int main(int argc, char **argv)
 {
-	char *bootIP;
+	char * bootIP;
 	int	bootport, ringport;
 	char 	userInput[64], cmd[20],succiIP[70];
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
-	requestUDP* startUDP;
-	
+	socketStruct socketCFG_UDP;
+	socketStruct socketCFG_TCP;
+
+
 	bootIP = (char*) malloc(128*sizeof(char));
 
-	bootIP = (char*) check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
+	bootIP = check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
 
 	printf("\nWelcome to your favorite p2p client! You have chosen the following specifications: \n\n");
 	
@@ -26,8 +28,9 @@ int main(int argc, char **argv)
 
 	printf("Type 'help' to show the available commands.\n\n");
 	
-	startUDP = createUDP(bootIP, bootport, 0, NULL,0);
-
+	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
+	socketCFG_TCP = setupSocket(NULL,ringport, 'S');
+	
 	do
 	{
 		ringx = 0;
@@ -35,7 +38,7 @@ int main(int argc, char **argv)
    		succi = -1;
    		succiTCP = -1;
 		memset(succiIP,0,70);	
-	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP, bootport, bootIP, ringport, startUDP));	
+	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP,ringport, socketCFG_UDP));	
 
-  	exit(0);
+  	exit(6);
 }
