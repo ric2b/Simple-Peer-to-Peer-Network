@@ -137,7 +137,7 @@ socketStruct setupSocket(char * servidorArranque, int port, char protocol)
       printf("Reached maximum queue on listen\n\n");
       exit(1); //error
     }
-    printf("Establish TCP connection server \n\n", servidorArranque);
+    printf("Establish TCP connection server \n\n");
   }
   printf("Finished socket creation (%c), exiting\n\n", protocol);
   return socketCFG;
