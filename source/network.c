@@ -61,7 +61,8 @@ int listenSocket(int listen_port){
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   server_addr.sin_port = htons(listen_port);
-    
+  
+  /* associa o socket à ringport */  
   while(bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
   {
     printf("porta %d ocupada, a tentar a próxima\n", listen_port);
@@ -71,16 +72,16 @@ int listenSocket(int listen_port){
   
   printf("port - %d\n", listen_port);
     
-    /* socket do servidor a escutar pedidos */
-    if (listen(server_socket, MAX_PENDING) < 0) { // fila de espera de escuta pela parte da socket do servidor é de 128 clientes, valor definido pelo MAX_PENDING
-        perror("impossível criar socket: erro na função listen()\n");
+  /* socket do servidor a escutar pedidos */
+  if (listen(server_socket, MAX_PENDING) < 0) { // fila de espera de escuta pela parte da socket do servidor é de 128 clientes, valor definido pelo MAX_PENDING
+    perror("impossível criar socket: erro na função listen()\n");
     exit(1);
-    }
+  }
 
-    char buffer[128];
-    
-    gethostname(buffer,128);
-    printf("%s\n", buffer);
+  char buffer[128];
+  
+  gethostname(buffer,128);
+  printf("%s\n", buffer);
 
     return server_socket; // função devolve o file descriptor da socket do servidor
 }
@@ -121,7 +122,7 @@ socketStruct setupSocket(char * servidor, int port, char protocol)
 
   if((h=gethostbyname(servidor))==NULL) //substituir por bootIP
   {
-    ignoreAddr = 1;
+    ignoreAddr = 1; //
   }
 
   /* --------------------------< SetupSocket >--------------------------------- */
