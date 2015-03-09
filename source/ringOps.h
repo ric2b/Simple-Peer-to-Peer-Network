@@ -18,6 +18,8 @@ typedef struct ringStruct
   int prediPort;
 } ringStruct;
 
+void Join_Ring(int , int , int , socketStruct );
+
 
 /*
 socketStruct setupListenSocket(char * myIP, int myPort);
