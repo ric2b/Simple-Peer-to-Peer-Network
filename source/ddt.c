@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "interface.h"
-#include "network.h"
+//#include "network.h"
 #include "ringOps.h"
 
 #define STDIN 0
@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
 	int 	listenFD = 8080;
-
+	socketStruct socketCFG_UDP;
 	//By default, bootIP="tejo.ist.utl.pt" and bootport=58000
 	strcpy(bootIP,"tejo.ist.utl.pt");
 	bootport = 58000;
@@ -25,8 +25,8 @@ int main(int argc, char **argv)
 
 
 	char clientIP[128];
-	listenFD = listenSocket(ringport);	
-
+	listenFD = listenSocket(&ringport);	
+	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
 	
@@ -54,14 +54,15 @@ int main(int argc, char **argv)
 			}
 			if(FD_ISSET(STDIN, &fds))
 			{
-				read(STDIN, buffer, 128);
-				printf("teclado: %s", buffer);
+				run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP, ringport, socketCFG_UDP);
+				//read(STDIN, buffer, 128);
+				//printf("teclado: %s", buffer);
 			}
 
 		}
 	}
 
-	do
+	/*do
 	{
 		ringx = 0;
    		identifier = -1;
@@ -69,7 +70,7 @@ int main(int argc, char **argv)
    		succiTCP = -1;
 		memset(succiIP,0,70);
 	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP));
-
+	*/
 	//closeSocket(socketCFG);
   	exit(0);
 }
