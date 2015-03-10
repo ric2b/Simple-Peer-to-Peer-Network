@@ -19,7 +19,7 @@ void Join_Ring(int ring, int identifier, int ringport, socketStruct start)
   socketStruct PeerTCP;
 
 
-  sprintf(msg,"BQRY %d\n",ring);
+  sprintf(msg,"BQRY %d",ring);
   printf("Command sent: %s\n",msg);
   printf("Socket: %d\n",start.socketFD);
   if((temp = sendUDP(msg,strlen(msg),start)) == -1)
@@ -74,7 +74,7 @@ void Join_Ring(int ring, int identifier, int ringport, socketStruct start)
       printf("IP: %s\nPort: %d\n",idIP,startTCP);
       PeerTCP = setupSocket(idIP, startTCP, 'T');
       memset((void*)&msg,'\0',sizeof(msg));
-      sprintf(msg,"ID %d", identifier);
+      sprintf(msg,"ID %d\n", identifier);
       printf("Sending %s with %d bytes\n",msg,(int)strlen(msg));
       sendTCP(msg,strlen(msg),PeerTCP);
     }

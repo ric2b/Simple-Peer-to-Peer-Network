@@ -38,8 +38,12 @@ int main(int argc, char **argv)
 		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
 		FD_SET(STDIN, &fds); // stdin
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
-		printf("Waiting to select...\n");
-		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
+		//printf("Waiting to select...\n");
+
+		timeout.tv_sec  = 1;
+		timeout.tv_usec = 0;
+
+		if (select(maxfd+1, &fds, NULL, NULL, &timeout) > 0) {
 			memset(buffer,0,128);
 
 			if(FD_ISSET(STDIN, &fds))
@@ -62,7 +66,7 @@ int main(int argc, char **argv)
 			}
 
 		}
-		printf("Looping...\n");
+		//printf("Looping...\n");
 	}
 
 	/*do
