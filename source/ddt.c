@@ -18,7 +18,6 @@ int main(int argc, char **argv)
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
 	int 	listenFD = 8080;
 	socketStruct socketCFG_UDP;
-	struct timeval timeout;
 
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
 
@@ -29,8 +28,6 @@ int main(int argc, char **argv)
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
 	
-	timeout.tv_sec  = 10;
-	timeout.tv_usec = 0;
 
 	while(1)
 	{	//bloqueia no select até haver algo para ler num dos sockets que estão em fds
@@ -40,10 +37,7 @@ int main(int argc, char **argv)
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 		//printf("Waiting to select...\n");
 
-		timeout.tv_sec  = 1;
-		timeout.tv_usec = 0;
-
-		if (select(maxfd+1, &fds, NULL, NULL, &timeout) > 0) {
+		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
 			memset(buffer,0,128);
 
 			if(FD_ISSET(STDIN, &fds))
