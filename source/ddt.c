@@ -18,9 +18,8 @@ int main(int argc, char **argv)
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
 	int 	listenFD = 8080;
 	socketStruct socketCFG_UDP;
-	//By default, bootIP="tejo.ist.utl.pt" and bootport=58000
-	strcpy(bootIP,"tejo.ist.utl.pt");
-	bootport = 58000;
+	struct timeval timeout;
+
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
 
 
@@ -30,6 +29,8 @@ int main(int argc, char **argv)
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
 	
+	timeout.tv_sec  = 10;
+	timeout.tv_usec = 0;
 
 	while(1)
 	{	//bloqueia no select até haver algo para ler num dos sockets que estão em fds
@@ -37,21 +38,10 @@ int main(int argc, char **argv)
 		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
 		FD_SET(STDIN, &fds); // stdin
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
-
+		printf("Waiting to select...\n");
 		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
 			memset(buffer,0,128);
 
-			if(FD_ISSET(listenFD, &fds))
-			{
-				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
-				
-				// the usual stuff
-				read(nodeFD, buffer, 128);
-				write(nodeFD, "OK", 2);
-				printf("%s: %s", clientIP, buffer);
-				
-				close(nodeFD); // fecha o file descriptor do nó cliente	
-			}
 			if(FD_ISSET(STDIN, &fds))
 			{
 				run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP, ringport, socketCFG_UDP);
@@ -59,7 +49,20 @@ int main(int argc, char **argv)
 				//printf("teclado: %s", buffer);
 			}
 
+			if(FD_ISSET(listenFD, &fds))
+			{
+				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
+				
+				// the usual stuff
+				read(nodeFD, buffer, 128);
+				//write(nodeFD, "OK", 2);
+				printf("Peer received: %s\n", buffer);
+				
+				close(nodeFD); // fecha o file descriptor do nó cliente	
+			}
+
 		}
+		printf("Looping...\n");
 	}
 
 	/*do
