@@ -1,7 +1,10 @@
 #ifndef _INTERFACE_H
 #define _INTERFACE_H
 
-int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option);
-int run_commands(char * userInput, char * cmd, char * succiIP, int * exitProgram, int * identifier, int * ringx, int* succi, int * succiTCP);
+#include "network.h"
 
+int check_arguments(int , char **, char* , int * , int* , char * );
+
+int run_commands(char * , char * , char * ,int*, int * , int * , int* , int * , int , socketStruct);
+// nao e necessario meter o nome das variaveis apenas o tipo
 #endif

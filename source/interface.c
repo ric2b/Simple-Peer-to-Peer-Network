@@ -3,7 +3,9 @@
 #include <getopt.h>
 #include <string.h>
 
-//#include "interface.h"
+//#include "network.h"
+#include "interface.h"
+#include "ringOps.h"
 
 int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
 {
@@ -51,7 +53,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 	return 0;
 }
 
-int run_commands(char * userInput, char * cmd, char * succiIP, int * identifier, int * ringx, int* succi, int * succiTCP)
+int run_commands(char * userInput, char * cmd, char * succiIP, int* exitProgram, int * identifier, int * ringx, int* succi, int * succiTCP, int ringport, socketStruct arranque)
 {
    printf("> ");
    fgets(userInput,63,stdin);
@@ -90,6 +92,7 @@ int run_commands(char * userInput, char * cmd, char * succiIP, int * identifier,
 		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, ringx, identifier, succi, succiIP, succiTCP) ==3)
 		{
 			printf("Joining ring number %i with an identifier %i.\n", * ringx, * identifier);
+			Join_Ring(*ringx, *identifier, ringport, arranque); 
 		}
 
 		else if(* ringx > 0 && * identifier > -1 && * identifier < 64 && * succi > -1 && * succi < 64 && * succiTCP > -1)

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <assert.h>
 
 #include "network.h"
 
@@ -44,11 +46,12 @@ int recvTCP(char * buffer,socketStruct socketCFG)
 
 /* --------------------------< Listening >--------------------------------- */
 
-int listenSocket(int listen_port){
+int listenSocket(int* listen_port){
   
   int server_socket;
   struct sockaddr_in server_addr;
-  
+  const int       optVal = 1;
+  const socklen_t optLen = sizeof(optVal);
   /* criar socket do servidor */
   if ((server_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) 
   {
@@ -60,17 +63,19 @@ int listenSocket(int listen_port){
   bzero((char *) &server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_addr.sin_port = htons(listen_port);
+  server_addr.sin_port = htons(*listen_port);
   
+  setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
+
   /* associa o socket à ringport */  
   while(bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
   {
-    printf("porta %d ocupada, a tentar a próxima\n", listen_port);
-    listen_port++;
-    server_addr.sin_port = htons(listen_port);
+    printf("porta %d ocupada, a tentar a próxima\n", *listen_port);
+    (*listen_port)++;
+    server_addr.sin_port = htons(*listen_port);
   }
   
-  printf("port - %d\n", listen_port);
+  printf("port - %d\n", *listen_port);
     
   /* socket do servidor a escutar pedidos */
   if (listen(server_socket, MAX_PENDING) < 0) { // fila de espera de escuta pela parte da socket do servidor é de 128 clientes, valor definido pelo MAX_PENDING
@@ -83,7 +88,7 @@ int listenSocket(int listen_port){
   gethostname(buffer,128);
   printf("%s\n", buffer);
 
-    return server_socket; // função devolve o file descriptor da socket do servidor
+  return server_socket; // função devolve o file descriptor da socket do servidor
 }
 
 int aceita_cliente(int server_socket, char * remote_address)
@@ -91,7 +96,7 @@ int aceita_cliente(int server_socket, char * remote_address)
 
   int client_socket; // file descriptor que irá ser associado a cada cliente
   struct sockaddr_in client_addr;
-  unsigned int client_lenght = sizeof(client_addr);
+  socklen_t client_lenght = sizeof(client_addr);
   
   /* espera por ligação do cliente */
   if ((client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &client_lenght)) < 0) 
@@ -113,7 +118,8 @@ socketStruct setupSocket(char * servidor, int port, char protocol)
   struct in_addr *a;
   int socketFD;
   int ignoreAddr = 0;
-
+  const int       optVal = 1;
+  const socklen_t optLen = sizeof(optVal);
   socketStruct socketCFG;
 
   struct sockaddr_in * addr = (struct sockaddr_in *) malloc(sizeof(struct sockaddr_in));
@@ -142,6 +148,8 @@ socketStruct setupSocket(char * servidor, int port, char protocol)
     exit(1);
   }
 
+  setsockopt(socketFD, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
+
   if(ignoreAddr == 0)
   {
     a=(struct in_addr*)h->h_addr_list[0];
@@ -160,7 +168,11 @@ socketStruct setupSocket(char * servidor, int port, char protocol)
   if(protocol == 'T')
   {
     int n = connect(socketFD,(struct sockaddr*)addr, sizeof(*addr));
-    if(n==-1) exit(1);
+    if(n==-1) 
+    {
+      printf("Erro no connect a %c\n", protocol);
+      exit(1);
+    }
   }
   
   return socketCFG;

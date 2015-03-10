@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "interface.h"
-#include "network.h"
+//#include "network.h"
 #include "ringOps.h"
 
 #define STDIN 0
@@ -17,16 +17,14 @@ int main(int argc, char **argv)
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
 	int 	listenFD = 8080;
+	socketStruct socketCFG_UDP;
 
-	//By default, bootIP="tejo.ist.utl.pt" and bootport=58000
-	strcpy(bootIP,"tejo.ist.utl.pt");
-	bootport = 58000;
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
 
 
 	char clientIP[128];
-	listenFD = listenSocket(ringport);	
-
+	listenFD = listenSocket(&ringport);	
+	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
 	
@@ -37,9 +35,17 @@ int main(int argc, char **argv)
 		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
 		FD_SET(STDIN, &fds); // stdin
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
+		//printf("Waiting to select...\n");
 
 		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
 			memset(buffer,0,128);
+
+			if(FD_ISSET(STDIN, &fds))
+			{
+				run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP, ringport, socketCFG_UDP);
+				//read(STDIN, buffer, 128);
+				//printf("teclado: %s", buffer);
+			}
 
 			if(FD_ISSET(listenFD, &fds))
 			{
@@ -47,21 +53,17 @@ int main(int argc, char **argv)
 				
 				// the usual stuff
 				read(nodeFD, buffer, 128);
-				write(nodeFD, "OK", 2);
-				printf("%s: %s", clientIP, buffer);
+				//write(nodeFD, "OK", 2);
+				printf("Peer received: %s\n", buffer);
 				
 				close(nodeFD); // fecha o file descriptor do nó cliente	
 			}
-			if(FD_ISSET(STDIN, &fds))
-			{
-				read(STDIN, buffer, 128);
-				printf("teclado: %s", buffer);
-			}
 
 		}
+		//printf("Looping...\n");
 	}
 
-	do
+	/*do
 	{
 		ringx = 0;
    		identifier = -1;
@@ -69,7 +71,7 @@ int main(int argc, char **argv)
    		succiTCP = -1;
 		memset(succiIP,0,70);
 	} while(0 == run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP));
-
+	*/
 	//closeSocket(socketCFG);
   	exit(0);
 }

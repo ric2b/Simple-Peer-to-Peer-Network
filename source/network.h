@@ -24,7 +24,7 @@ int recvTCP(char * buffer,socketStruct socketCFG);
 
 
 
-int listenSocket(int listen_port);
+int listenSocket(int* listen_port);
 
 int aceita_cliente(int server_socket, char * remote_address);
 
