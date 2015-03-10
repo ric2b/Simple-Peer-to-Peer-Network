@@ -18,7 +18,9 @@ typedef struct ringStruct
   int prediPort;
 } ringStruct;
 
-int removeNode(ringStruct * ringData, socketStruct socketCFG);
+int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succiPeer, socketStruct prediPeer);
+
+int searchNode(ringStruct * ringData, socketStruct succiPeer, int k);
 
 /*
 socketStruct setupListenSocket(char * myIP, int myPort);

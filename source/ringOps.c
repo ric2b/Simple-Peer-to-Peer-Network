@@ -84,7 +84,7 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
     {
       exit(1);
     }
-    else if(sscanf(buffer,"%s %d %d %s %d", cmd, &ringx, &ringID, idIP, &startTCP) == 5 && strcmp(cmd,"BRSP") == 0 && ringID == ringData.myID)
+    else if(sscanf(buffer,"%s %i %i %s %i", cmd, &ringx, &ringID, idIP, &startTCP) == 5 && strcmp(cmd,"BRSP") == 0 && ringID == ringData.myID)
     {
       memset(buffer,0,strlen(buffer));
       memset(msg,0,strlen(msg));
@@ -141,6 +141,31 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
     {
       exit(1);
     }
+  }
+  exit(1);
+}
+
+int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
+{
+  char msg[128], buffer[128], qryIP[30], cmd[10];
+  int qryID, qryTCP;
+
+  if( k > ringData.prediID && k <= ringData.succiID) // put thing of the distance, this is wrong now!!!!
+  {
+    printf("%i %s %i", ringData.succiID, ringData.succiIP, ringData.succiPort);
+    exit(0);
+  }
+  else
+  {
+    sprintf(msg,"QRY %i %i\n", ringData.myID, k);
+    sendTCP(msg, strlen(msg), succiPeer);
+    recvTCP(buffer, succiPeer);
+
+    sscanf(buffer,"%s %i %i %i %s %i", cmd, &ringx, &ringID, idIP, &startTCP) // YOU LEFT SESSION OF CODING HERE! COMEBACK! DONT LEAVE ME!
+
+    printf("%i %s %i", qryID, qryIP, qryTCP);
+
+    exit(0);
   }
   exit(1);
 }
