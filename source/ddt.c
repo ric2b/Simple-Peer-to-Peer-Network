@@ -25,11 +25,11 @@ int main(int argc, char **argv)
 
 
 	char clientIP[128];
-	listenFD = listenSocket(ringport);	
+	listenFD = listenSocket(ringport);
 
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
-	
+
 
 	while(1)
 	{	//bloqueia no select até haver algo para ler num dos sockets que estão em fds
@@ -44,13 +44,13 @@ int main(int argc, char **argv)
 			if(FD_ISSET(listenFD, &fds))
 			{
 				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
-				
+
 				// the usual stuff
 				read(nodeFD, buffer, 128);
 				write(nodeFD, "OK", 2);
 				printf("%s: %s", clientIP, buffer);
-				
-				close(nodeFD); // fecha o file descriptor do nó cliente	
+
+				close(nodeFD); // fecha o file descriptor do nó cliente
 			}
 			if(FD_ISSET(STDIN, &fds))
 			{
