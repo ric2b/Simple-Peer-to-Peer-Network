@@ -16,11 +16,14 @@ typedef struct ringStruct
   int prediID;
   char * prediIP[128];
   int prediPort;
+  int starter;
 } ringStruct;
 
 int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succiPeer, socketStruct prediPeer);
 
 int searchNode(ringStruct * ringData, socketStruct succiPeer, int k);
+
+int showNode(ringStruct * ringData);
 
 /*
 socketStruct setupListenSocket(char * myIP, int myPort);

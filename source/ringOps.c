@@ -85,6 +85,12 @@ int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
   return 1;
 }
 
+int showNode(ringStruct * ringData)
+{
+  printf("%i %i %i %i", ringData.ringID, ringData.myID, ringData.succiID, ringData.prediID);
+  return 0;
+}
+
 /*
 int joinRing_KnownSucci(ringStruct * ringData, int ringID, int myID, int succiID, char * succiIP, int succiPort)
 {
