@@ -12,12 +12,18 @@
 int main(int argc, char **argv)
 {
 	char  	bootIP[1024];
-	int		bootport, ringport;
+	int	bootport, ringport;
 	char 	userInput[64], cmd[20],succiIP[70], buffer[128];
 	char	option;
 	int 	exitProgram, identifier, ringx, succi, succiTCP;
 	int 	listenFD = 8080;
+	int 	succiFD = -1; 
+	int 	prediFD = -1;
 	socketStruct socketCFG_UDP;
+
+	memset(bootIP, 0, 128);
+	strcpy(bootIP,"tejo.tecnico.ulisboa.pt");
+	bootport = 58000;
 
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
 
@@ -34,9 +40,18 @@ int main(int argc, char **argv)
 		FD_ZERO(&fds);
 		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
 		FD_SET(STDIN, &fds); // stdin
-		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
-		//printf("Waiting to select...\n");
+		if (succiFD != -1)
+			FD_SET(succiFD, &fds);
+		if (prediFD != -1)
+			FD_SET(preddiFD, &fds);
 
+		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
+		maxfd = (succiFD > maxfd) ? succiFD : maxfd;
+		maxfd = (prediFD > maxfd) ? prediFD : maxfd;
+
+		//printf("Waiting to select...\n");
+		printf("> ");
+		fflush(stdout);
 		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
 			memset(buffer,0,128);
 
@@ -55,7 +70,28 @@ int main(int argc, char **argv)
 				read(nodeFD, buffer, 128);
 				//write(nodeFD, "OK", 2);
 				printf("Peer received: %s\n", buffer);
+				close(nodeFD); // fecha o file descriptor do nó cliente	
+			}
+
+			if(FD_ISSET(succiFD, &fds))
+			{
+				int nodeFD = aceita_cliente(succiFD, clientIP); // cria um novo socket de comunicação para o nó succi
 				
+				// the usual stuff
+				read(nodeFD, buffer, 128);
+				//write(nodeFD, "OK", 2);
+				printf("Peer received: %s\n", buffer);
+				close(nodeFD); // fecha o file descriptor do nó cliente	
+			}
+
+			if(FD_ISSET(prediFD, &fds))
+			{
+				int nodeFD = aceita_cliente(succiFD, clientIP); // cria um novo socket de comunicação para o nó predi
+				
+				// the usual stuff
+				read(nodeFD, buffer, 128);
+				//write(nodeFD, "OK", 2);
+				printf("Peer received: %s\n", buffer);
 				close(nodeFD); // fecha o file descriptor do nó cliente	
 			}
 

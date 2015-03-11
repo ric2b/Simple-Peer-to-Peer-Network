@@ -19,7 +19,7 @@ void Join_Ring(int ring, int identifier, int ringport, socketStruct start)
   socketStruct PeerTCP;
 
 
-  sprintf(msg,"BQRY %d",ring);
+  sprintf(msg,"BQRY %d\n",ring);
   printf("Command sent: %s\n",msg);
   printf("Socket: %d\n",start.socketFD);
   if((temp = sendUDP(msg,strlen(msg),start)) == -1)
@@ -111,7 +111,8 @@ socketStruct setupListenSocket(char * myIP, int myPort)
   return ListenSocket;
 }
 */
-/*
+
+
 int joinRing_KnownSucci(ringStruct * ringData, int ringID, int myID, int succiID, char * succiIP, int succiPort)
 {
   ringData->succiID = succiID;
@@ -121,19 +122,16 @@ int joinRing_KnownSucci(ringStruct * ringData, int ringID, int myID, int succiID
   char joinCommand[128*2]; //para aguentar com os 128 do IP + extras
   sprintf(joinCommand, "NEW %d %s %d", myID, ringData->myIP, ringData->myPort);
 
-
+  ringData->ListenSocket = setupSocket(succiIP, succiPort, 'T');
+	
   if(connect(ringData->ListenSocket.socketFD, (struct sockaddr*)ringData->ListenSocket.addr, ringData->ListenSocket.addrlen) == -1)
   {
     printf("erro a fazer connect na joinRing_KnownSucci\n");
     exit(-1);
   }
 
-  //socketStruct setupSocket(succiIP, succiPort, 'T');
-  void sendTCP(char * msg, int msg_length, socketStruct socketCFG);
-  int recvTCP(char * buffer,socketStruct socketCFG);
-
-
-
+  sendTCP(joinCommand, strlen(joinCommand), ringData->ListenSocket);
+ 
   return 0;
 }
-*/
+
