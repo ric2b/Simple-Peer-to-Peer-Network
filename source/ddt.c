@@ -59,7 +59,8 @@ int main(int argc, char **argv)
 				
 				read(nodeFD, buffer, 128);
 				if(JR_Message(buffer,&node,nodeFD) == 1)
-					close(nodeFD); // fecha o file descriptor do nó cliente	
+					close(nodeFD); // fecha o file descriptor do nó cliente
+				printf("Finished processing\n");
 			}
 
 		}
