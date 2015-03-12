@@ -36,6 +36,7 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
       {
         memset(msg,0,strlen(msg));
         sprintf(msg,"BOOT\n");
+        //This part is not well done
         sendTCP(msg, strlen(msg), succiPeer);
         closeSocket(succiPeer);
         memset(msg,0,strlen(msg));
@@ -60,27 +61,48 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
   return 1;
 }
 
-int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
-{
-  char msg[128], buffer[128], qryIP[30], cmd[10];
-  int qryID, qryTCP;
+int distance(int k, int l)
+{ // if it returns -1 something wrong occured
+  int res;
+  if(l >= k)
+    res = l-k;
+  else if(l < k)
+    res = 64 + l - k;
+  else
+    res = -1;
+  return res;
+}
 
-  if( k > ringData.prediID && k <= ringData.succiID) // put thing of the distance, this is wrong now!!!!
+int responsability(int predi, int succi, int k)
+{ // returns 1 if succi is responsible for k, 0 otherwise.
+  if(distance(k,succi) < distance(k,predi))
+    return 1;
+  else
+    return 0;
+}
+
+int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
+{ // returns 0 if everything went as expected
+  char msg[128], buffer[128], cmd[10], qryIP[40];
+  int asked, queried, qryID, qryTCP;
+  if(responsability(ringData.prediID,ringData.succiID,k) == 1)
   {
     printf("%i %s %i", ringData.succiID, ringData.succiIP, ringData.succiPort);
-    exit(0);
+    return 0;
   }
   else
   {
     sprintf(msg,"QRY %i %i\n", ringData.myID, k);
     sendTCP(msg, strlen(msg), succiPeer);
     recvTCP(buffer, succiPeer);
-
-    sscanf(buffer,"%s %i %i %i %s %i", cmd, &ringx, &ringID, idIP, &startTCP) // YOU LEFT SESSION OF CODING HERE! COMEBACK! DONT LEAVE ME!
-
-    printf("%i %s %i", qryID, qryIP, qryTCP);
-
-    return 0;
+    sscanf(buffer,"%s %i %i %i %s %i", cmd, &asked, &queried, &qryID, qryIP, &qryTCP);
+    if(strcmp(cmd,"RSP") == 0 && asked == ringData.myID && queried == k)
+    {
+      printf("%i %s %i", qryID, qryIP, qryTCP);
+      return 0;
+    }
+    else
+      return 1;
   }
   return 1;
 }
