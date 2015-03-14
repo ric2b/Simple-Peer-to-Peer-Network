@@ -24,7 +24,7 @@ int recvUDP(char * buffer,socketStruct socketCFG)
 
 /* --------------------------< TCP >--------------------------------- */
 
-void sendTCP(char * msg, int msg_length, socketStruct socketCFG)
+int sendTCP(char * msg, int msg_length, socketStruct socketCFG)
 {
   int nwritten;
   int nleft = strlen(msg);
