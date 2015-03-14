@@ -19,7 +19,7 @@ typedef struct socketStruct
 int sendUDP(char * msg, int msg_length, socketStruct socketCFG);
 int recvUDP(char * buffer,socketStruct socketCFG);
 
-void sendTCP(char * msg, int msg_length, socketStruct socketCFG);
+int sendTCP(char * msg, int msg_length, socketStruct socketCFG);
 int recvTCP(char * buffer,socketStruct socketCFG);
 
 
