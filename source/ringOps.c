@@ -11,7 +11,7 @@ void GetIP(ringStruct* node)
 	char localmachine[128];
 	struct hostent *h;
     struct in_addr *a;
-    
+
 	if(gethostname(localmachine,128) == -1)
     {
       printf("\nError during hostname query\n\n");
@@ -19,7 +19,7 @@ void GetIP(ringStruct* node)
     }
     if((h=gethostbyname(localmachine))==NULL)
       {
-        
+
         exit(1);//error
       }
     printf("Hostname: %s\n",localmachine);
@@ -49,13 +49,13 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	char cmd[128], msg[128], ip[128];
 	int no_arrq, no_novo, no_dest, tcp;
 	printf("A analisar: %s",request);
-	
-	
+
+
 	if(sscanf(request,"%s %d %d %d %s %d",cmd,&no_arrq,&no_novo,&no_dest,ip,&tcp)!= 5)
 	{
 		printf("Comando 1: %s %d\n ",cmd,(int)strlen(cmd));
 		if(sscanf(request,"%s %d %s %d",cmd,&no_novo,ip,&tcp)!= 4)
-		{	
+		{
   			printf("Comando 2: %s %d\n ",cmd,(int)strlen(cmd));
   			if(sscanf(request,"%s %d",cmd,&no_novo)!= 2)
   			{
@@ -70,7 +70,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
       					{
                     memset(msg,0,128);
       							sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
-      							printf("%s",msg);	
+      							printf("%s",msg);
       							sendTCPv2(msg,strlen(msg), nodeFD);
       							return 0;
       					}
@@ -78,10 +78,10 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
                 {
                     memset(msg,0,128);
                     sprintf(msg,"QRY %d %d\n",node->myID,no_novo);
-                    printf("%s",msg); 
+                    printf("%s",msg);
                     sendTCPv2(msg,strlen(msg), node->succiFD);
                     return 0;
-                }  			
+                }
             }
     			 else
     			 {
@@ -91,7 +91,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
   			}
 		}
 		else
-		{			
+		{
 			if(strcmp(cmd,"NEW") == 0)
 			{
 				node->prediID = no_novo;
@@ -113,7 +113,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 		if(strcmp(cmd,"RSP") == 0)
 		{
 				sprintf(msg,"SUCC %d %s %d\n",no_dest, ip, tcp);
-				printf("%s\n",msg);	
+				printf("%s\n",msg);
 				sendTCPv2(msg,strlen(msg), nodeFD);
 				return 0;
 		}
@@ -123,7 +123,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 			return 1;
 		}
 	}
-	
+
 	return 1;
 }
 
@@ -149,7 +149,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
     exit(1);
   if((temp = recvUDP(buffer,start)) == -1)
     exit(1);
-  
+
   printf("Command recieved: %s\n",buffer);
 
   if(strcmp(buffer,"EMPTY") == 0)
@@ -161,23 +161,23 @@ void Join_Ring(ringStruct* node, socketStruct start)
     }
     if((h=gethostbyname(localmachine))==NULL)
       {
-        
+
         exit(1);//error
       }
     printf("Hostname: %s\n",localmachine);
     a = (struct in_addr*)h->h_addr_list[0];
-  
+
     sprintf(msg,"REG %d %d %s %d\n",node->ringID, node->myID,inet_ntoa(*a), node->myPort);
     strcpy(node->myIP,inet_ntoa(*a));
     printf("%s\n",msg);
-    
+
     if((temp = sendUDP(msg,strlen(msg),start)) == -1)
       exit(1);
     if((temp = recvUDP(buffer,start)) == -1)
       exit(1);
 
     printf("Temp: %s\n",buffer);
-    
+
     if(strcmp(buffer,"OK") == 0)
       return;
   }
@@ -198,7 +198,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
       printf("IP: %s\nPort: %d\n",idIP,startTCP);
 
  // vai se ligar ao no de arranque
- // enviando ID i   
+ // enviando ID i
 
       PeerTCP = setupSocket(idIP, startTCP, 'T');
       memset((void*)&msg,'\0',sizeof(msg));
@@ -206,7 +206,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
       printf("Sending 1 %s",msg);
       sendTCP(msg,strlen(msg),PeerTCP);
       memset(buffer,0,128);
-      
+
       if(recvTCP(buffer,PeerTCP)<0)
   	  {
     		printf("Can't receive message from TCP connection\n");
@@ -219,13 +219,13 @@ void Join_Ring(ringStruct* node, socketStruct start)
     		printf("Bad Message 2\n");
     		exit(1);
   	  }
-	  
+
 	     while(tmpid == node->myID)
       {
 		    printf("Can't use identifier %d, please choose a different one: ",node->myID);
         scanf("%d",&(node->myID));
       }
-      
+
       if(strcmp(cmd,"SUCC") != 0)
   	  {
     		printf("Bad Message 3\n");
@@ -240,61 +240,135 @@ void Join_Ring(ringStruct* node, socketStruct start)
       memset(buffer,0,128);
     }
   }
-   
+
 }
 
-/*
-socketStruct setupListenSocket(char * myIP, int myPort)
+
+//socketStruct setupListenSocket(char * myIP, int myPort)
+
+int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succiPeer, socketStruct prediPeer)
 {
-  socketStruct ListenSocket;
-
-  ListenSocket = setupSocket("NULL", 0, 'T');
-
-  if(listen(ListenSocket.socketFD, MAXPENDING) != 0)
+  //getting out with return 0, everything went fine
+  //getting out with return 1, something went wrong
+  char msg[128], buffer[128];
+  if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
   {
-    printf("erro a fazer listen\n");
-    exit(-1);
+    sprintf(msg,"UNR %i\n",ringData->ringID);
+    if(sendUDP(msg,strlen(msg),socketCFG) == -1)
+      return 1;
+    if(recvUDP(buffer,socketCFG) == -1)
+      return 1;
+    else if(strcmp(buffer,"OK")==0)
+      return 0;
+    else
+      return 1;
   }
-  
-  bzero(ListenSocket.addr, ListenSocket.addrlen);
-  ListenSocket.addr->sin_family = AF_INET;
-  ListenSocket.addr->sin_addr.s_addr = htonl(INADDR_ANY);
-  ListenSocket.addr->sin_port = htons(myPort);
-  
-  if(bind(ListenSocket.socketFD, (struct sockaddr *) ListenSocket.addr, ListenSocket.addrlen) < 0)
+  else
   {
-    printf("erro a fazer bind\n");
-    exit(-1);
+    if(ringData->starter == 1) // Test to check if the current node is the starter node. If it is, put the next node as the starter one
+    {
+      sprintf(msg,"REG %i %i %s %i\n", ringData->ringID, ringData->succiID, ringData->succiIP, ringData->succiPort);
+      if(sendUDP(msg,strlen(msg),socketCFG) == -1)
+        return 1;
+      if(recvUDP(buffer,socketCFG) == -1)
+        return 1;
+      else if(strcmp(buffer,"OK")==0)
+      {
+        memset(msg,0,strlen(msg));
+        sprintf(msg,"BOOT\n");
+        //This part is not well done
+        sendTCP(msg, strlen(msg), succiPeer);
+        closeSocket(succiPeer);
+        memset(msg,0,strlen(msg));
+        sprintf(msg,"CON %i %s %i\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
+        sendTCP(msg, strlen(msg), prediPeer);
+        closeSocket(prediPeer);
+        return 0;
+      }
+      else // Default Case
+      {
+        closeSocket(succiPeer);
+        memset(msg,0,strlen(msg));
+        sprintf(msg,"CON %i %s %i\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
+        sendTCP(msg, strlen(msg), prediPeer);
+        closeSocket(prediPeer);
+        return 0;
+      }
+    }
+    else
+      return 1;
   }
-
-  gethostname(myIP, 128);
-
-  return ListenSocket;
+  return 1;
 }
-*/
+
+int distance(int k, int l)
+{ // if it returns -1 something wrong occured
+  int res;
+  if(l >= k)
+    res = l-k;
+  else if(l < k)
+    res = 64 + l - k;
+  else
+    res = -1;
+  return res;
+}
+
+int responsability(int predi, int succi, int k)
+{ // returns 1 if succi is responsible for k, 0 otherwise.
+  if(distance(k,succi) < distance(k,predi))
+    return 1;
+  else
+    return 0;
+}
+
+int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
+{ // returns 0 if everything went as expected
+  char msg[128], buffer[128], cmd[10], qryIP[40];
+  int asked, queried, qryID, qryTCP;
+  if(responsability(ringData->prediID,ringData->succiID,k) == 1)
+  {
+    printf("%i %s %i", ringData->succiID, ringData->succiIP, ringData->succiPort);
+    return 0;
+  }
+  else
+  {
+    sprintf(msg,"QRY %i %i\n", ringData->myID, k);
+    sendTCP(msg, strlen(msg), succiPeer);
+    recvTCP(buffer, succiPeer);
+    sscanf(buffer,"%s %i %i %i %s %i", cmd, &asked, &queried, &qryID, qryIP, &qryTCP);
+    if(strcmp(cmd,"RSP") == 0 && asked == ringData->myID && queried == k)
+    {
+      printf("%i %s %i", qryID, qryIP, qryTCP);
+      return 0;
+    }
+    else
+      return 1;
+  }
+  return 1;
+}
+
+int showNode(ringStruct * ringData)
+{
+  printf("%i %i %i %i", ringData->ringID, ringData->myID, ringData->succiID, ringData->prediID);
+  return 0;
+}
+
 /*
 int joinRing_KnownSucci(ringStruct * ringData, int ringID, int myID, int succiID, char * succiIP, int succiPort)
 {
   ringData->succiID = succiID;
   strcpy(ringData->succiIP, succiIP);
   ringData->succiPort = succiPort;
-
   char joinCommand[128*2]; //para aguentar com os 128 do IP + extras
   sprintf(joinCommand, "NEW %d %s %d", myID, ringData->myIP, ringData->myPort);
-
-
   if(connect(ringData->ListenSocket.socketFD, (struct sockaddr*)ringData->ListenSocket.addr, ringData->ListenSocket.addrlen) == -1)
   {
     printf("erro a fazer connect na joinRing_KnownSucci\n");
     exit(-1);
   }
-
   //socketStruct setupSocket(succiIP, succiPort, 'T');
   void sendTCP(char * msg, int msg_length, socketStruct socketCFG);
   int recvTCP(char * buffer,socketStruct socketCFG);
-
-
-
   return 0;
 }
 */

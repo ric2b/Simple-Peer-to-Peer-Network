@@ -4,7 +4,7 @@
 #include "network.h"
 
 typedef struct ringStruct
-{	
+{
   socketStruct ListenSocket;
   int ringID;
   int myID;
@@ -24,8 +24,20 @@ typedef struct ringStruct
 void GetIP(ringStruct* ); //ta aqui só para não ter problemas com includes circulares
 
 void Join_Ring(ringStruct*, socketStruct );
+
 void Node_Initialization(ringStruct* );
+
 int JR_Message(char*,ringStruct*,int);
+
+int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succiPeer, socketStruct prediPeer);
+
+int distance(int k, int l);
+
+int responsability(int predi, int succi, int k);
+
+int searchNode(ringStruct * ringData, socketStruct succiPeer, int k);
+
+int showNode(ringStruct * ringData);
 
 /*
 socketStruct setupListenSocket(char * myIP, int myPort);
