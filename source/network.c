@@ -8,7 +8,6 @@
 #include "network.h"
 
 
-
 /* --------------------------< UDP >--------------------------------- */
 
 int sendUDP(char * msg, int msg_length, socketStruct socketCFG)
@@ -33,6 +32,18 @@ void sendTCP(char * msg, int msg_length, socketStruct socketCFG)
   while(nleft > 0)
   {
     nwritten = write(socketCFG.socketFD, msg, msg_length);
+    nleft -= nwritten;
+    msg += nwritten;
+  }
+}
+
+void sendTCPv2(char * msg, int msg_length, int socket)
+{
+  int nwritten;
+  int nleft = strlen(msg);
+  while(nleft > 0)
+  {
+    nwritten = write(socket, msg, msg_length);
     nleft -= nwritten;
     msg += nwritten;
   }

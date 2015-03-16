@@ -53,7 +53,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 	return 0;
 }
 
-int run_commands(char * userInput, char * cmd, char * succiIP, int* exitProgram, int * identifier, int * ringx, int* succi, int * succiTCP, int ringport, socketStruct arranque)
+int run_commands(char * userInput, char * cmd, ringStruct* node, socketStruct arranque)
 {
    printf("> ");
    fgets(userInput,63,stdin);
@@ -75,12 +75,12 @@ int run_commands(char * userInput, char * cmd, char * succiIP, int* exitProgram,
    }
 	else	if(strcmp(cmd,"search") == 0)
 	{
-       sscanf(userInput,"%s %i",cmd, identifier);
+       sscanf(userInput,"%s %i",cmd, &node->myID);
        //corrigir o caso para o qual o utilizador nao insere o argumento
 
-       if(* identifier > -1 && * identifier < 64)
+       if((node->myID) > -1 && (node->myID) < 64)
 		 {
-           printf("\nSearching the identifier and localization of the node responsible for the identifier %i.\n\n", * identifier);
+           printf("\nSearching the identifier and localization of the node responsible for the identifier %i.\n\n", (node->myID));
        }
 		 else
 		 {
@@ -89,15 +89,15 @@ int run_commands(char * userInput, char * cmd, char * succiIP, int* exitProgram,
    }
 	else if(strcmp(cmd,"join") == 0)
 	{
-		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, ringx, identifier, succi, succiIP, succiTCP) ==3)
+		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, &(node->ringID), &(node->myID), &(node->succiID), node->succiIP, &(node->succiPort)) ==3)
 		{
-			printf("Joining ring number %i with an identifier %i.\n", * ringx, * identifier);
-			Join_Ring(*ringx, *identifier, ringport, arranque); 
+			printf("Joining ring number %i with an identifier %i.\n", (node->ringID), (node->myID));
+			Join_Ring(node, arranque); 
 		}
 
-		else if(* ringx > 0 && * identifier > -1 && * identifier < 64 && * succi > -1 && * succi < 64 && * succiTCP > -1)
+		else if((node->ringID) > 0 && (node->myID) > -1 && (node->myID) < 64 && (node->succiID) > -1 && (node->succiID) < 64 && (node->succiPort) > -1)
 		{
-      	printf("\nJoining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n\n", * ringx, * identifier, * succi, succiIP, * succiTCP);
+      	printf("\nJoining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
   		}
 		else
 		{

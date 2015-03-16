@@ -9,6 +9,7 @@
 
 #define MAX_PENDING 10
 
+
 typedef struct socketStruct
 {
   int socketFD;
@@ -16,21 +17,22 @@ typedef struct socketStruct
   socklen_t addrlen;
 } socketStruct;
 
-int sendUDP(char * msg, int msg_length, socketStruct socketCFG);
-int recvUDP(char * buffer,socketStruct socketCFG);
 
-void sendTCP(char * msg, int msg_length, socketStruct socketCFG);
-int recvTCP(char * buffer,socketStruct socketCFG);
+int sendUDP(char * , int , socketStruct );
+int recvUDP(char * ,socketStruct );
 
-
-
-int listenSocket(int* listen_port);
-
-int aceita_cliente(int server_socket, char * remote_address);
+void sendTCP(char * , int , socketStruct );
+void sendTCPv2(char * , int , int );
+int recvTCP(char * ,socketStruct );
 
 
 
-socketStruct setupSocket(char * servidor, int port, char protocol);
-void closeSocket(socketStruct socketCFG);
+int listenSocket(int* );
+int aceita_cliente(int , char * );
+
+
+
+socketStruct setupSocket(char * , int , char );
+void closeSocket(socketStruct );
 
 #endif

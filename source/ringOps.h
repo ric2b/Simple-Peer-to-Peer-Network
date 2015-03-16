@@ -13,13 +13,19 @@ typedef struct ringStruct
   int succiID;
   char succiIP[128];
   int succiPort;
+  int succiFD;
   int prediID;
-  char * prediIP[128];
+  char prediIP[128];
   int prediPort;
+  int prediFD;
 } ringStruct;
 
-void Join_Ring(int , int , int , socketStruct );
 
+void GetIP(ringStruct* ); //ta aqui só para não ter problemas com includes circulares
+
+void Join_Ring(ringStruct*, socketStruct );
+void Node_Initialization(ringStruct* );
+int JR_Message(char*,ringStruct*,int);
 
 /*
 socketStruct setupListenSocket(char * myIP, int myPort);
