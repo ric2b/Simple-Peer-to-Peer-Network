@@ -6,7 +6,6 @@
 #include "ringOps.h"
 #include "network.h"
 
-<<<<<<< HEAD
 void Join_Ring(int ring, int identifier, int ringport, socketStruct start)
 {
   char msg[128];
@@ -27,7 +26,7 @@ void Join_Ring(int ring, int identifier, int ringport, socketStruct start)
     exit(1);
   if((temp = recvUDP(buffer,start)) == -1)
     exit(1);
-  
+
   printf("Command recieved: %s\n",buffer);
 
   if(strcmp(buffer,"EMPTY") == 0)
@@ -39,22 +38,22 @@ void Join_Ring(int ring, int identifier, int ringport, socketStruct start)
     }
     if((h=gethostbyname(localmachine))==NULL)
       {
-        
+
         exit(1);//error
       }
     printf("Hostname: %s\n",localmachine);
     a = (struct in_addr*)h->h_addr_list[0];
-  
+
     sprintf(msg,"REG %d %d %s %d\n",ring, identifier,inet_ntoa(*a), ringport);
     printf("%s\n",msg);
-    
+
     if((temp = sendUDP(msg,strlen(msg),start)) == -1)
     exit(1);
     if((temp = recvUDP(buffer,start)) == -1)
     exit(1);
 
     printf("Temp: %s\n",buffer);
-    
+
     if(strcmp(buffer,"OK") == 0)
       return;
   }
@@ -80,14 +79,13 @@ void Join_Ring(int ring, int identifier, int ringport, socketStruct start)
       sendTCP(msg,strlen(msg),PeerTCP);
     }
   }
-   
+
 }
 
-/*
-socketStruct setupListenSocket(char * myIP, int myPort)
-=======
+
+//socketStruct setupListenSocket(char * myIP, int myPort)
+
 int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succiPeer, socketStruct prediPeer)
->>>>>>> origin/removeNode
 {
   //getting out with return 0, everything went fine
   //getting out with return 1, something went wrong
@@ -200,23 +198,15 @@ int joinRing_KnownSucci(ringStruct * ringData, int ringID, int myID, int succiID
   ringData->succiID = succiID;
   strcpy(ringData->succiIP, succiIP);
   ringData->succiPort = succiPort;
-
   char joinCommand[128*2]; //para aguentar com os 128 do IP + extras
   sprintf(joinCommand, "NEW %d %s %d", myID, ringData->myIP, ringData->myPort);
-
-
   if(connect(ringData->ListenSocket.socketFD, (struct sockaddr*)ringData->ListenSocket.addr, ringData->ListenSocket.addrlen) == -1)
   {
     printf("erro a fazer connect na joinRing_KnownSucci\n");
     exit(-1);
   }
-
   //socketStruct setupSocket(succiIP, succiPort, 'T');
   void sendTCP(char * msg, int msg_length, socketStruct socketCFG);
   int recvTCP(char * buffer,socketStruct socketCFG);
-
-
-
   return 0;
 }
-*/

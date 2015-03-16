@@ -20,20 +20,11 @@ int main(int argc, char **argv)
 	socketStruct socketCFG_UDP;
 
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
-
-
 	char clientIP[128];
-<<<<<<< HEAD
-	listenFD = listenSocket(&ringport);	
+	listenFD = listenSocket(&ringport);
 	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
-=======
-	listenFD = listenSocket(ringport);
-
->>>>>>> origin/removeNode
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
-
-
 	while(1)
 	{	//bloqueia no select até haver algo para ler num dos sockets que estão em fds
 		FD_ZERO(&fds);
@@ -41,36 +32,23 @@ int main(int argc, char **argv)
 		FD_SET(STDIN, &fds); // stdin
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 		//printf("Waiting to select...\n");
-
 		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
 			memset(buffer,0,128);
-
 			if(FD_ISSET(STDIN, &fds))
 			{
 				run_commands(userInput, cmd, succiIP, & exitProgram, & identifier, & ringx, & succi, & succiTCP, ringport, socketCFG_UDP);
 				//read(STDIN, buffer, 128);
 				//printf("teclado: %s", buffer);
 			}
-
 			if(FD_ISSET(listenFD, &fds))
 			{
 				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
-
 				// the usual stuff
 				read(nodeFD, buffer, 128);
-<<<<<<< HEAD
 				//write(nodeFD, "OK", 2);
 				printf("Peer received: %s\n", buffer);
-				
-				close(nodeFD); // fecha o file descriptor do nó cliente	
-=======
-				write(nodeFD, "OK", 2);
-				printf("%s: %s", clientIP, buffer);
-
 				close(nodeFD); // fecha o file descriptor do nó cliente
->>>>>>> origin/removeNode
 			}
-
 		}
 		//printf("Looping...\n");
 	}
