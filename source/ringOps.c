@@ -57,10 +57,10 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 
 	if(sscanf(request,"%s %d %d %d %s %d",cmd,&no_arrq,&no_novo,&no_dest,ip,&tcp)!= 5)
 	{
-		printf("Comando 1: %s %d\n ",cmd,(int)strlen(cmd));
+		//printf("Comando 1: %s %d\n ",cmd,(int)strlen(cmd));
 		if(sscanf(request,"%s %d %s %d",cmd,&no_novo,ip,&tcp)!= 4)
 		{
-  			printf("Comando 2: %s %d\n ",cmd,(int)strlen(cmd));
+  			//printf("Comando 2: %s %d\n ",cmd,(int)strlen(cmd));
   			if(sscanf(request,"%s %d",cmd,&no_novo)!= 2)
   			{
     				printf("Bad Message 5\n");
@@ -70,12 +70,16 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
   			{
     				if(strcmp(cmd,"ID") == 0)
     				{
-      					if(node->succiID == -1)
+      					if(node->succiID == -1 && node->prediFD == -1)
       					{
                     memset(msg,0,128);
       							sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
       							printf("%s",msg);
       							sendTCPv2(msg,strlen(msg), nodeFD);
+                    printf("1\n");
+                    printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+                    printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+                    printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
       							return 0;
       					}
                 else
@@ -84,6 +88,10 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
                     sprintf(msg,"QRY %d %d\n",node->myID,no_novo);
                     printf("%s",msg);
                     sendTCPv2(msg,strlen(msg), node->succiFD);
+                    printf("2\n");
+                    printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+                    printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+                    printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
                     return 0;
                 }
             }
@@ -98,11 +106,33 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 		{
 			if(strcmp(cmd,"NEW") == 0)
 			{
-				node->prediID = no_novo;
-				strcpy(node->prediIP,ip);
-				node->prediPort = tcp;
-				node->prediFD = nodeFD;
-				return 0;
+				if(node->succiID == -1 && node->prediFD == -1)
+        {
+          node->prediID = no_novo;
+  				strcpy(node->prediIP,ip);
+  				node->prediPort = tcp;
+  				node->prediFD = nodeFD;
+          node->succiID = no_novo;
+          strcpy(node->succiIP,ip);
+          node->succiPort = tcp;
+          node->succiFD = nodeFD;
+          printf("3\n");
+          printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+          printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+          printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+          return 0;
+        }else
+        {
+          node->prediID = no_novo;
+          strcpy(node->prediIP,ip);
+          node->prediPort = tcp;
+          node->prediFD = nodeFD;
+          printf("4\n");
+          printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+          printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+          printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+          return 0;
+        }
 			}
 			else
 			{
@@ -113,7 +143,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	}
 	else
 	{
-		printf("Comando 3: %s %d\n ",cmd,(int)strlen(cmd));
+		//printf("Comando 3: %s %d\n ",cmd,(int)strlen(cmd));
 		if(strcmp(cmd,"RSP") == 0)
 		{
 				sprintf(msg,"SUCC %d %s %d\n",no_dest, ip, tcp);
@@ -216,8 +246,10 @@ void Join_Ring(ringStruct* node, socketStruct start)
     		printf("Can't receive message from TCP connection\n");
     		exit(1);
   	  }
-  	  //closeSocket(PeerTCP);
+  	  closeSocket(PeerTCP);
   	  printf("TCP received: %s\n",buffer);
+
+      // Message after query through the ring
   	  if(sscanf(buffer,"%s %d %s %d",cmd, &tmpid, tmpip, &tmpport) != 4)
   	  {
     		printf("Bad Message 2\n");
@@ -237,14 +269,22 @@ void Join_Ring(ringStruct* node, socketStruct start)
 	    }
 
 	    memset((void*)&msg,'\0',sizeof(msg));
+      // Sends message to l informing him that i'm his predi
+      // l is now my succi and information is updated 
       sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);
-      printf("Sending 2 %s",msg);
+      printf("Sending to %d, message %s",PeerTCP.socketFD, msg);
+      PeerTCP = setupSocket(tmpip,tmpport,'T');
       sendTCP(msg,strlen(msg),PeerTCP);
-      printf("Sent\n");
-      memset(buffer,0,128);
+      //printf("Sent\n");
+      node->succiFD = PeerTCP.socketFD;
+      strcpy(node->succiIP,tmpip);
+      node->succiID = tmpid;
+      node->succiPort = tmpport;
+      //memset(buffer,0,128);
+      return;
     }
   }
-
+  return;
 }
 
 
@@ -317,9 +357,9 @@ int distance(int k, int l)
   return res;
 }
 
-int responsability(int predi, int succi, int k)
+int responsability(int predi, int i, int k)
 { // returns 1 if succi is responsible for k, 0 otherwise.
-  if(distance(k,succi) < distance(k,predi))
+  if(distance(k,i) < distance(k,predi))
     return 1;
   else
     return 0;
