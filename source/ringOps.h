@@ -18,6 +18,7 @@ typedef struct ringStruct
   char prediIP[128];
   int prediPort;
   int prediFD;
+  int starter;
 } ringStruct;
 
 

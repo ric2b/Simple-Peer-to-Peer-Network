@@ -18,10 +18,10 @@ typedef struct socketStruct
 } socketStruct;
 
 
-int sendTCP(char * msg, int msg_length, socketStruct socketCFG);
-int recvTCP(char * buffer,socketStruct socketCFG);
+int sendUDP(char * msg, int msg_length, socketStruct socketCFG);
+int recvUDP(char * buffer,socketStruct socketCFG);
 
-void sendTCP(char * , int , socketStruct );
+int sendTCP(char * , int , socketStruct );
 void sendTCPv2(char * , int , int );
 int recvTCP(char * ,socketStruct );
 
