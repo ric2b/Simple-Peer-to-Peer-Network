@@ -10,21 +10,25 @@ void GetIP(ringStruct* node)
 {
 	char localmachine[128];
 	struct hostent *h;
-    struct in_addr *a;
+  struct in_addr *a;
 
 	if(gethostname(localmachine,128) == -1)
     {
       printf("\nError during hostname query\n\n");
       exit(1);
     }
-    if((h=gethostbyname(localmachine))==NULL)
-      {
+  if((h=gethostbyname(localmachine))==NULL)
+    {
+      printf("\nError during hostname query\n\n");
+      exit(1);//error
+    }
 
-        exit(1);//error
-      }
-    printf("Hostname: %s\n",localmachine);
-    a = (struct in_addr*)h->h_addr_list[0];
-    strcpy(node->myIP,inet_ntoa(*a));
+  printf("Hostname: %s\n",localmachine);
+  a = (struct in_addr*)h->h_addr_list[0];
+
+  printf("internet address: %s (%08lX)\n", inet_ntoa(*a), (long unsigned int)ntohl(a->s_addr));
+
+  strcpy(node->myIP,inet_ntoa(*a));
 }
 
 
