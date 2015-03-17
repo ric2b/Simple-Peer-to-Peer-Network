@@ -10,14 +10,17 @@ typedef struct ringStruct
   int myID;
   char myIP[128];
   int myPort;
+
   int succiID;
   char succiIP[128];
   int succiPort;
   int succiFD;
+
   int prediID;
   char prediIP[128];
   int prediPort;
   int prediFD;
+
   int starter;
 } ringStruct;
 
@@ -34,7 +37,7 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
 
 int distance(int k, int l);
 
-int responsability(int predi, int succi, int k);
+int responsability(int predi, int i, int k);
 
 int searchNode(ringStruct * ringData, socketStruct succiPeer, int k);
 
