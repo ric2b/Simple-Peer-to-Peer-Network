@@ -40,8 +40,12 @@ int main(int argc, char **argv)
 	{	//bloqueia no select até haver algo para ler num dos sockets que estão em fds
 		FD_ZERO(&fds);
 		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
-		FD_SET(STDIN, &fds); // stdin
+		FD_SET(STDIN, &fds);  // stdin
+		FD_SET(node.prediFD,&fds);
+		FD_SET(node.succiFD,&fds);
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
+		maxfd = (node.prediFD > maxfd) ? node.prediFD : maxfd; //calcular maxfd
+		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
 
 		//printf("Waiting to select...\n");
 		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
@@ -53,11 +57,23 @@ int main(int argc, char **argv)
 			}
 			if(FD_ISSET(listenFD, &fds))
 			{
+				printf("Servidor: %d\n",listenFD);
 				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
 				read(nodeFD, buffer, 128);
 				if(JR_Message(buffer,&node,nodeFD) == 1)
+				{
+					printf("A fechar socket!\n");
 					close(nodeFD); // fecha o file descriptor do nó cliente
+				}
 				printf("Finished processing\n");
+			}
+			if(FD_ISSET(node.prediFD,&fds))
+			{
+				printf("Mensagem do predi\n");				
+			}
+			if(FD_ISSET(node.succiFD,&fds))
+			{
+				printf("Mensagem do succi\n");				
 			}
 		}
 	}
