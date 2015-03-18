@@ -40,7 +40,7 @@ int distance(int k, int l);
 
 int responsability(int predi, int i, int k);
 
-int searchNode(ringStruct * ringData, socketStruct succiPeer, int k);
+void searchNode(ringStruct * ringData, int k);
 
 void showNode(ringStruct * ringData);
 

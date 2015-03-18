@@ -16,7 +16,7 @@ void GetIP(ringStruct* node)
 	char addr[128];
 	//struct sockaddr
 	//sa_data
-	
+
 	char addressOutputBuffer[INET6_ADDRSTRLEN];
 	struct ifaddrs *interfaceArray;
 	if(getifaddrs(&interfaceArray) != 0)
@@ -24,14 +24,14 @@ void GetIP(ringStruct* node)
 		printf("erro na getifaddrs\n");
 		exit(-1);
 	}
-	
-	struct ifaddrs * aux;	
+
+	struct ifaddrs * aux;
 	for(aux = interfaceArray; aux != NULL; aux = aux->ifa_next)
     {
-	
+
 		if(aux->ifa_addr->sa_family == AF_INET && strcmp(aux->ifa_name, "lo") != 0)
 		{
-			strcpy(addr, inet_ntop(aux->ifa_addr->sa_family, aux, addressOutputBuffer, sizeof(addressOutputBuffer))); 
+			strcpy(addr, inet_ntop(aux->ifa_addr->sa_family, aux, addressOutputBuffer, sizeof(addressOutputBuffer)));
 			printf("Self Address on %s:  %s \n",aux->ifa_name, addr);
 			break;
 		}
@@ -141,7 +141,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 					printf("Big Shet I Guess\n");
 				 }
 				 else
-				 { 
+				 {
 					if(responsability(node->prediID,node->myID,no_novo))
 					{
 						printf("My responsability\n");
@@ -369,7 +369,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
    	  node->succiFD = PeerTCP.socketFD;
 	  strcpy(node->succiIP,tmpip);
 	  node->succiID = tmpid;
-	  node->succiPort = tmpport; 
+	  node->succiPort = tmpport;
       //memset(buffer,0,128);
       return;
     }
@@ -449,28 +449,30 @@ int distance(int k, int l)
 }
 
 int responsability(int predi, int i, int k)
-{ // returns 1 if succi is responsible for k, 0 otherwise.
+{ // returns 1 if i is responsible for k, 0 otherwise.
   if(distance(k,i) < distance(k,predi))
     return 1;
   else
     return 0;
 }
 
-int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
+void searchNode(ringStruct * ringData, int k)
 { // returns 0 if everything went as expected
-  char msg[128];
-  if(responsability(ringData->prediID,ringData->myID,k) == 1)
-  {
-    printf("%i %s %i", ringData->succiID, ringData->succiIP, ringData->succiPort);
-    return 0;
-  }
-  else
-  {
-    sprintf(msg,"QRY %i %i\n", ringData->myID, k);
-    sendTCP(msg, succiPeer.socketFD);
-	return 0;
-  }
-  return 1;
+  	char msg[128];
+	if(k>=0 && k<64)
+	{
+		if(responsability(ringData->prediID,ringData->myID,k) == 1)
+		{
+			printf("%i %s %i", ringData->succiID, ringData->succiIP, ringData->succiPort);
+			return;
+		}
+		else
+		{
+			sprintf(msg,"QRY %i %i\n", ringData->myID, k);
+			sendTCP(msg, ringData->succiFD);
+			return;
+		}
+	}
 }
 
 void showNode(ringStruct * ringData)
