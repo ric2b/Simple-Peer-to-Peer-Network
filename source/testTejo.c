@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "network.h"
-#define buffersize 128
+#define buffersize 1024
 
 int main(int argc, char ** argv)
 {
@@ -40,6 +40,12 @@ int main(int argc, char ** argv)
       if(first) socketcfg = setupSocket(host, hostPort, 'T');      
       sendTCP(message, strlen(message), socketcfg);
       recvTCP(buffer, socketcfg);
+
+		while (read(socketcfg.socketFD, buffer, buffersize) != 0)
+		{
+			printf("%s\n", buffer);
+			memset(buffer, 0, buffersize);
+		}
     }
     else
     {

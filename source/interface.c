@@ -8,8 +8,8 @@
 #include "ringOps.h"
 
 int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
-{
-  	//bootIP and bootport are the IP adress e UDP port of the starting server
+{	  	
+	//bootIP and bootport are the IP adress e UDP port of the starting server
 
   	//Ringport is the TCP server port used for establishing a TCP session in the ring
 
@@ -53,57 +53,60 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 	return 0;
 }
 
-int run_commands(char * userInput, char * cmd, ringStruct* node, socketStruct arranque)
+int run_commands(char * userInput, char * cmd, ringStruct* node, socketStruct socket, ringStruct * ringData)
 {
-   printf("> ");
+
+	printf("[SYSTEM]: ");
    fgets(userInput,63,stdin);
 
    sscanf(userInput,"%s",cmd);
 
-   if(strcmp(cmd,"exit") == 0)
+	if(strcmp(cmd,"exit") == 0)
 	{
-		printf("\nYou have closed the application.\n\n");
+		printf("You have closed the application.\n\n");
 		return 1;
-   }
+	}
 	else if(strcmp(cmd,"leave") == 0)
 	{
-           printf("\nYou removed your node from the current ring.\n\n");
-   }
+		printf("You removed your node from the current ring.\n\n");
+	}
 	else if(strcmp(cmd,"show") == 0)
 	{
-         printf("\nShowing ring number, node identifier and predi/succi identifiers.\n\n");
-   }
-	else	if(strcmp(cmd,"search") == 0)
+		showNode(node);		
+		//printf("Showing ring number, node identifier and predi/succi identifiers.\n\n");
+	}
+	else if(strcmp(cmd,"search") == 0)
 	{
-       sscanf(userInput,"%s %i",cmd, &node->myID);
+		sscanf(userInput,"%s %i",cmd, &node->myID);
        //corrigir o caso para o qual o utilizador nao insere o argumento
 
-       if((node->myID) > -1 && (node->myID) < 64)
-		 {
-           printf("\nSearching the identifier and localization of the node responsible for the identifier %i.\n\n", (node->myID));
-       }
-		 else
-		 {
-           printf("\nYou didn't specify an identifier k or it isn't on the specified interval.\n\n");
-    	 }
-   }
+		if((node->myID) > -1 && (node->myID) < 64)
+		{
+			printf("Searching the identifier and localization of the node responsible for the identifier %i.\n\n", (node->myID));
+		}
+		else
+		{
+			printf("You didn't specify an identifier k or it isn't on the specified interval.\n\n");
+ 		}
+   	}
 	else if(strcmp(cmd,"join") == 0)
 	{
 		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, &(node->ringID), &(node->myID), &(node->succiID), node->succiIP, &(node->succiPort)) ==3)
 		{
 			printf("Joining ring number %i with an identifier %i.\n", (node->ringID), (node->myID));
-			Join_Ring(node, arranque); 
+			Join_Ring(node, socket); 
 		}
 
 		else if((node->ringID) > 0 && (node->myID) > -1 && (node->myID) < 64 && (node->succiID) > -1 && (node->succiID) < 64 && (node->succiPort) > -1)
 		{
-      	printf("\nJoining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
+			joinRing_KnownSucci(ringData, node->succiID, node->succiIP, node->succiPort);      		
+			printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
   		}
 		else
 		{
-         printf("\nYour joining command doesn't have the correct arguments.\n\n");
+         		printf("Your joining command doesn't have the correct arguments.\n\n");
   		}
-   }
+	}
 	else if(strcmp(cmd,"help") == 0)
 	{
          printf("\n\t- join [x] [i]\n");
@@ -112,11 +115,13 @@ int run_commands(char * userInput, char * cmd, ringStruct* node, socketStruct ar
          printf("\t- show \n");
          printf("\t- search [k]\n");
          printf("\t- exit\n\n");
-   }
+   	}
 	else
 	{
-         printf("\nThe command you have inserted is non existent.\n");
-         printf("\nType 'help' to show the available commands.\n\n");
-   }
+         printf("The command you have inserted is non existent.\n");
+         printf("Type 'help' to show the available commands.\n\n");
+   	}
+	printf("> ");
+	fflush(stdout);
 	return 0;
 }

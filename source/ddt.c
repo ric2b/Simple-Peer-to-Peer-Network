@@ -34,6 +34,9 @@ int main(int argc, char **argv)
 	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
 	GetIP(&node);
 
+	printf("\n> ");
+	fflush(stdout);
+
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
 	while(1)
@@ -46,13 +49,13 @@ int main(int argc, char **argv)
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 		maxfd = (node.prediFD > maxfd) ? node.prediFD : maxfd; //calcular maxfd
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
-
+		
 		//printf("Waiting to select...\n");
 		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
 			memset(buffer,0,128);
 			if(FD_ISSET(STDIN, &fds))
 			{
-				run_commands(userInput, cmd, &node, socketCFG_UDP);
+				run_commands(userInput, cmd, &node, socketCFG_UDP, &node);
 
 			}
 			if(FD_ISSET(listenFD, &fds))
@@ -69,11 +72,14 @@ int main(int argc, char **argv)
 			}
 			if(FD_ISSET(node.prediFD,&fds))
 			{
-				printf("Mensagem do predi\n");				
+				
+				read(node.prediFD, buffer, 128);
+				printf("Mensagem do predi: %s\n", buffer);				
 			}
 			if(FD_ISSET(node.succiFD,&fds))
 			{
-				printf("Mensagem do succi\n");				
+				read(node.succiFD, buffer, 128);
+				printf("Mensagem do succi: %s\n", buffer);				
 			}
 		}
 	}

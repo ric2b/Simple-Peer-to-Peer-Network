@@ -367,9 +367,8 @@ int responsability(int predi, int i, int k)
 
 int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
 { // returns 0 if everything went as expected
-  char msg[128], buffer[128], cmd[10], qryIP[40];
-  int asked, queried, qryID, qryTCP;
-  if(responsability(ringData->prediID,ringData->succiID,k) == 1)
+  char msg[128];
+  if(responsability(ringData->prediID,ringData->myID,k) == 1)
   {
     printf("%i %s %i", ringData->succiID, ringData->succiIP, ringData->succiPort);
     return 0;
@@ -378,41 +377,29 @@ int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
   {
     sprintf(msg,"QRY %i %i\n", ringData->myID, k);
     sendTCP(msg, strlen(msg), succiPeer);
-    recvTCP(buffer, succiPeer);
-    sscanf(buffer,"%s %i %i %i %s %i", cmd, &asked, &queried, &qryID, qryIP, &qryTCP);
-    if(strcmp(cmd,"RSP") == 0 && asked == ringData->myID && queried == k)
-    {
-      printf("%i %s %i", qryID, qryIP, qryTCP);
-      return 0;
-    }
-    else
-      return 1;
+	return 0;
   }
   return 1;
 }
 
-int showNode(ringStruct * ringData)
+void showNode(ringStruct * ringData)
 {
-  printf("%i %i %i %i", ringData->ringID, ringData->myID, ringData->succiID, ringData->prediID);
-  return 0;
+	printf("%i %i %i %i\n", ringData->ringID, ringData->myID, ringData->succiID, ringData->prediID);
+	return;
 }
 
-/*
-int joinRing_KnownSucci(ringStruct * ringData, int ringID, int myID, int succiID, char * succiIP, int succiPort)
+
+int joinRing_KnownSucci(ringStruct * ringData, int succiID, char * succiIP, int succiPort)
 {
-  ringData->succiID = succiID;
-  strcpy(ringData->succiIP, succiIP);
-  ringData->succiPort = succiPort;
-  char joinCommand[128*2]; //para aguentar com os 128 do IP + extras
-  sprintf(joinCommand, "NEW %d %s %d", myID, ringData->myIP, ringData->myPort);
-  if(connect(ringData->ListenSocket.socketFD, (struct sockaddr*)ringData->ListenSocket.addr, ringData->ListenSocket.addrlen) == -1)
-  {
-    printf("erro a fazer connect na joinRing_KnownSucci\n");
-    exit(-1);
-  }
-  //socketStruct setupSocket(succiIP, succiPort, 'T');
-  void sendTCP(char * msg, int msg_length, socketStruct socketCFG);
-  int recvTCP(char * buffer,socketStruct socketCFG);
-  return 0;
+  	ringData->succiID = succiID;
+  	strcpy(ringData->succiIP, succiIP);
+  	ringData->succiPort = succiPort;
+
+	ringData->succiFD = setupSocket(succiIP, succiPort, 'T').socketFD;  	
+	
+	char joinCommand[128*2]; //para aguentar com os 128 do IP + extras
+  	sprintf(joinCommand, "NEW %d %s %d", ringData->myID, ringData->myIP, ringData->myPort);
+	
+  	sendTCPv2(joinCommand, strlen(joinCommand), ringData->succiFD);
+  	return 0;
 }
-*/

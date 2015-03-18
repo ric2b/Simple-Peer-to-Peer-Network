@@ -41,10 +41,10 @@ int responsability(int predi, int i, int k);
 
 int searchNode(ringStruct * ringData, socketStruct succiPeer, int k);
 
-int showNode(ringStruct * ringData);
+void showNode(ringStruct * ringData);
 
+int joinRing_KnownSucci(ringStruct * ringData, int succiID, char * succiIP, int succiPort);
 /*
 socketStruct setupListenSocket(char * myIP, int myPort);
-int joinRing_KnownSucci(ringStruct * ringData, int ringID, int myID, int succiID, char * succiIP, int succiPort);
 */
 #endif
