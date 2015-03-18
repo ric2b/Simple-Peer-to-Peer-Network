@@ -11,10 +11,10 @@
 
 int main(int argc, char **argv)
 {
-	char  bootIP[1024];
-	char  clientIP[128];
+	char  	bootIP[1024];
+	char  	clientIP[128];
 	int		bootport, ringport;
-	char 	userInput[64], cmd[20], buffer[128];
+	char 	buffer[128];
 	char	option;
 	int 	listenFD = 8080;
 	socketStruct socketCFG_UDP;
@@ -55,8 +55,7 @@ int main(int argc, char **argv)
 			memset(buffer,0,128);
 			if(FD_ISSET(STDIN, &fds))
 			{
-				run_commands(userInput, cmd, &node, socketCFG_UDP, &node);
-
+				run_commands(&node, socketCFG_UDP, &node);
 			}
 			if(FD_ISSET(listenFD, &fds))
 			{

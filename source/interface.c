@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <string.h>
+#include <getopt.h>
+#include <unistd.h>
+
 
 //#include "network.h"
 #include "interface.h"
@@ -53,13 +55,16 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 	return 0;
 }
 
-int run_commands(char * userInput, char * cmd, ringStruct* node, socketStruct socket, ringStruct * ringData)
+int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 {
-
+	char userInput[64], cmd[20];
+	memset(userInput, 0, 64);
+	strcpy(cmd,"help"); //default to help
+	read(0,userInput,63); // stdin
+			
 	printf("[SYSTEM]: ");
-   fgets(userInput,63,stdin);
-
-   sscanf(userInput,"%s",cmd);
+   
+	sscanf(userInput,"%s",cmd);
 
 	if(strcmp(cmd,"exit") == 0)
 	{

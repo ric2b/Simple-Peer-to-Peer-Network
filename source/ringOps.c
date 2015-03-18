@@ -384,7 +384,7 @@ int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
 
 void showNode(ringStruct * ringData)
 {
-	printf("%i %i %i %i\n", ringData->ringID, ringData->myID, ringData->succiID, ringData->prediID);
+	printf("ring: %i myID: %i succi: %i predi:%i\n", ringData->ringID, ringData->myID, ringData->succiID, ringData->prediID);
 	return;
 }
 
