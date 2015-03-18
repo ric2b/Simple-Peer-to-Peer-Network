@@ -39,20 +39,6 @@ void sendTCP(char * msg, int socket)
   }
 }
 
-/* ========================================*/
-/*void sendTCPv2(char * msg, int msg_length, int socket)
-{
-  int nwritten;
-  int nleft = strlen(msg);
-  while(nleft > 0)
-  {
-    nwritten = write(socket, msg, msg_length);
-    nleft -= nwritten;
-    msg += nwritten;
-  }
-}*/
-/* =======================================*/
-
 void recvTCP(char * buffer, socketStruct socketCFG)
 {
   int nreceived;
@@ -61,11 +47,9 @@ void recvTCP(char * buffer, socketStruct socketCFG)
   memset(buffer,0,128);
   while(nleft > 0)
   {
-      printf("waiting\n");
       nreceived = read(socketCFG.socketFD, buffer, nleft);
       nleft -= nreceived;
       buffer += nreceived;
-printf("%d\n", nreceived);
       if(nreceived == -1)
       {
           printf("erro a enviar com sendTCP\n");
@@ -76,7 +60,6 @@ printf("%d\n", nreceived);
           break;
       }
   }
-  printf("já recebi\n");
 }
 
 /* --------------------------< Listening >--------------------------------- */
@@ -111,9 +94,11 @@ int listenSocket(int* listen_port)
     perror("impossível criar socket: erro na função listen()\n");
     exit(1);
   }
+  /*
   char buffer[128];
   gethostname(buffer,128);
   printf("%s\n", buffer);
+  */
   return listen_socket; // função devolve o file descriptor da socket do servidor
 }
 
@@ -134,7 +119,7 @@ int aceita_cliente(int server_socket, char * remote_address)
 
 /* --------------------------< Tejo Communication >--------------------------------- */
 
-socketStruct setupSocket(char * servidor, int port, char protocol)
+socketStruct setupSocket(char * destinatario, int port, char protocol)
 {
   struct hostent *h;
   struct in_addr *a;
@@ -148,8 +133,9 @@ socketStruct setupSocket(char * servidor, int port, char protocol)
 
   /* --------------------------< GetHostByName >--------------------------------- */
 
-  if((h=gethostbyname(servidor))==NULL) //substituir por bootIP
+  if((h=gethostbyname(destinatario))==NULL) //substituir por bootIP
   {
+	printf("gethostbyname falhou na setupSocket, a continuar na mesma\n");
     ignoreAddr = 1; //
   }
 
@@ -160,19 +146,21 @@ socketStruct setupSocket(char * servidor, int port, char protocol)
     socketFD = socket(AF_INET,SOCK_STREAM,0);
   else
   {
-    printf("protocolo é U (USP), T (TCP)\n");
+    printf("protocolo é U (USP) ou T (TCP)\n");
     exit(-1);
   }
 
   if(socketFD == -1)
   {
     printf("erro a criar o socket\n");
-    exit(1);
+    exit(-1);
   }
+  
+  socketCFG.socketFD = socketFD;
 
   setsockopt(socketFD, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
 
-  if(ignoreAddr == 0)
+  if(ignoreAddr != 1) // se gethostbyname falhou, dnão mexer no endereco
   {
     a=(struct in_addr*)h->h_addr_list[0];
 
@@ -185,7 +173,7 @@ socketStruct setupSocket(char * servidor, int port, char protocol)
     socketCFG.addrlen = sizeof(*addr);
   }
 
-  socketCFG.socketFD = socketFD;
+  
 
   if(protocol == 'T')
   {

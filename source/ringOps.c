@@ -2,22 +2,50 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
+//
+#include <ifaddrs.h>
+//
 #include "ringOps.h"
 #include "network.h"
 
 void GetIP(ringStruct* node)
 {
-	char localmachine[128];
-	struct hostent *h;
-  struct in_addr *a;
+	//char localmachine[128];
+	//struct hostent *h;
+	//struct in_addr *a;
+	char addr[128];
+	//struct sockaddr
+	//sa_data
+	
+	char addressOutputBuffer[INET6_ADDRSTRLEN];
+	struct ifaddrs *interfaceArray;
+	if(getifaddrs(&interfaceArray) != 0)
+	{
+		printf("erro na getifaddrs\n");
+		exit(-1);
+	}
+	
+	struct ifaddrs * aux;	
+	for(aux = interfaceArray; aux != NULL; aux = aux->ifa_next)
+    {
+	
+		if(aux->ifa_addr->sa_family == AF_INET && strcmp(aux->ifa_name, "lo") != 0)
+		{
+			strcpy(addr, inet_ntop(aux->ifa_addr->sa_family, aux, addressOutputBuffer, sizeof(addressOutputBuffer))); 
+			printf("Self Address on %s:  %s \n",aux->ifa_name, addr);
+			break;
+		}
+	}
+	strcpy(node->myIP, addr);
 
+	freeifaddrs(interfaceArray);
+/*
 	if(gethostname(localmachine,128) == -1)
     {
       printf("\nError during hostname query\n\n");
       exit(1);
     }
-  if((h=gethostbyname(localmachine))==NULL)
+	if((h=gethostbyname(localmachine))==NULL)
     {
       printf("\nError during hostname query\n\n");
       exit(1);//error
@@ -27,8 +55,8 @@ void GetIP(ringStruct* node)
   a = (struct in_addr*)h->h_addr_list[0];
 
   printf("internet address: %s (%08lX)\n", inet_ntoa(*a), (long unsigned int)ntohl(a->s_addr));
-
-  strcpy(node->myIP,inet_ntoa(*a));
+*/
+  //strcpy(node->myIP,inet_ntoa(*a));
 }
 
 
@@ -251,10 +279,10 @@ void Join_Ring(ringStruct* node, socketStruct start)
 
         exit(1);//error
       }
-    printf("Hostname: %s\n",localmachine);
+    //printf("Hostname: %s\n",localmachine);
     a = (struct in_addr*)h->h_addr_list[0];
 
-    sprintf(msg,"REG %d %d %s %d\n",node->ringID, node->myID,inet_ntoa(*a), node->myPort);
+    sprintf(msg,"REG %d %d %s %d\n",node->ringID, node->myID, node->myIP, node->myPort);
     strcpy(node->myIP,inet_ntoa(*a));
     printf("%s\n",msg);
 
