@@ -15,16 +15,19 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 
 	strcpy(bootIP,"tejo.tecnico.ulisboa.pt");
 	*bootport = 58000;
-
+	*ringport = 40000;
 		//Ringport is the TCP server port used for establishing a TCP session in the ring
 
-	if((argc % 2 == 0) || (argc > 7)  || (argc <= 1))
+	if(argc != 1) // Se o utilizador não forneceu argumentos, usar defaults sem se queixar
 	{
-		printf("\nThe program doesn't have enough arguments or it has more arguments than it can handle.\n\n");
-		printf("Invoke the program as the following: ./ddt -t ringport -i bootIP -p bootport\n\n");
-		exit(1);
+		if((argc % 2 == 0) || (argc > 7)  || (argc <= 1))
+		{
+			printf("\nThe program doesn't have enough arguments or it has more arguments than it can handle.\n\n");
+			printf("Invoke the program as the following: ./ddt -t ringport -i bootIP -p bootport\n\n");
+			exit(1);
+		}
 	}
-
+	
 	while((*option = getopt(argc,argv,"t:i:p:")) != -1) // Checking the various options received on the console application
 	{
 		 switch(* option)
