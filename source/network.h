@@ -18,19 +18,15 @@ typedef struct socketStruct
 } socketStruct;
 
 
-int sendUDP(char * msg, int msg_length, socketStruct socketCFG);
+int sendUDP(char * msg, socketStruct socketCFG);
 int recvUDP(char * buffer,socketStruct socketCFG);
 
-int sendTCP(char * , int , socketStruct );
+void sendTCP(char *, socketStruct );
 void sendTCPv2(char * , int , int );
-int recvTCP(char * ,socketStruct );
-
-
+void recvTCP(char * ,socketStruct );
 
 int listenSocket(int* );
 int aceita_cliente(int , char * );
-
-
 
 socketStruct setupSocket(char * , int , char );
 void closeSocket(socketStruct );

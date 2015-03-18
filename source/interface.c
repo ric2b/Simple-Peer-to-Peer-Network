@@ -10,10 +10,13 @@
 #include "ringOps.h"
 
 int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
-{	  	
+{
 	//bootIP and bootport are the IP adress e UDP port of the starting server
 
-  	//Ringport is the TCP server port used for establishing a TCP session in the ring
+	strcpy(bootIP,"tejo.tecnico.ulisboa.pt");
+	*bootport = 58000;
+
+		//Ringport is the TCP server port used for establishing a TCP session in the ring
 
 	if((argc % 2 == 0) || (argc > 7)  || (argc <= 1))
 	{
@@ -61,9 +64,9 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 	memset(userInput, 0, 64);
 	strcpy(cmd,"help"); //default to help
 	read(0,userInput,63); // stdin
-			
+
 	printf("[SYSTEM]: ");
-   
+
 	sscanf(userInput,"%s",cmd);
 
 	if(strcmp(cmd,"exit") == 0)
@@ -77,7 +80,7 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 	}
 	else if(strcmp(cmd,"show") == 0)
 	{
-		showNode(node);		
+		showNode(node);
 		//printf("Showing ring number, node identifier and predi/succi identifiers.\n\n");
 	}
 	else if(strcmp(cmd,"search") == 0)
@@ -99,12 +102,12 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, &(node->ringID), &(node->myID), &(node->succiID), node->succiIP, &(node->succiPort)) ==3)
 		{
 			printf("Joining ring number %i with an identifier %i.\n", (node->ringID), (node->myID));
-			Join_Ring(node, socket); 
+			Join_Ring(node, socket);
 		}
 
 		else if((node->ringID) > 0 && (node->myID) > -1 && (node->myID) < 64 && (node->succiID) > -1 && (node->succiID) < 64 && (node->succiPort) > -1)
 		{
-			joinRing_KnownSucci(ringData, node->succiID, node->succiIP, node->succiPort);      		
+			joinRing_KnownSucci(ringData, node->succiID, node->succiIP, node->succiPort);
 			printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
   		}
 		else

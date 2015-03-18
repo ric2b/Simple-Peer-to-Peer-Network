@@ -10,9 +10,9 @@
 
 /* --------------------------< UDP >--------------------------------- */
 
-int sendUDP(char * msg, int msg_length, socketStruct socketCFG)
+int sendUDP(char * msg, socketStruct socketCFG)
 {
-  return sendto(socketCFG.socketFD,msg,msg_length,0,(struct sockaddr*)socketCFG.addr,socketCFG.addrlen);
+  return sendto(socketCFG.socketFD,msg, strlen(msg),0,(struct sockaddr*)socketCFG.addr,socketCFG.addrlen);
 }
 
 int recvUDP(char * buffer,socketStruct socketCFG)
@@ -22,19 +22,24 @@ int recvUDP(char * buffer,socketStruct socketCFG)
 }
 
 /* --------------------------< TCP >--------------------------------- */
-int sendTCP(char * msg, int msg_length, socketStruct socketCFG)
+void sendTCP(char * msg, socketStruct socketCFG)
 {
   int nwritten;
   int nleft = strlen(msg);
   while(nleft > 0)
   {
-    nwritten = write(socketCFG.socketFD, msg, msg_length);
+    nwritten = write(socketCFG.socketFD, msg, strlen(msg));
     nleft -= nwritten;
     msg += nwritten;
+
+    if(nwritten == -1)
+    {
+      printf("erro a enviar com sendTCP\n");
+    }
   }
-  return 0;
 }
 
+/* ========================================*/
 void sendTCPv2(char * msg, int msg_length, int socket)
 {
   int nwritten;
@@ -46,22 +51,43 @@ void sendTCPv2(char * msg, int msg_length, int socket)
     msg += nwritten;
   }
 }
+/* =======================================*/
 
-int recvTCP(char * buffer,socketStruct socketCFG)
+void recvTCP(char * buffer, socketStruct socketCFG)
 {
+  int nreceived;
+  int nleft = 128;
+
   memset(buffer,0,128);
-  return read(socketCFG.socketFD, buffer, 128);
+  while(nleft > 0)
+  {
+      printf("waiting\n");
+      nreceived = read(socketCFG.socketFD, buffer, nleft);
+      nleft -= nreceived;
+      buffer += nreceived;
+printf("%d\n", nreceived);
+      if(nreceived == -1)
+      {
+          printf("erro a enviar com sendTCP\n");
+          exit(-1);
+      }
+      else if(nreceived == 0) // acabou de receber
+      {
+          break;
+      }
+  }
+  printf("já recebi\n");
 }
 
 /* --------------------------< Listening >--------------------------------- */
 int listenSocket(int* listen_port)
 {
-  int server_socket;
+  int listen_socket;
   struct sockaddr_in server_addr;
   const int       optVal = 1;
   const socklen_t optLen = sizeof(optVal);
   /* criar socket do servidor */
-  if ((server_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+  if ((listen_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
   {
     perror("impossível criar socket: erro na função socket()\n");
     exit(1);
@@ -71,9 +97,9 @@ int listenSocket(int* listen_port)
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   server_addr.sin_port = htons(*listen_port);
-  setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
+  setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
   /* associa o socket à ringport */
-  while(bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
+  while(bind(listen_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
   {
     printf("porta %d ocupada, a tentar a próxima\n", *listen_port);
     (*listen_port)++;
@@ -81,14 +107,14 @@ int listenSocket(int* listen_port)
   }
   printf("port - %d\n", *listen_port);
   /* socket do servidor a escutar pedidos */
-  if (listen(server_socket, MAX_PENDING) < 0) { // fila de espera de escuta pela parte da socket do servidor é de 128 clientes, valor definido pelo MAX_PENDING
+  if (listen(listen_socket, MAX_PENDING) < 0) { // fila de espera de escuta pela parte da socket do servidor é de 128 clientes, valor definido pelo MAX_PENDING
     perror("impossível criar socket: erro na função listen()\n");
     exit(1);
   }
   char buffer[128];
   gethostname(buffer,128);
   printf("%s\n", buffer);
-  return server_socket; // função devolve o file descriptor da socket do servidor
+  return listen_socket; // função devolve o file descriptor da socket do servidor
 }
 
 int aceita_cliente(int server_socket, char * remote_address)

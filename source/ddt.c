@@ -22,10 +22,6 @@ int main(int argc, char **argv)
 
 	Node_Initialization(&node);
 
-	memset(bootIP, 0, 128);
-	strcpy(bootIP,"tejo.tecnico.ulisboa.pt");
-	bootport = 58000;
-
 	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
 
 	listenFD = listenSocket(&ringport);
@@ -41,6 +37,7 @@ int main(int argc, char **argv)
 	int maxfd;
 	while(1)
 	{	//bloqueia no select até haver algo para ler num dos sockets que estão em fds
+
 		FD_ZERO(&fds);
 		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
 		FD_SET(STDIN, &fds);  // stdin
@@ -49,14 +46,19 @@ int main(int argc, char **argv)
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 		maxfd = (node.prediFD > maxfd) ? node.prediFD : maxfd; //calcular maxfd
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
-		
+
 		//printf("Waiting to select...\n");
-		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0) {
+		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0)
+		{
 			memset(buffer,0,128);
+
+			/* Comando do Utilizador*/
 			if(FD_ISSET(STDIN, &fds))
 			{
 				run_commands(&node, socketCFG_UDP, &node);
 			}
+
+			/* Mensagem de desconhecido */
 			if(FD_ISSET(listenFD, &fds))
 			{
 				printf("Servidor: %d\n",listenFD);
@@ -69,18 +71,22 @@ int main(int argc, char **argv)
 				}
 				printf("Finished processing\n");
 			}
+
+			/* Mensagem do Predi*/
 			if(FD_ISSET(node.prediFD,&fds))
 			{
-				
+
 				read(node.prediFD, buffer, 128);
-				printf("Mensagem do predi: %s\n", buffer);				
+				printf("Mensagem do predi: %s\n", buffer);
 			}
+
+			/* Mensagem do Succi*/
 			if(FD_ISSET(node.succiFD,&fds))
 			{
 				read(node.succiFD, buffer, 128);
-				printf("Mensagem do succi: %s\n", buffer);				
+				printf("Mensagem do succi: %s\n", buffer);
 			}
 		}
 	}
-  	exit(0);
+  exit(0);
 }

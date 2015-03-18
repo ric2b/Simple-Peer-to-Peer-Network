@@ -179,7 +179,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
   sprintf(msg,"BQRY %d",node->ringID);
   printf("Command sent: %s\n",msg);
   printf("Socket: %d\n",start.socketFD);
-  if((temp = sendUDP(msg,strlen(msg),start)) == -1)
+  if((temp = sendUDP(msg, start)) == -1)
     exit(1);
   if((temp = recvUDP(buffer,start)) == -1)
     exit(1);
@@ -205,7 +205,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
     strcpy(node->myIP,inet_ntoa(*a));
     printf("%s\n",msg);
 
-    if((temp = sendUDP(msg,strlen(msg),start)) == -1)
+    if((temp = sendUDP(msg,start)) == -1)
       exit(1);
     if((temp = recvUDP(buffer,start)) == -1)
       exit(1);
@@ -238,14 +238,11 @@ void Join_Ring(ringStruct* node, socketStruct start)
       memset((void*)&msg,'\0',sizeof(msg));
       sprintf(msg,"ID %d\n", node->myID);
       printf("Sending 1 %s",msg);
-      sendTCP(msg,strlen(msg),PeerTCP);
+      sendTCP(msg,PeerTCP);
       memset(buffer,0,128);
 
-      if(recvTCP(buffer,PeerTCP)<0)
-  	  {
-    		printf("Can't receive message from TCP connection\n");
-    		exit(1);
-  	  }
+			recvTCP(buffer,PeerTCP);
+
   	  closeSocket(PeerTCP);
   	  printf("TCP received: %s\n",buffer);
 
@@ -270,11 +267,11 @@ void Join_Ring(ringStruct* node, socketStruct start)
 
 	    memset((void*)&msg,'\0',sizeof(msg));
       // Sends message to l informing him that i'm his predi
-      // l is now my succi and information is updated 
+      // l is now my succi and information is updated
       sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);
       printf("Sending to %d, message %s",PeerTCP.socketFD, msg);
       PeerTCP = setupSocket(tmpip,tmpport,'T');
-      sendTCP(msg,strlen(msg),PeerTCP);
+      sendTCP(msg,PeerTCP);
       //printf("Sent\n");
       node->succiFD = PeerTCP.socketFD;
       strcpy(node->succiIP,tmpip);
@@ -298,7 +295,7 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
   if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
   {
     sprintf(msg,"UNR %i\n",ringData->ringID);
-    if(sendUDP(msg,strlen(msg),socketCFG) == -1)
+    if(sendUDP(msg,socketCFG) == -1)
       return 1;
     if(recvUDP(buffer,socketCFG) == -1)
       return 1;
@@ -312,7 +309,7 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
     if(ringData->starter == 1) // Test to check if the current node is the starter node. If it is, put the next node as the starter one
     {
       sprintf(msg,"REG %i %i %s %i\n", ringData->ringID, ringData->succiID, ringData->succiIP, ringData->succiPort);
-      if(sendUDP(msg,strlen(msg),socketCFG) == -1)
+      if(sendUDP(msg,socketCFG) == -1)
         return 1;
       if(recvUDP(buffer,socketCFG) == -1)
         return 1;
@@ -321,11 +318,11 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
         memset(msg,0,strlen(msg));
         sprintf(msg,"BOOT\n");
         //This part is not well done
-        sendTCP(msg, strlen(msg), succiPeer);
+        sendTCP(msg, succiPeer);
         closeSocket(succiPeer);
         memset(msg,0,strlen(msg));
         sprintf(msg,"CON %i %s %i\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
-        sendTCP(msg, strlen(msg), prediPeer);
+        sendTCP(msg, prediPeer);
         closeSocket(prediPeer);
         return 0;
       }
@@ -334,7 +331,7 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
         closeSocket(succiPeer);
         memset(msg,0,strlen(msg));
         sprintf(msg,"CON %i %s %i\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
-        sendTCP(msg, strlen(msg), prediPeer);
+        sendTCP(msg, prediPeer);
         closeSocket(prediPeer);
         return 0;
       }
@@ -376,7 +373,7 @@ int searchNode(ringStruct * ringData, socketStruct succiPeer, int k)
   else
   {
     sprintf(msg,"QRY %i %i\n", ringData->myID, k);
-    sendTCP(msg, strlen(msg), succiPeer);
+    sendTCP(msg, succiPeer);
 	return 0;
   }
   return 1;
@@ -395,11 +392,11 @@ int joinRing_KnownSucci(ringStruct * ringData, int succiID, char * succiIP, int 
   	strcpy(ringData->succiIP, succiIP);
   	ringData->succiPort = succiPort;
 
-	ringData->succiFD = setupSocket(succiIP, succiPort, 'T').socketFD;  	
-	
+	ringData->succiFD = setupSocket(succiIP, succiPort, 'T').socketFD;
+
 	char joinCommand[128*2]; //para aguentar com os 128 do IP + extras
-  	sprintf(joinCommand, "NEW %d %s %d", ringData->myID, ringData->myIP, ringData->myPort);
-	
+	sprintf(joinCommand, "NEW %d %s %d", ringData->myID, ringData->myIP, ringData->myPort);
+
   	sendTCPv2(joinCommand, strlen(joinCommand), ringData->succiFD);
   	return 0;
 }
