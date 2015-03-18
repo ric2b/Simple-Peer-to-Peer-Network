@@ -5,7 +5,7 @@ EXECUTABLES		= ddt testTejo
 S_DIR 			= source
 O_DIR 			= obj
 
-all: makefolders ddt testTejo
+all: makefolders ddt 
 
 # ddt
 ddt: ddt.o interface.o network.o ringOps.o
