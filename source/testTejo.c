@@ -20,7 +20,7 @@ int main(int argc, char ** argv)
 
   strcpy(host, argv[1]);
   sscanf(argv[2], " %d ", &hostPort);
-  strcpy(mode, argv[3]); 
+  strcpy(mode, argv[3]);
 
   int first = 1;
   while(1)
@@ -31,29 +31,30 @@ int main(int argc, char ** argv)
     if(strcmp("UDP", mode) == 0)
     {
       socketcfg = setupSocket(host, hostPort, 'U');
-      sendUDP(message,strlen(message),socketcfg);
+      sendUDP(message,socketcfg);
       recvUDP(buffer, socketcfg);
     }
     /* --------------------------< TCP >--------------------------------- */
     else if(strcmp("TCP", mode) == 0)
     {
-      if(first) socketcfg = setupSocket(host, hostPort, 'T');      
-      sendTCP(message, strlen(message), socketcfg);
+      if(first) socketcfg = setupSocket(host, hostPort, 'T');
+      sendTCP(message, socketcfg);
       recvTCP(buffer, socketcfg);
+      printf("%s\n", buffer);/*
 
 		while (read(socketcfg.socketFD, buffer, buffersize) != 0)
 		{
 			printf("%s\n", buffer);
 			memset(buffer, 0, buffersize);
-		}
+		}*/
     }
     else
     {
       printf("modo inválido, TCP ou UDP\n");
-      exit(-1); 
+      exit(-1);
     }
     printf("[server]: %s\n", buffer);
   }
-  first = 0; 
+  first = 0;
   exit(0);
 }
