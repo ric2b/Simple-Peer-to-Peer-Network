@@ -22,13 +22,13 @@ int recvUDP(char * buffer,socketStruct socketCFG)
 }
 
 /* --------------------------< TCP >--------------------------------- */
-void sendTCP(char * msg, socketStruct socketCFG)
+void sendTCP(char * msg, int socket)
 {
   int nwritten;
   int nleft = strlen(msg);
   while(nleft > 0)
   {
-    nwritten = write(socketCFG.socketFD, msg, strlen(msg));
+    nwritten = write(socket, msg, strlen(msg));
     nleft -= nwritten;
     msg += nwritten;
 
@@ -40,7 +40,7 @@ void sendTCP(char * msg, socketStruct socketCFG)
 }
 
 /* ========================================*/
-void sendTCPv2(char * msg, int msg_length, int socket)
+/*void sendTCPv2(char * msg, int msg_length, int socket)
 {
   int nwritten;
   int nleft = strlen(msg);
@@ -50,7 +50,7 @@ void sendTCPv2(char * msg, int msg_length, int socket)
     nleft -= nwritten;
     msg += nwritten;
   }
-}
+}*/
 /* =======================================*/
 
 void recvTCP(char * buffer, socketStruct socketCFG)

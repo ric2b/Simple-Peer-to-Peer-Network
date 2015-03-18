@@ -21,8 +21,8 @@ typedef struct socketStruct
 int sendUDP(char * msg, socketStruct socketCFG);
 int recvUDP(char * buffer,socketStruct socketCFG);
 
-void sendTCP(char *, socketStruct );
-void sendTCPv2(char * , int , int );
+void sendTCP(char *, int );
+//void sendTCPv2(char * , int , int );
 void recvTCP(char * ,socketStruct );
 
 int listenSocket(int* );
