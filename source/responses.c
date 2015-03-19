@@ -29,8 +29,8 @@ void readPredi(char* msg,ringStruct* myNode)
 
 void readSucci(char* msg,ringStruct* myNode)
 {
-    char cmd[128],buffer[128],respIP[128];
-    int qNode, i, respID,respTCP;
+    char cmd[128],respIP[128];
+    int qNode, i, respID, respTCP;
     //Ver qual o tipo de comando que foi recebido do no succi
     sscanf(msg,"%s",cmd);
     if(strcmp(cmd,"RSP") == 0)
