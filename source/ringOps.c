@@ -8,13 +8,18 @@
 #include "ringOps.h"
 #include "network.h"
 
-int FDsocket, Port, ID, Destination, No_Novo;
-char IP[128];
+int FDsocket;
 
-
-void Message_ID(ringStruct* node,char * request)
+int Message_ID(ringStruct* node,char * request)
 {
 	char msg[128], cmd[128];
+	int ID;
+
+	if(sscanf(request,"%s %d",cmd,&ID)!=2)
+	{
+		printf("Bad Message (ID)\n");
+		return 1;
+	}
 
 	if(strcmp(cmd,"ID") == 0)
 	{
@@ -29,23 +34,79 @@ void Message_ID(ringStruct* node,char * request)
 			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
 			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-			return ;
+			return 0;
 		}
 		else
 		{
 			node->NEWfd = FDsocket;
 			memset(msg,0,128);
-			sprintf(msg,"QRY %d %d\n",node->myID,No_Novo);
+			sprintf(msg,"QRY %d %d\n",node->myID,ID);
 			printf("%s",msg);
 			sendTCP(msg, node->succiFD);
 			printf("2\n");
 			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
 			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-			return ;
+			return 0;
 		}
 	}
+	return 1;
 }
+
+int Message_NEW(ringStruct* node, char* request)
+{
+	char  cmd[128];
+	int  Port, ID;
+	char IP[128];
+
+	if(sscanf(request,"%s %d %s %d",cmd,&ID,IP,&Port) != 4)
+	{
+		printf("Bad Message (NEW)\n");
+		return 1;		
+	}
+
+	if(strcmp(cmd,"NEW") == 0)
+	{
+		if(node->succiID == -1 && node->prediFD == -1)
+		{
+			node->prediID = ID;
+			strcpy(node->prediIP,IP);
+			node->prediPort = Port;
+			node->prediFD = FDsocket;
+			node->succiID = ID;
+			strcpy(node->succiIP,IP);
+
+
+			//////////////////////////////////////////////////////
+			// ADD CODE TO CREATE NEW SOCKET FOR SUCCI OR PREDI //
+			//////////////////////////////////////////////////////
+
+
+
+			node->succiPort = Port;
+			node->succiFD = FDsocket;
+			printf("3\n");
+			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+		    return 0;
+		}
+		else
+		{
+		  node->prediID = ID;
+		  strcpy(node->prediIP,IP);
+		  node->prediPort = Port;
+		  node->prediFD = FDsocket;
+		  printf("4\n");
+		  printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+		  printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+		  printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+		  return 0;
+		}
+	}
+	return 1;
+}
+
 
 void GetIP(ringStruct* node)
 {
