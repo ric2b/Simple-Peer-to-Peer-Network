@@ -12,7 +12,7 @@ int FDsocket, Port, ID, Destination, No_Novo;
 char IP[128];
 
 
-void Message_NEW(ringStruct* node,char * request)
+void Message_ID(ringStruct* node,char * request)
 {
 	char msg[128], cmd[128];
 

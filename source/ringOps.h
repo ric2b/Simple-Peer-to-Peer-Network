@@ -33,7 +33,7 @@ void Join_Ring(ringStruct*, socketStruct );
 void Node_Initialization(ringStruct* );
 
 int JR_Message(char*,ringStruct*,int);
-void Message_NEW(ringStruct* node, char* request);
+void Message_ID(ringStruct* node, char* request);
 int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succiPeer, socketStruct prediPeer);
 
 int distance(int k, int l);
