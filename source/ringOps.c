@@ -107,6 +107,24 @@ int Message_NEW(ringStruct* node, char* request)
 	return 1;
 }
 
+int Message_RSP(ringStruct* node, char* request)
+{
+	char cmd[128], msg[128];
+	int  Port, ID, Master, Destination;
+	char IP[128];
+
+	if(sscanf(request,"%s %d %d %d %s %d",cmd,&Master,&ID,&Destination,IP,&Port) != 4)
+	{
+		printf("Bad Message (NEW)\n");
+		return 1;		
+	}
+	sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
+	printf("%s\n",msg);
+	sendTCP(msg, FDsocket);
+	return 0;
+	// REVER 
+}
+
 
 void GetIP(ringStruct* node)
 {
@@ -286,7 +304,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 		}
 		else
 		{
-			if(strcmp(cmd,"NEW") == 0)
+			/*if(strcmp(cmd,"NEW") == 0)
 			{
 				if(node->succiID == -1 && node->prediFD == -1)
 				{
@@ -320,7 +338,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 			{
 				printf("Bad Message 7\n");
 				return 1;
-			}
+			}*/
 		}
 	}
 	else
