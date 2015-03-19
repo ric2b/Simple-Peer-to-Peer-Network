@@ -8,6 +8,45 @@
 #include "ringOps.h"
 #include "network.h"
 
+int FDsocket, Port, ID, Destination, No_Novo;
+char IP[128];
+
+
+void Message_NEW(ringStruct* node,char * request)
+{
+	char msg[128], cmd[128];
+
+	if(strcmp(cmd,"ID") == 0)
+	{
+		if(node->succiID == -1 && node->prediFD == -1)
+		{
+			node->NEWfd = FDsocket;
+			memset(msg,0,128);
+			sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
+			printf("%s",msg);
+			sendTCP(msg, FDsocket);
+			printf("1\n");
+			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+			return ;
+		}
+		else
+		{
+			node->NEWfd = FDsocket;
+			memset(msg,0,128);
+			sprintf(msg,"QRY %d %d\n",node->myID,No_Novo);
+			printf("%s",msg);
+			sendTCP(msg, node->succiFD);
+			printf("2\n");
+			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+			return ;
+		}
+	}
+}
+
 void GetIP(ringStruct* node)
 {
 	//char localmachine[128];
@@ -82,6 +121,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	int no_arrq, no_novo, no_dest, tcp;
 	printf("A analisar: %s",request);
 
+	FDsocket = nodeFD;
 
 	if(sscanf(request,"%s %d %d %d %s %d",cmd,&no_arrq,&no_novo,&no_dest,ip,&tcp)!= 5)
 	{
@@ -98,7 +138,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 				}
 				else
 				{
-						if(strcmp(cmd,"ID") == 0)
+						/*if(strcmp(cmd,"ID") == 0)
 						{
 							if(node->succiID == -1 && node->prediFD == -1)
 							{
@@ -131,7 +171,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 						{
 							printf("Bad Message 4\n");
 							return 1;
-						}
+						}*/
 				}
 			 }
 			 else
