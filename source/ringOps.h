@@ -31,7 +31,7 @@ typedef struct ringStruct
 
 void GetIP(ringStruct* ); //ta aqui só para não ter problemas com includes circulares
 
-void Join_Ring(ringStruct*, socketStruct );
+int Join_Ring(ringStruct*, socketStruct );
 
 void Node_Initialization(ringStruct* );
 
