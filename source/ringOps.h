@@ -40,6 +40,8 @@ int  Message_NEW(ringStruct* node, char* request);
 
 int Message_RSP(ringStruct* node, char* request);
 
+int Message_QRY(ringStruct*node, char* request);
+
 int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succiPeer, socketStruct prediPeer);
 
 int distance(int k, int l);

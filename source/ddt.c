@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 			if(FD_ISSET(node.prediFD,&fds))
 			{
 				read(node.prediFD, buffer, 128);
-				printf("Succi Funct\n");
+				printf("Predi Funct\n");
 				if(JR_Message(buffer,&node,node.prediFD) == 1)
 				{
 					printf("A fechar predi socket!\n");
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 			{
 				read(node.succiFD, buffer, 128);
 
-				printf("Predi Funct\n");
+				printf("Succi Funct\n");
 				if(JR_Message(buffer,&node,node.succiFD) == 1)
 				{
 					printf("A fechar succi socket!\n");
