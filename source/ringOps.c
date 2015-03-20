@@ -185,7 +185,30 @@ int Message_QRY(ringStruct*node, char* request)
 	 return 1;
 }
 
+int Message_SUCC(ringStruct*node, char* request)
+{
+	char cmd[128], msg[128];
+	int dest_ID, dest_Port;
+	char dest_IP[128];
+	socketStruct Succi_Node;
 
+	if(sscanf(request,"%s %d %s %d",cmd, &dest_ID, dest_IP, &dest_Port) != 4)
+	{
+		printf("Bad Message (SUCC)\n");
+		return 1;		
+	}
+	while(dest_ID == node->myID)
+	{
+		printf("Can't use identifier %d, please choose a different one: ",node->myID);
+        scanf("%d",&(node->myID));
+	}
+
+	Succi_Node = setupSocket(dest_IP,dest_Port,'T');
+	memset(msg,0,128);
+	sprintf(msg,"NEW %d %s %d\n",node->myID,node->myIP,node->myPort);
+	sendTCP(msg,Succi_Node.socketFD);
+	return 0;
+}
 
 void GetIP(ringStruct* node)
 {
@@ -255,6 +278,12 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 		tmp = Message_QRY(node,request);
 		return (tmp == 1) ? tmp : 0;
 	}
+	if(strcmp(cmd,"SUCC") == 0)
+	{
+		tmp = Message_QRY(node,request);
+		return (tmp == 1) ? tmp : 0;
+	}
+
 	return 1;
 }
 
