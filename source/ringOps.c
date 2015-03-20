@@ -280,14 +280,14 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	}
 	if(strcmp(cmd,"SUCC") == 0)
 	{
-		tmp = Message_QRY(node,request);
-		return (tmp == 1) ? tmp : 0;
+		tmp = Message_SUCC(node,request);
+		return (tmp == 0) ? tmp : 1;
 	}
 
 	return 1;
 }
 
-void Join_Ring(ringStruct* node, socketStruct start)
+int Join_Ring(ringStruct* node, socketStruct start)
 {
 	char msg[128],cmd[128];
 	char buffer[128];
@@ -323,7 +323,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
 	    printf("Temp: %s\n",buffer);
 
 	    if(strcmp(buffer,"OK") == 0)
-	      return;
+	      return -1;
 	}
 	else
 	{
@@ -352,7 +352,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
 	MasterNode = setupSocket(node->starterIP,node->starterPort,'T');
 	sendTCP(msg, MasterNode.socketFD);
 
-	return;
+	return MasterNode.socketFD;
 }
 
 
