@@ -148,7 +148,7 @@ int Message_QRY(ringStruct*node, char* request)
 			printf("My responsability\n");
 			memset(msg,0,128);
 
-			if(node->starter == node->myID){
+			if(node->starterID == node->myID){
 				memset(msg,0,128);
 				sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
 				printf("Socket %d with %s",node->NEWfd,msg);
@@ -265,6 +265,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
 	char idIP[20];
 	int startid,startTCP,ringx;
 	int temp;
+	socketStruct MasterNode;
 
 	sprintf(msg,"BQRY %d",node->ringID);
 	printf("Command sent: %s\n",msg);
@@ -321,10 +322,14 @@ void Join_Ring(ringStruct* node, socketStruct start)
 		}
 	}
 
- // vai se ligar ao no de arranque
- // enviando ID i
+	sprintf(msg,"ID %d\n",node->myID);
+	node->starterID = startid;
+	node->starterPort = startTCP;
+	strcpy(node->starterIP,idIP);
 
-  /////////////////////////////////////////////////////////////////
+	MasterNode = setupSocket(node->starterIP,node->starterPort,'T');
+	sendTCP(msg, MasterNode.socketFD);
+	
 	return;
 }
 
@@ -350,7 +355,7 @@ int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succi
   }
   else
   {
-    if(ringData->starter == 1) // Test to check if the current node is the starter node. If it is, put the next node as the starter one
+    if(ringData->starterID == 1) // Test to check if the current node is the starter node. If it is, put the next node as the starter one
     {
       sprintf(msg,"REG %i %i %s %i\n", ringData->ringID, ringData->succiID, ringData->succiIP, ringData->succiPort);
       if(sendUDP(msg,socketCFG) == -1)
