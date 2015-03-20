@@ -64,10 +64,10 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 {
 	char userInput[64], cmd[20];
+	
 	memset(userInput, 0, 64);
 	strcpy(cmd,"help"); //default to help
 	read(0,userInput,63); // stdin
-
 	printf("[SYSTEM]: ");
 
 	sscanf(userInput,"%s",cmd);
@@ -105,8 +105,7 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, &(node->ringID), &(node->myID), &(node->succiID), node->succiIP, &(node->succiPort)) ==3)
 		{
 			printf("Joining ring number %i with an identifier %i.\n", (node->ringID), (node->myID));
-			Join_Ring(node, socket);
-			return 0;
+			return Join_Ring(node, socket);
 		}
 
 		else if((node->ringID) > 0 && (node->myID) > -1 && (node->myID) < 64 && (node->succiID) > -1 && (node->succiID) < 64 && (node->succiPort) > -1)
