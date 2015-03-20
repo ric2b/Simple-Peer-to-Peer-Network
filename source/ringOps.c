@@ -262,7 +262,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
 {
 	char msg[128];
 	char buffer[128];
-	char cmd[10],idIP[20];
+	char idIP[20];
 	int startid,startTCP,ringx;
 	int temp;
 
@@ -297,19 +297,27 @@ void Join_Ring(ringStruct* node, socketStruct start)
 	}
 	else
 	{
-		if(sscanf(buffer,"%s %d %d %s %d",cmd,&ringx,&startid,idIP,&startTCP) != 5)
+		if(strcmp(buffer,"BRSP") == 0)
 		{
-		  printf("Bad Response from start server\n");
-		  exit(1);
+			if(sscanf(buffer,"%*s %d %d %s %d",&ringx,&startid,idIP,&startTCP) != 5)
+			{
+			  printf("Bad Response from start server\n");
+			  exit(1);
+			}
+			else
+			{
+				while(startid == node->myID)
+				{
+				    printf("Can't use identifier %d, please choose a different one: ",node->myID);
+					scanf("%d",&(node->myID));
+				}
+				printf("IP: %s\nPort: %d\n",idIP,startTCP);
+			}
 		}
 		else
 		{
-			while(startid == node->myID)
-			{
-			    printf("Can't use identifier %d, please choose a different one: ",node->myID);
-				scanf("%d",&(node->myID));
-			}
-			printf("IP: %s\nPort: %d\n",idIP,startTCP);
+			printf("Bad Response from Server. Exiting...\n");
+			exit(-1);
 		}
 	}
 
