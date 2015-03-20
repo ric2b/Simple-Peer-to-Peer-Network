@@ -106,6 +106,7 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 		{
 			printf("Joining ring number %i with an identifier %i.\n", (node->ringID), (node->myID));
 			Join_Ring(node, socket);
+			return 0;
 		}
 
 		else if((node->ringID) > 0 && (node->myID) > -1 && (node->myID) < 64 && (node->succiID) > -1 && (node->succiID) < 64 && (node->succiPort) > -1)
