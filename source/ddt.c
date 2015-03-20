@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	char 	buffer[128];
 	char	option;
 	int 	listenFD = 8080;
-	int  	master_socket;
+	int  	master_socket = -1;
 	socketStruct socketCFG_UDP;
 	ringStruct node;
 
