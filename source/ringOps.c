@@ -9,6 +9,8 @@
 #include "network.h"
 
 int FDsocket;
+int ID_ID,ID_Port;
+char ID_IP;
 
 int Message_ID(ringStruct* node,char * request)
 {
@@ -76,12 +78,9 @@ int Message_NEW(ringStruct* node, char* request)
 			node->succiID = ID;
 			strcpy(node->succiIP,IP);
 
-
 			//////////////////////////////////////////////////////
 			// ADD CODE TO CREATE NEW SOCKET FOR SUCCI OR PREDI //
 			//////////////////////////////////////////////////////
-
-
 
 			node->succiPort = Port;
 			node->succiFD = FDsocket;
@@ -190,53 +189,41 @@ int Message_QRY(ringStruct*node, char* request)
 
 void GetIP(ringStruct* node)
 {
-	//char localmachine[128];
-	//struct hostent *h;
-	//struct in_addr *a;
-	char addr[128];
-	//struct sockaddr
-	//sa_data
+	char localmachine[128];
+	struct hostent *h;
+	struct in_addr *a;
 
-	char addressOutputBuffer[INET6_ADDRSTRLEN];
-	struct ifaddrs *interfaceArray;
-	if(getifaddrs(&interfaceArray) != 0)
+	if(gethostname(localmachine,128) == -1)
 	{
-		printf("erro na getifaddrs\n");
-		exit(-1);
+		printf("\nError during hostname query\n\n");
+		exit(1);
 	}
 
-	struct ifaddrs * aux;
-	for(aux = interfaceArray; aux != NULL; aux = aux->ifa_next)
-    {
-
-		if(aux->ifa_addr->sa_family == AF_INET && strcmp(aux->ifa_name, "lo") != 0)
-		{
-			strcpy(addr, inet_ntop(aux->ifa_addr->sa_family, aux, addressOutputBuffer, sizeof(addressOutputBuffer)));
-			printf("Self Address on %s:  %s \n",aux->ifa_name, addr);
-			break;
-		}
+	if((h=gethostbyname(localmachine))==NULL)
+	{
+		exit(1);//error
 	}
-	strcpy(node->myIP, addr);
 
-	freeifaddrs(interfaceArray);
-
+	printf("Hostname: %s\n",localmachine);
+	a = (struct in_addr*)h->h_addr_list[0];
+	strcpy(node->myIP,inet_ntoa(*a));
 }
 
 
 void Node_Initialization(ringStruct* node)
 {
-  node->ringID = -1;
-  node->myID = -1;
-  strcpy(node->myIP,"\0");
-  node->myPort = -1;
-  node->succiID = -1;
-  strcpy(node->succiIP,"\0");
-  node->succiPort = -1;
-  node->succiFD = -1;
-  node->prediID = -1;
-  strcpy(node->prediIP,"\0");
-  node->prediPort = -1;
-  node->prediFD = -1;
+	node->ringID = -1;
+	node->myID = -1;
+	strcpy(node->myIP,"\0");
+	node->myPort = -1;
+	node->succiID = -1;
+	strcpy(node->succiIP,"\0");
+	node->succiPort = -1;
+	node->succiFD = -1;
+	node->prediID = -1;
+	strcpy(node->prediIP,"\0");
+	node->prediPort = -1;
+	node->prediFD = -1;
 }
 
 int JR_Message(char* request,ringStruct* node, int nodeFD)
@@ -273,137 +260,64 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 
 void Join_Ring(ringStruct* node, socketStruct start)
 {
-  char msg[128];
-  char buffer[128];
-  char localmachine[128];
-  char cmd[10],idIP[20];
-  int tmpid, tmpport;
-  char tmpip[128];
-  int startid,startTCP,ringx;
-  struct hostent *h;
-  struct in_addr *a;
-  int temp;
-  socketStruct PeerTCP;
+	char msg[128];
+	char buffer[128];
+	char cmd[10],idIP[20];
+	int startid,startTCP,ringx;
+	int temp;
 
+	sprintf(msg,"BQRY %d",node->ringID);
+	printf("Command sent: %s\n",msg);
+	printf("Socket: %d\n",start.socketFD);
 
-  sprintf(msg,"BQRY %d",node->ringID);
-  printf("Command sent: %s\n",msg);
-  printf("Socket: %d\n",start.socketFD);
-  if((temp = sendUDP(msg, start)) == -1)
-    exit(1);
-  if((temp = recvUDP(buffer,start)) == -1)
-    exit(1);
+	if((temp = sendUDP(msg, start)) == -1)
+		exit(1);
+	if((temp = recvUDP(buffer,start)) == -1)
+		exit(1);
 
-  printf("Command recieved: %s\n",buffer);
+	printf("Command recieved: %s\n",buffer);
 
-  if(strcmp(buffer,"EMPTY") == 0)
-  {
-    if(gethostname(localmachine,128) == -1)
-    {
-      printf("\nError during hostname query\n\n");
-      exit(1);
-    }
-    if((h=gethostbyname(localmachine))==NULL)
-      {
+	if(strcmp(buffer,"EMPTY") == 0)
+	{
+	    GetIP(node);
 
-        exit(1);//error
-      }
-    //printf("Hostname: %s\n",localmachine);
-    a = (struct in_addr*)h->h_addr_list[0];
+	    sprintf(msg,"REG %d %d %s %d\n",node->ringID, node->myID, node->myIP, node->myPort);
 
-    sprintf(msg,"REG %d %d %s %d\n",node->ringID, node->myID, node->myIP, node->myPort);
-    strcpy(node->myIP,inet_ntoa(*a));
-    printf("%s\n",msg);
+	    printf("%s\n",msg);
 
-    if((temp = sendUDP(msg,start)) == -1)
-      exit(1);
-    if((temp = recvUDP(buffer,start)) == -1)
-      exit(1);
+	    if((temp = sendUDP(msg,start)) == -1)
+	      exit(1);
+	    if((temp = recvUDP(buffer,start)) == -1)
+	      exit(1);
 
-    printf("Temp: %s\n",buffer);
+	    printf("Temp: %s\n",buffer);
 
-    if(strcmp(buffer,"OK") == 0)
-      return;
-  }
-  else
-  {
-    if(sscanf(buffer,"%s %d %d %s %d",cmd,&ringx,&startid,idIP,&startTCP) != 5)
-    {
-      printf("Bad Response from start server\n");
-      exit(1);
-    }
-    else
-    {
-      while(startid == node->myID)
-      {
-		    printf("Can't use identifier %d, please choose a different one: ",node->myID);
-        scanf("%d",&(node->myID));
-       }
-      printf("IP: %s\nPort: %d\n",idIP,startTCP);
+	    if(strcmp(buffer,"OK") == 0)
+	      return;
+	}
+	else
+	{
+		if(sscanf(buffer,"%s %d %d %s %d",cmd,&ringx,&startid,idIP,&startTCP) != 5)
+		{
+		  printf("Bad Response from start server\n");
+		  exit(1);
+		}
+		else
+		{
+			while(startid == node->myID)
+			{
+			    printf("Can't use identifier %d, please choose a different one: ",node->myID);
+				scanf("%d",&(node->myID));
+			}
+			printf("IP: %s\nPort: %d\n",idIP,startTCP);
+		}
+	}
 
  // vai se ligar ao no de arranque
  // enviando ID i
-	  node->starter = startid;
-      PeerTCP = setupSocket(idIP, startTCP, 'T');
-      memset((void*)&msg,'\0',sizeof(msg));
-      sprintf(msg,"ID %d\n", node->myID);
-      printf("Sending 1 %s",msg);
-      sendTCP(msg,PeerTCP.socketFD);
-      memset(buffer,0,128);
 
-	  printf("Receive 1\n");
-      recvTCP(buffer,PeerTCP);
-
-  	  closeSocket(PeerTCP);
-  	  printf("TCP received: %s\n",buffer);
-
-      // Message after query through the ring
-  	  if(sscanf(buffer,"%s %d %s %d",cmd, &tmpid, tmpip, &tmpport) != 4)
-  	  {
-    		printf("Bad Message 2\n");
-    		exit(1);
-  	  }
-
-	     while(tmpid == node->myID)
-      {
-		    printf("Can't use identifier %d, please choose a different one: ",node->myID);
-        scanf("%d",&(node->myID));
-      }
-
-      if(strcmp(cmd,"SUCC") != 0)
-  	  {
-    		printf("Bad Message 3\n");
-    		exit(1);
-	    }
-
-	    memset((void*)&msg,'\0',sizeof(msg));
-      // Sends message to l informing him that i'm his predi
-      // l is now my succi and information is updated
-      sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);
-      printf("Sending to %d, message %s",PeerTCP.socketFD, msg);
-      PeerTCP = setupSocket(tmpip,tmpport,'T');
-      sendTCP(msg,PeerTCP.socketFD);
-      //printf("Sent\n");
-      if(node->starter == tmpid)
-      {
-		node->succiFD = PeerTCP.socketFD;
-		strcpy(node->succiIP,tmpip);
-		node->succiID = tmpid;
-		node->succiPort = tmpport;
-		node->prediFD = PeerTCP.socketFD;
-		strcpy(node->prediIP,tmpip);
-		node->prediID = tmpid;
-		node->prediPort = tmpport;
-   	  }
-   	  node->succiFD = PeerTCP.socketFD;
-	  strcpy(node->succiIP,tmpip);
-	  node->succiID = tmpid;
-	  node->succiPort = tmpport;
-      //memset(buffer,0,128);
-      return;
-    }
-  }
-  return;
+  /////////////////////////////////////////////////////////////////
+	return;
 }
 
 
