@@ -260,7 +260,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 
 void Join_Ring(ringStruct* node, socketStruct start)
 {
-	char msg[128];
+	char msg[128],cmd[128];
 	char buffer[128];
 	char idIP[20];
 	int startid,startTCP,ringx;
@@ -298,29 +298,22 @@ void Join_Ring(ringStruct* node, socketStruct start)
 	}
 	else
 	{
-		if(strcmp(buffer,"BRSP") == 0)
+		if(sscanf(buffer,"%s %d %d %s %d",cmd, &ringx,&startid,idIP,&startTCP) != 5)
 		{
-			if(sscanf(buffer,"%*s %d %d %s %d",&ringx,&startid,idIP,&startTCP) != 5)
-			{
-			  printf("Bad Response from start server\n");
-			  exit(1);
-			}
-			else
-			{
-				while(startid == node->myID)
-				{
-				    printf("Can't use identifier %d, please choose a different one: ",node->myID);
-					scanf("%d",&(node->myID));
-				}
-				printf("IP: %s\nPort: %d\n",idIP,startTCP);
-			}
+			  printf("Bad Response from Server. Exiting...\n");
+				exit(-1);
 		}
 		else
 		{
-			printf("Bad Response from Server. Exiting...\n");
-			exit(-1);
+			while(startid == node->myID)
+			{
+			    printf("Can't use identifier %d, please choose a different one: ",node->myID);
+				scanf("%d",&(node->myID));
+			}
+				printf("IP: %s\nPort: %d\n",idIP,startTCP);
 		}
 	}
+	
 
 	sprintf(msg,"ID %d\n",node->myID);
 	node->starterID = startid;
@@ -329,7 +322,7 @@ void Join_Ring(ringStruct* node, socketStruct start)
 
 	MasterNode = setupSocket(node->starterIP,node->starterPort,'T');
 	sendTCP(msg, MasterNode.socketFD);
-	
+
 	return;
 }
 
