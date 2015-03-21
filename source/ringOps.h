@@ -30,15 +30,13 @@ typedef struct ringStruct
 
 void GetIP(ringStruct* ); //ta aqui só para não ter problemas com includes circulares
 
-int Join_Ring(ringStruct*, socketStruct );
-
 void Node_Initialization(ringStruct* );
 
 int JR_Message(char*,ringStruct*,int);
 
-int  Message_ID(ringStruct* node, char* request);
+int Message_ID(ringStruct* node, char* request);
 
-int  Message_NEW(ringStruct* node, char* request);
+int Message_NEW(ringStruct* node, char* request);
 
 int Message_RSP(ringStruct* node, char* request);
 
@@ -50,20 +48,10 @@ int Message_CON(ringStruct* node, char* request);
 
 int Message_BOOT(ringStruct* node, char* request);
 
-void removeNode(ringStruct * ringData, socketStruct socketCFG);
-
 int distance(int k, int l);
 
 int responsability(int predi, int i, int k);
 
-void searchNode(ringStruct * ringData, int k);
-
-void showNode(ringStruct * ringData);
-
-int joinRing_KnownSucci(ringStruct * ringData, int succiID, char * succiIP, int succiPort);
-
 void nodeReset(ringStruct * ringData);
-/*
-socketStruct setupListenSocket(char * myIP, int myPort);
-*/
+
 #endif

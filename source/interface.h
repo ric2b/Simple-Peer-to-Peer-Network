@@ -3,6 +3,7 @@
 
 #include "network.h"
 #include "ringOps.h"
+#include "triggers.h"
 
 int check_arguments(int , char **, char* , int * , int* , char * );
 
