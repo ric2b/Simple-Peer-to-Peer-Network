@@ -1,6 +1,6 @@
 #include "responses.h"
 
-int FDsocket;
+int senderSocket;
 
 int Message_ID(ringStruct* node,char * request)
 {
@@ -15,13 +15,13 @@ int Message_ID(ringStruct* node,char * request)
 
 	if(strcmp(cmd,"ID") == 0)
 	{
-		node->NEWfd = FDsocket;
+		node->NEWfd = senderSocket;
 		memset(msg,0,128);
 		if(node->succiID == -1 && node->prediFD == -1)
 		{
 			sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
 			printf("%s",msg);
-			sendTCP(msg, FDsocket);
+			sendTCP(msg, senderSocket);
 			printf("1\n");
 		}
 		else
@@ -56,64 +56,52 @@ int Message_NEW(ringStruct* node, char* request)
 	{
 		if(node->succiID == -1 && node->prediFD == -1)
 		{
-			tmp = setupSocket(IP,Port,'T');
+			// guardar predi
+			node->prediFD = senderSocket;
 			node->prediID = ID;
 			strcpy(node->prediIP,IP);
 			node->prediPort = Port;
-			node->prediFD = FDsocket;
+			
+			// guardar succi
+			tmp = setupSocket(IP,Port,'T');
+			node->succiFD = tmp.socketFD;
 			node->succiID = ID;
 			strcpy(node->succiIP,IP);
 			node->succiPort = Port;
-			node->succiFD = tmp.socketFD;
 
 			printf("3\n");
-			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-		    return 0;
 		}
 		else
 		{
-			if(node->succiID == -1)
+			if(node->prediFD == -1)
 			{
-				tmp = setupSocket(IP,Port,'T');
-				node->succiID = ID;
-				strcpy(node->succiIP,IP);
-				node->succiPort = Port;
-				node->succiFD = tmp.socketFD;
+				// guardar a ligação ao novo predi
+				node->prediID = ID;
+				strcpy(node->prediIP,IP);
+				node->prediPort = Port;
+				node->prediFD = senderSocket;
 				printf("3\n");
-			    return 0;
 			}
 			else
 			{
-				if(node->prediFD == -1)
-				{
-					node->prediID = ID;
-					strcpy(node->prediIP,IP);
-					node->prediPort = Port;
-					node->prediFD = FDsocket;
-					printf("3\n");
-				}
-				else
-				{
-					memset(msg,0,128);
-					sprintf(msg,"CON %d %s %d",ID, IP, Port);
-					sendTCP(msg,node->prediFD);
-					close(node->prediFD);
-					node->prediID = ID;
-					strcpy(node->prediIP,IP);
-					node->prediPort = Port;
-					node->prediFD = FDsocket;
-					memset(msg,0,128);
-					sprintf(msg,"CON %d %s %d\n",ID, IP, Port);
-					printf("4\n");
-				}
+				// fechar a ligação com o predi anterior
+				memset(msg,0,128);
+				sprintf(msg,"CON %d %s %d",ID, IP, Port);
+				sendTCP(msg,node->prediFD);
+				close(node->prediFD);
+				
+				// guardar a ligação ao novo predi
+				node->prediID = ID;
+				strcpy(node->prediIP,IP);
+				node->prediPort = Port;
+				node->prediFD = senderSocket;
+				printf("4\n");
 			}
-			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-			return 0;
 		}
+		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+		printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+		return 0;
 	}
 	return 1;
 }
@@ -131,7 +119,7 @@ int Message_RSP(ringStruct* node, char* request)
 	}
 	sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
 	printf("%s\n",msg);
-	sendTCP(msg, FDsocket);
+	sendTCP(msg, senderSocket);
 	printf("9\n");
 	printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 	printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
@@ -242,15 +230,18 @@ int Message_CON(ringStruct* node, char* request)
 		printf("Bad Message (CON)\n");
 		return 1;
 	}
+	close(node->succiFD); //fecha a comunicação com o Succi antigo
+
+	tmp =  setupSocket(dest_IP,dest_Port,'T'); //cria socket para comunicar com o novo Succi
 	memset(msg,0,128);
-	sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);
-	tmp =  setupSocket(dest_IP,dest_Port,'T');
+	sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);	
 	sendTCP(msg,tmp.socketFD);
-	close(node->succiFD);
+
 	node->succiFD = tmp.socketFD;
 	node->succiID = dest_ID;
 	node->succiPort = dest_Port;
 	strcpy(node->succiIP,dest_IP);
+
 	printf("10\n");
 	printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 	printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
@@ -271,8 +262,9 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	int tmp;
 	printf("A analisar: %s\n",request);
 
-	FDsocket = nodeFD;
+	senderSocket = nodeFD;
 	sscanf(request,"%s",cmd);
+	printf("cmd: %s END\n", cmd);
 	if(strcmp(cmd,"NEW") == 0)
 	{
 		tmp = Message_NEW(node,request);
