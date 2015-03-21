@@ -18,6 +18,7 @@ int main(int argc, char **argv)
 	char	option;
 	int 	listenFD = 8080;
 	int  	master_socket = -1;
+	int     refreshSocket = -1;
 	socketStruct socketCFG_UDP;
 	ringStruct node;
 
@@ -56,7 +57,11 @@ int main(int argc, char **argv)
 			/* Comando do Utilizador*/
 			if(FD_ISSET(STDIN, &fds))
 			{
-				master_socket = run_commands(&node, socketCFG_UDP, &node);
+				refreshSocket = run_commands(&node, socketCFG_UDP, &node);
+				if(refreshSocket!=-1)
+				{
+					master_socket=refreshSocket;
+				}
 			}
 
 			/* Mensagem de desconhecido */

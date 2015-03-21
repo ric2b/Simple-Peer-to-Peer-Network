@@ -519,7 +519,7 @@ void searchNode(ringStruct * ringData, int k)
 	}
 	else
 	{
-		printf("The node you are searching for is not in the 0 to 63 interval!");
+		printf("The node you are searching for is not in the 0 to 63 interval!\n");
 	}
 }
 

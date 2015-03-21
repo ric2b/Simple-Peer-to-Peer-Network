@@ -78,16 +78,19 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 	{
 		removeNode(node,socket);
 		printf("You removed your node from the current ring.\n\n");
+		return -1;
 	}
 	else if(strcmp(cmd,"show") == 0)
 	{
 		showNode(node);
 		//printf("Showing ring number, node identifier and predi/succi identifiers.\n\n");
+		return -1;
 	}
 	else if(strcmp(cmd,"search") == 0)
 	{
 		sscanf(userInput,"%s %i",cmd,&qryNode);
        	searchNode(node,qryNode);
+		return -1;
    	}
 	else if(strcmp(cmd,"join") == 0)
 	{
@@ -101,10 +104,12 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 		{
 			joinRing_KnownSucci(ringData, node->succiID, node->succiIP, node->succiPort);
 			printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
+			return -1;
   		}
 		else
 		{
          		printf("Your joining command doesn't have the correct arguments.\n\n");
+				return -1;
   		}
 	}
 	else if(strcmp(cmd,"help") == 0)
@@ -115,11 +120,12 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
          printf("\t- show \n");
          printf("\t- search [k]\n");
          printf("\t- exit\n\n");
+		 return -1;
    	}
 	else
 	{
          printf("The command you have inserted is non existent.\n");
          printf("Type 'help' to show the available commands.\n\n");
+		 return -1;
    	}
-	return 0;
 }
