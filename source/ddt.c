@@ -31,9 +31,6 @@ int main(int argc, char **argv)
 	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
 	GetIP(&node);
 
-	printf("\n> ");
-	fflush(stdout);
-
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
 	while(1)
@@ -50,6 +47,8 @@ int main(int argc, char **argv)
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
 		maxfd = (master_socket > maxfd) ? master_socket : maxfd; //calcular maxfd
 		//printf("Waiting to select...\n");
+		printf("\n> ");
+		fflush(stdout);
 		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0)
 		{
 			memset(buffer,0,128);

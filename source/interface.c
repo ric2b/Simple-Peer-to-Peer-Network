@@ -132,7 +132,5 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
          printf("The command you have inserted is non existent.\n");
          printf("Type 'help' to show the available commands.\n\n");
    	}
-	printf("> ");
-	fflush(stdout);
 	return 0;
 }
