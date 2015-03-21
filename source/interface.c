@@ -27,7 +27,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 			exit(1);
 		}
 	}
-	
+
 	while((*option = getopt(argc,argv,"t:i:p:")) != -1) // Checking the various options received on the console application
 	{
 		 switch(* option)
@@ -75,7 +75,7 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 	if(strcmp(cmd,"exit") == 0)
 	{
 		printf("You have closed the application.\n\n");
-		return 1;
+		exit(0);
 	}
 	else if(strcmp(cmd,"leave") == 0)
 	{

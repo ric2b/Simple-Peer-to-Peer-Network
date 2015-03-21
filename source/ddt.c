@@ -75,16 +75,29 @@ int main(int argc, char **argv)
 			/* Mensagem do Predi*/
 			if(FD_ISSET(node.prediFD,&fds))
 			{
-
 				read(node.prediFD, buffer, 128);
-				printf("Mensagem do predi: %s\n", buffer);
+				printf("Succi Funct\n");
+				if(JR_Message(buffer,&node,node.prediFD) == 1)
+				{
+					printf("A fechar predi socket!\n");
+					close(node.prediFD); // fecha o file descriptor do nó cliente
+				}
+				printf("Finished processing predi\n");				
 			}
 
 			/* Mensagem do Succi*/
 			if(FD_ISSET(node.succiFD,&fds))
 			{
 				read(node.succiFD, buffer, 128);
-				printf("Mensagem do succi: %s\n", buffer);
+
+				printf("Predi Funct\n");
+				if(JR_Message(buffer,&node,node.succiFD) == 1)
+				{
+					printf("A fechar succi socket!\n");
+					close(node.succiFD); // fecha o file descriptor do nó cliente
+				}
+				printf("Finished processing succi\n");	
+				
 			}
 		}
 	}
