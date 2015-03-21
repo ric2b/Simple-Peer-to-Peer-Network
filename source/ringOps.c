@@ -25,32 +25,27 @@ int Message_ID(ringStruct* node,char * request)
 
 	if(strcmp(cmd,"ID") == 0)
 	{
+		node->NEWfd = FDsocket;
+		memset(msg,0,128);
 		if(node->succiID == -1 && node->prediFD == -1)
-		{
-			node->NEWfd = FDsocket;
-			memset(msg,0,128);
+		{			
 			sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
 			printf("%s",msg);
 			sendTCP(msg, FDsocket);
 			printf("1\n");
-			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-			return 0;
 		}
 		else
 		{
-			node->NEWfd = FDsocket;
-			memset(msg,0,128);
 			sprintf(msg,"QRY %d %d\n",node->myID,ID);
 			printf("%s",msg);
 			sendTCP(msg, node->succiFD);
 			printf("2\n");
-			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-			return 0;
 		}
+		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+		printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+
+		return 0;
 	}
 	return 1;
 }
@@ -97,9 +92,6 @@ int Message_NEW(ringStruct* node, char* request)
 				node->succiPort = Port;
 				node->succiFD = tmp.socketFD;
 				printf("3\n");
-				printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-				printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-				printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
 			    return 0;
 			}
 			else
@@ -111,10 +103,6 @@ int Message_NEW(ringStruct* node, char* request)
 					node->prediPort = Port;
 					node->prediFD = FDsocket;
 					printf("3\n");
-					printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-					printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-					printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-				    return 0;
 				}
 				else
 				{
@@ -129,13 +117,12 @@ int Message_NEW(ringStruct* node, char* request)
 					memset(msg,0,128);
 					sprintf(msg,"CON %d %s %d\n",ID, IP, Port);
 					printf("4\n");
-					printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-					printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-					printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-					return 0;	
 				}
 			}
-			
+			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+			return 0;			
 		}
 	}
 	return 1;
@@ -194,10 +181,7 @@ int Message_QRY(ringStruct*node, char* request)
 				printf("Socket %d with %s",node->NEWfd,msg);
 				sendTCP(msg, node->NEWfd);
 				printf("7\n");
-				printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-				printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-				printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-				return 0;
+
 			}
 			else
 			{
@@ -205,10 +189,6 @@ int Message_QRY(ringStruct*node, char* request)
 				printf("Sending to Master %s",msg);
 				sendTCP(msg, node->prediFD);
 				printf("8\n");
-				printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-				printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-				printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-				return 0;
 			}
 		}
 		else
@@ -216,11 +196,12 @@ int Message_QRY(ringStruct*node, char* request)
 			printf("Sending to Succi %s",request);
 			sendTCP(request, node->succiFD);
 			printf("5\n");
-			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-			return 0;
 		}
+
+		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+		printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+		return 0;
 	 }
 	 return 1;
 }
