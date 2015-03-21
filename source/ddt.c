@@ -6,6 +6,7 @@
 #include "interface.h"
 //#include "network.h"
 #include "ringOps.h"
+#include "responses.h"
 
 #define STDIN 0
 
@@ -17,6 +18,8 @@ int main(int argc, char **argv)
 	char 	buffer[128];
 	char	option;
 	int 	listenFD = 8080;
+	int  	master_socket = -1;
+	int     refreshSocket = -1;
 	socketStruct socketCFG_UDP;
 	ringStruct node;
 
@@ -30,9 +33,6 @@ int main(int argc, char **argv)
 	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
 	GetIP(&node);
 
-	printf("\n> ");
-	fflush(stdout);
-
 	fd_set fds;	// isto são tretas para o select
 	int maxfd;
 	while(1)
@@ -43,11 +43,14 @@ int main(int argc, char **argv)
 		FD_SET(STDIN, &fds);  // stdin
 		FD_SET(node.prediFD,&fds);
 		FD_SET(node.succiFD,&fds);
+		FD_SET(master_socket,&fds);
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 		maxfd = (node.prediFD > maxfd) ? node.prediFD : maxfd; //calcular maxfd
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
-
+		maxfd = (master_socket > maxfd) ? master_socket : maxfd; //calcular maxfd
 		//printf("Waiting to select...\n");
+		printf("\n> ");
+		fflush(stdout);
 		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0)
 		{
 			memset(buffer,0,128);
@@ -55,7 +58,11 @@ int main(int argc, char **argv)
 			/* Comando do Utilizador*/
 			if(FD_ISSET(STDIN, &fds))
 			{
-				run_commands(&node, socketCFG_UDP, &node);
+				refreshSocket = run_commands(&node, socketCFG_UDP, &node);
+				if(refreshSocket!=-1)
+				{
+					master_socket=refreshSocket;
+				}
 			}
 
 			/* Mensagem de desconhecido */
@@ -76,13 +83,13 @@ int main(int argc, char **argv)
 			if(FD_ISSET(node.prediFD,&fds))
 			{
 				read(node.prediFD, buffer, 128);
-				printf("Succi Funct\n");
+				printf("Predi Funct\n");
 				if(JR_Message(buffer,&node,node.prediFD) == 1)
 				{
 					printf("A fechar predi socket!\n");
 					close(node.prediFD); // fecha o file descriptor do nó cliente
 				}
-				printf("Finished processing predi\n");				
+				printf("Finished processing predi\n");
 			}
 
 			/* Mensagem do Succi*/
@@ -90,14 +97,28 @@ int main(int argc, char **argv)
 			{
 				read(node.succiFD, buffer, 128);
 
-				printf("Predi Funct\n");
+				printf("Succi Funct\n");
 				if(JR_Message(buffer,&node,node.succiFD) == 1)
 				{
 					printf("A fechar succi socket!\n");
 					close(node.succiFD); // fecha o file descriptor do nó cliente
 				}
-				printf("Finished processing succi\n");	
-				
+				printf("Finished processing succi\n");
+
+			}
+			/* Mensagem para No Mestre - Comunicaçao inicial */
+			if(FD_ISSET(master_socket,&fds))
+			{
+				read(master_socket, buffer, 128);
+
+				printf("Add Node Funct\n");
+				if(JR_Message(buffer,&node,master_socket) == 1)
+				{
+					printf("A fechar master socket!\n");
+					close(master_socket); // fecha o file descriptor do nó cliente
+				}
+				printf("Finished processing Add Node\n");
+
 			}
 		}
 	}

@@ -9,10 +9,21 @@
 #include "ringOps.h"
 #include "network.h"
 
+int JR_Message(char*,ringStruct*,int);
 
-void readPredi(char* msg,ringStruct* myNode);
+int Message_ID(ringStruct* node, char* request);
 
-void readSucci(char* msg,ringStruct* myNode);
+int Message_NEW(ringStruct* node, char* request);
+
+int Message_RSP(ringStruct* node, char* request);
+
+int Message_QRY(ringStruct* node, char* request);
+
+int Message_SUCC(ringStruct* node, char* request);
+
+int Message_CON(ringStruct* node, char* request);
+
+int Message_BOOT(ringStruct* node, char* request);
 
 
 #endif
