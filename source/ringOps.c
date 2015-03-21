@@ -60,7 +60,7 @@ int Message_NEW(ringStruct* node, char* request)
 	char  cmd[128];
 	int  Port, ID;
 	char IP[128];
-
+	socketStruct tmp;
 	if(sscanf(request,"%s %d %s %d",cmd,&ID,IP,&Port) != 4)
 	{
 		printf("Bad Message (NEW)\n");
@@ -71,19 +71,22 @@ int Message_NEW(ringStruct* node, char* request)
 	{
 		if(node->succiID == -1 && node->prediFD == -1)
 		{
-			node->prediID = ID;
-			strcpy(node->prediIP,IP);
-			node->prediPort = Port;
-			node->prediFD = FDsocket;
-			node->succiID = ID;
-			strcpy(node->succiIP,IP);
-
 			//////////////////////////////////////////////////////
 			// ADD CODE TO CREATE NEW SOCKET FOR SUCCI OR PREDI //
 			//////////////////////////////////////////////////////
 
+			tmp = setupSocket(IP,Port,'T');
+
+			node->prediID = ID;
+			strcpy(node->prediIP,IP);
+			node->prediPort = Port;
+			node->prediFD = FDsocket;
+
+			node->succiID = ID;
+			strcpy(node->succiIP,IP);	
 			node->succiPort = Port;
-			node->succiFD = FDsocket;
+			node->succiFD = tmp.socketFD;
+
 			printf("3\n");
 			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
@@ -130,9 +133,9 @@ int Message_QRY(ringStruct*node, char* request)
 	int   ID, Master;
 
 
-	if(sscanf(request,"%s %d %d",cmd, &Master, &ID) != 4)
+	if(sscanf(request,"%s %d %d",cmd, &Master, &ID) != 3)
 	{
-		printf("Bad Message (NEW)\n");
+		printf("Bad Message (QRY)\n");
 		return 1;		
 	}
 
@@ -148,7 +151,7 @@ int Message_QRY(ringStruct*node, char* request)
 			printf("My responsability\n");
 			memset(msg,0,128);
 
-			if(node->starterID == node->myID){
+			if(node->starter == 1){
 				memset(msg,0,128);
 				sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
 				printf("Socket %d with %s",node->NEWfd,msg);
@@ -204,9 +207,43 @@ int Message_SUCC(ringStruct*node, char* request)
 	}
 
 	Succi_Node = setupSocket(dest_IP,dest_Port,'T');
+
+	node->succiFD = Succi_Node.socketFD;
+	node->succiID = dest_ID;
+	strcpy(node->succiIP,dest_IP);
+	node->succiPort = dest_Port;
+
 	memset(msg,0,128);
 	sprintf(msg,"NEW %d %s %d\n",node->myID,node->myIP,node->myPort);
 	sendTCP(msg,Succi_Node.socketFD);
+	return 0;
+}
+
+int Message_CON(ringStruct* node, char* request)
+{
+	char cmd[128], msg[128];
+	int dest_ID, dest_Port;
+	char dest_IP[128];
+	socketStruct tmp;
+
+	if(sscanf(request,"%s %d %s %d",cmd, &dest_ID, dest_IP, &dest_Port) != 4)
+	{
+		printf("Bad Message (CON)\n");
+		return 1;		
+	}
+
+	memset(msg,0,128);
+	sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);
+	tmp =  setupSocket(dest_IP,dest_Port,'T');
+	sendTCP(msg,tmp.socketFD);
+
+	close(node->succiFD);
+
+	node->succiFD = tmp.socketFD;
+	node->succiID = dest_ID;
+	node->succiPort = dest_Port;
+	strcpy(node->succiIP,dest_IP);
+	
 	return 0;
 }
 
@@ -256,6 +293,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	printf("A analisar: %s",request);
 
 	FDsocket = nodeFD;
+
 	sscanf(request,"%s",cmd);
 
 	if(strcmp(cmd,"NEW") == 0)
@@ -322,34 +360,31 @@ int Join_Ring(ringStruct* node, socketStruct start)
 
 	    printf("Temp: %s\n",buffer);
 
+	    node->starter = 1;
+
 	    if(strcmp(buffer,"OK") == 0)
 	      return -1;
 	}
-	else
+
+	if(sscanf(buffer,"%s %d %d %s %d",cmd, &ringx,&startid,idIP,&startTCP) != 5)
 	{
-		if(sscanf(buffer,"%s %d %d %s %d",cmd, &ringx,&startid,idIP,&startTCP) != 5)
-		{
-			  printf("Bad Response from Server. Exiting...\n");
-				exit(-1);
-		}
-		else
-		{
-			while(startid == node->myID)
-			{
-			    printf("Can't use identifier %d, please choose a different one: ",node->myID);
-				scanf("%d",&(node->myID));
-			}
-				printf("IP: %s\nPort: %d\n",idIP,startTCP);
-		}
+		printf("Bad Response from Server. Exiting...\n");		  
+		exit(-1);
 	}
+
+	while(startid == node->myID)
+	{
+	    printf("Can't use identifier %d, please choose a different one: ",node->myID);
+		scanf("%d",&(node->myID));
+	}
+
+	printf("IP: %s\nPort: %d\n",idIP,startTCP);
+
 	
-
 	sprintf(msg,"ID %d\n",node->myID);
-	node->starterID = startid;
-	node->starterPort = startTCP;
-	strcpy(node->starterIP,idIP);
+	node->starter = 0;
 
-	MasterNode = setupSocket(node->starterIP,node->starterPort,'T');
+	MasterNode = setupSocket(idIP,startTCP,'T');
 	sendTCP(msg, MasterNode.socketFD);
 
 	return MasterNode.socketFD;
@@ -358,60 +393,58 @@ int Join_Ring(ringStruct* node, socketStruct start)
 
 //socketStruct setupListenSocket(char * myIP, int myPort)
 
-int removeNode(ringStruct * ringData, socketStruct socketCFG, socketStruct succiPeer, socketStruct prediPeer)
+void removeNode(ringStruct * ringData, socketStruct socketCFG)
 {
-  //getting out with return 0, everything went fine
-  //getting out with return 1, something went wrong
-  char msg[128], buffer[128];
-  if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
-  {
-    sprintf(msg,"UNR %i\n",ringData->ringID);
-    if(sendUDP(msg,socketCFG) == -1)
-      return 1;
-    if(recvUDP(buffer,socketCFG) == -1)
-      return 1;
-    else if(strcmp(buffer,"OK")==0)
-      return 0;
-    else
-      return 1;
-  }
-  else
-  {
-    if(ringData->starterID == 1) // Test to check if the current node is the starter node. If it is, put the next node as the starter one
-    {
-      sprintf(msg,"REG %i %i %s %i\n", ringData->ringID, ringData->succiID, ringData->succiIP, ringData->succiPort);
-      if(sendUDP(msg,socketCFG) == -1)
-        return 1;
-      if(recvUDP(buffer,socketCFG) == -1)
-        return 1;
-      else if(strcmp(buffer,"OK")==0)
-      {
-        memset(msg,0,strlen(msg));
-        sprintf(msg,"BOOT\n");
-        //This part is not well done
-        sendTCP(msg, succiPeer.socketFD);
-        closeSocket(succiPeer);
-        memset(msg,0,strlen(msg));
-        sprintf(msg,"CON %i %s %i\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
-        sendTCP(msg, prediPeer.socketFD);
-        closeSocket(prediPeer);
-        return 0;
-      }
-      else // Default Case
-      {
-        closeSocket(succiPeer);
-        memset(msg,0,strlen(msg));
-        sprintf(msg,"CON %i %s %i\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
-        sendTCP(msg, prediPeer.socketFD);
-        closeSocket(prediPeer);
-        return 0;
-      }
-    }
-    else
-      return 1;
-  }
-  return 1;
+
+//////////////////////////////////////////////////////////
+//				 FALTA FAZER RESET AO NO´               //
+//////////////////////////////////////////////////////////	
+
+	char msg[128], buffer[128];
+	if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
+	{
+	    sprintf(msg,"UNR %i\n",ringData->ringID);
+	    if(sendUDP(msg,socketCFG) == -1)
+	        return;
+	    if(recvUDP(buffer,socketCFG) == -1)
+	        return;
+	    else if(strcmp(buffer,"OK")==0)
+	    {
+	                ringData->ringID = -1;
+	                ringData->myID = -1;
+	                ringData->starter=0;
+	                return;
+        }
+    	else
+			return;
+	}
+	else
+	{
+		if(ringData->starter == 1) // Test to check if the current node is the starter node. If it is, put the next node as the starter one
+		{
+		    sprintf(msg,"REG %i %i %s %i\n", ringData->ringID, ringData->succiID, ringData->succiIP, ringData->succiPort);
+		    if(sendUDP(msg,socketCFG) == -1)
+		        return;
+		    if(recvUDP(buffer,socketCFG) == -1)
+		        return;
+
+		else 
+			if(strcmp(buffer,"OK") == 0)
+		    {
+		            memset(msg,0,strlen(msg));
+		            sprintf(msg,"BOOT\n");
+		            sendTCP(msg, ringData->succiFD);
+		                ringData->starter=0;
+		    }
+		}
+		close(ringData->succiFD); //meter include relativo ao close
+		memset(msg,0,strlen(msg));
+		sprintf(msg,"CON %i %s %i\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
+		sendTCP(msg, ringData->prediFD);
+		return;
+		}
 }
+
 
 int distance(int k, int l)
 { // if it returns -1 something wrong occured
