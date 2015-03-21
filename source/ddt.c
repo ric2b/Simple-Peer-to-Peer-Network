@@ -6,6 +6,7 @@
 #include "interface.h"
 //#include "network.h"
 #include "ringOps.h"
+#include "responses.h"
 
 #define STDIN 0
 

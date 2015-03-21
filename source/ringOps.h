@@ -27,26 +27,9 @@ typedef struct ringStruct
 
 } ringStruct;
 
-
 void GetIP(ringStruct* ); //ta aqui só para não ter problemas com includes circulares
 
 void Node_Initialization(ringStruct* );
-
-int JR_Message(char*,ringStruct*,int);
-
-int Message_ID(ringStruct* node, char* request);
-
-int Message_NEW(ringStruct* node, char* request);
-
-int Message_RSP(ringStruct* node, char* request);
-
-int Message_QRY(ringStruct* node, char* request);
-
-int Message_SUCC(ringStruct* node, char* request);
-
-int Message_CON(ringStruct* node, char* request);
-
-int Message_BOOT(ringStruct* node, char* request);
 
 int distance(int k, int l);
 
