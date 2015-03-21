@@ -1,45 +1,25 @@
-CC 				= gcc
-CFLAGS 			= -Wall -g
-RMFLAGS			= -f
-EXECUTABLES		= ddt testTejo
-S_DIR 			= source
-O_DIR 			= obj
+SOURCES = $(shell ls source/*.c)
+TEMP = $(subst source/, obj/, $(SOURCES))
+OBJECTS = $(subst .c,.o, $(TEMP))
+CFLAGS = -Wall -ansi -std=gnu99 -g
+
 
 all: makefolders ddt
 
-# ddt
-ddt: ddt.o interface.o network.o ringOps.o
-	$(CC) $(CFLAGS) $(addprefix $(O_DIR)/,$^) -o $@
+ddt: $(OBJECTS)
+	$(CC) $^ -o $@
 
-ddt.o: $(S_DIR)/ddt.c $(S_DIR)/interface.h $(S_DIR)/network.h $(S_DIR)/ringOps.h
-	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
-
-interface.o: $(S_DIR)/interface.c
-	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
-
-network.o: $(S_DIR)/network.c
-	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
-
-ringOps.o: $(S_DIR)/ringOps.c
-	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
-
-#testTejo
-testTejo: testTejo.o network.o
-	$(CC) $(CFLAGS) $(addprefix $(O_DIR)/,$^) -o $@
-
-testTejo.o: $(S_DIR)/testTejo.c
-	$(CC) $(CFLAGS) -c $< -o $(O_DIR)/$@
+obj/%.o: source/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 #makefolders
-makefolders: 
-	mkdir -p $(O_DIR)
+makefolders:
+	mkdir -p obj
 
-#clean
 clean:
 	clear
-	rm $(RMFLAGS) $(O_DIR)/*.o
-	rm $(RMFLAGS) $(EXECUTABLES)
-
+	rm -f $(OBJECTS) ddt
+	rm -f obj/*.o
 
 # $@ reffers to named before the :
 # $^ reffers to all named after the :
