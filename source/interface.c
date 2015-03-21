@@ -12,7 +12,6 @@
 int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
 {
 	//bootIP and bootport are the IP adress e UDP port of the starting server
-
 	strcpy(bootIP,"tejo.tecnico.ulisboa.pt");
 	*bootport = 58000;
 	*ringport = 40000;
@@ -51,11 +50,9 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 	}
 
 	printf("\nWelcome to your favorite p2p client! You have chosen the following specifications: \n\n");
-
 	printf("\tSelected ringport: %i\n",*ringport);
 	printf("\tSelected bootIP: %s\n",bootIP);
 	printf("\tSelected bootport: %i\n\n", *bootport);
-
 	printf("Type 'help' to show the available commands.\n\n");
 
 	return 0;
@@ -63,13 +60,13 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 
 int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 {
+	int qryNode;
 	char userInput[64], cmd[20];
-	
+
 	memset(userInput, 0, 64);
 	strcpy(cmd,"help"); //default to help
 	read(0,userInput,63); // stdin
 	printf("[SYSTEM]: ");
-
 	sscanf(userInput,"%s",cmd);
 
 	if(strcmp(cmd,"exit") == 0)
@@ -79,6 +76,7 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 	}
 	else if(strcmp(cmd,"leave") == 0)
 	{
+		removeNode(node,socket);
 		printf("You removed your node from the current ring.\n\n");
 	}
 	else if(strcmp(cmd,"show") == 0)
@@ -88,17 +86,8 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 	}
 	else if(strcmp(cmd,"search") == 0)
 	{
-		sscanf(userInput,"%s %i",cmd, &node->myID);
-       //corrigir o caso para o qual o utilizador nao insere o argumento
-
-		if((node->myID) > -1 && (node->myID) < 64)
-		{
-			printf("Searching the identifier and localization of the node responsible for the identifier %i.\n\n", (node->myID));
-		}
-		else
-		{
-			printf("You didn't specify an identifier k or it isn't on the specified interval.\n\n");
- 		}
+		sscanf(userInput,"%s %i",cmd,&qryNode);
+       	searchNode(node,qryNode);
    	}
 	else if(strcmp(cmd,"join") == 0)
 	{

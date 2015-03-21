@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 					printf("A fechar predi socket!\n");
 					close(node.prediFD); // fecha o file descriptor do nó cliente
 				}
-				printf("Finished processing predi\n");				
+				printf("Finished processing predi\n");
 			}
 
 			/* Mensagem do Succi*/
@@ -97,8 +97,8 @@ int main(int argc, char **argv)
 					printf("A fechar succi socket!\n");
 					close(node.succiFD); // fecha o file descriptor do nó cliente
 				}
-				printf("Finished processing succi\n");	
-				
+				printf("Finished processing succi\n");
+
 			}
 			/* Mensagem para No Mestre - Comunicaçao inicial */
 			if(FD_ISSET(master_socket,&fds))
@@ -111,8 +111,8 @@ int main(int argc, char **argv)
 					printf("A fechar master socket!\n");
 					close(master_socket); // fecha o file descriptor do nó cliente
 				}
-				printf("Finished processing Add Node\n");	
-				
+				printf("Finished processing Add Node\n");
+
 			}
 		}
 	}

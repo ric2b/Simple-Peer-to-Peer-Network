@@ -28,7 +28,7 @@ int Message_ID(ringStruct* node,char * request)
 		node->NEWfd = FDsocket;
 		memset(msg,0,128);
 		if(node->succiID == -1 && node->prediFD == -1)
-		{			
+		{
 			sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
 			printf("%s",msg);
 			sendTCP(msg, FDsocket);
@@ -59,7 +59,7 @@ int Message_NEW(ringStruct* node, char* request)
 	if(sscanf(request,"%s %d %s %d",cmd,&ID,IP,&Port) != 4)
 	{
 		printf("Bad Message (NEW)\n");
-		return 1;		
+		return 1;
 	}
 
 	if(strcmp(cmd,"NEW") == 0)
@@ -72,7 +72,7 @@ int Message_NEW(ringStruct* node, char* request)
 			node->prediPort = Port;
 			node->prediFD = FDsocket;
 			node->succiID = ID;
-			strcpy(node->succiIP,IP);	
+			strcpy(node->succiIP,IP);
 			node->succiPort = Port;
 			node->succiFD = tmp.socketFD;
 
@@ -83,12 +83,12 @@ int Message_NEW(ringStruct* node, char* request)
 		    return 0;
 		}
 		else
-		{	
+		{
 			if(node->succiID == -1)
 			{
 				tmp = setupSocket(IP,Port,'T');
 				node->succiID = ID;
-				strcpy(node->succiIP,IP);	
+				strcpy(node->succiIP,IP);
 				node->succiPort = Port;
 				node->succiFD = tmp.socketFD;
 				printf("3\n");
@@ -97,7 +97,7 @@ int Message_NEW(ringStruct* node, char* request)
 			else
 			{
 				if(node->prediFD == -1)
-				{	
+				{
 					node->prediID = ID;
 					strcpy(node->prediIP,IP);
 					node->prediPort = Port;
@@ -122,7 +122,7 @@ int Message_NEW(ringStruct* node, char* request)
 			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
 			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-			return 0;			
+			return 0;
 		}
 	}
 	return 1;
@@ -137,7 +137,7 @@ int Message_RSP(ringStruct* node, char* request)
 	if(sscanf(request,"%s %d %d %d %s %d",cmd,&Master,&ID,&Destination,IP,&Port) != 4)
 	{
 		printf("Bad Message (NEW)\n");
-		return 1;		
+		return 1;
 	}
 	sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
 	printf("%s\n",msg);
@@ -148,7 +148,7 @@ int Message_RSP(ringStruct* node, char* request)
 	printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
 
 	return 0;
-	// REVER 
+	// REVER
 }
 
 int Message_QRY(ringStruct*node, char* request)
@@ -160,7 +160,7 @@ int Message_QRY(ringStruct*node, char* request)
 	if(sscanf(request,"%s %d %d",cmd, &Master, &ID) != 3)
 	{
 		printf("Bad Message (QRY)\n");
-		return 1;		
+		return 1;
 	}
 
 	if(node->succiFD == -1 && node->prediFD == -1)
@@ -216,7 +216,7 @@ int Message_SUCC(ringStruct*node, char* request)
 	if(sscanf(request,"%s %d %s %d",cmd, &dest_ID, dest_IP, &dest_Port) != 4)
 	{
 		printf("Bad Message (SUCC)\n");
-		return 1;		
+		return 1;
 	}
 	while(dest_ID == node->myID)
 	{
@@ -250,7 +250,7 @@ int Message_CON(ringStruct* node, char* request)
 	if(sscanf(request,"%s %d %s %d",cmd, &dest_ID, dest_IP, &dest_Port) != 4)
 	{
 		printf("Bad Message (CON)\n");
-		return 1;		
+		return 1;
 	}
 	memset(msg,0,128);
 	sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);
@@ -274,11 +274,11 @@ int Message_BOOT(ringStruct* node, char* request)
                 node->starter=1;
         return 0;
 }
- 
+
 void nodeReset(ringStruct * node)
 {
     node->ringID = -1;
-    node->myID = -1; 
+    node->myID = -1;
     node->succiID = -1;
     strcpy(node->succiIP,"\0");
     node->succiPort = -1;
@@ -410,7 +410,7 @@ int Join_Ring(ringStruct* node, socketStruct start)
 
 	if(sscanf(buffer,"%s %d %d %s %d",cmd, &ringx,&startid,idIP,&startTCP) != 5)
 	{
-		printf("Bad Response from Server. Exiting...\n");		  
+		printf("Bad Response from Server. Exiting...\n");
 		exit(-1);
 	}
 
@@ -420,7 +420,7 @@ int Join_Ring(ringStruct* node, socketStruct start)
 		scanf("%d",&(node->myID));
 	}
 
-	printf("IP: %s\nPort: %d\n",idIP,startTCP);	
+	printf("IP: %s\nPort: %d\n",idIP,startTCP);
 	sprintf(msg,"ID %d\n",node->myID);
 	node->starter = 0;
 	MasterNode = setupSocket(idIP,startTCP,'T');
@@ -461,9 +461,7 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 		        return;
 		    if(recvUDP(buffer,socketCFG) == -1)
 		        return;
-
-		else 
-			if(strcmp(buffer,"OK") == 0)
+			else if(strcmp(buffer,"OK") == 0)
 		    {
 	            memset(msg,0,strlen(msg));
 	            sprintf(msg,"BOOT\n");
@@ -518,6 +516,10 @@ void searchNode(ringStruct * ringData, int k)
 			sendTCP(msg, ringData->succiFD);
 			return;
 		}
+	}
+	else
+	{
+		printf("The node you are searching for is not in the 0 to 63 interval!");
 	}
 }
 

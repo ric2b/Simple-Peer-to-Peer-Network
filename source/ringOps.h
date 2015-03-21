@@ -34,7 +34,7 @@ int Join_Ring(ringStruct*, socketStruct );
 
 void Node_Initialization(ringStruct* );
 
-int JR_Message(char*,ringStruct*,int); 
+int JR_Message(char*,ringStruct*,int);
 
 int  Message_ID(ringStruct* node, char* request);
 
