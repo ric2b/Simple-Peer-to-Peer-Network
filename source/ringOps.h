@@ -48,6 +48,8 @@ int Message_SUCC(ringStruct* node, char* request);
 
 int Message_CON(ringStruct* node, char* request);
 
+int Message_BOOT(ringStruct* node, char* request);
+
 void removeNode(ringStruct * ringData, socketStruct socketCFG);
 
 int distance(int k, int l);
@@ -59,6 +61,8 @@ void searchNode(ringStruct * ringData, int k);
 void showNode(ringStruct * ringData);
 
 int joinRing_KnownSucci(ringStruct * ringData, int succiID, char * succiIP, int succiPort);
+
+void nodeReset(ringStruct * ringData);
 /*
 socketStruct setupListenSocket(char * myIP, int myPort);
 */
