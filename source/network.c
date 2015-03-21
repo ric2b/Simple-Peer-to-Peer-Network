@@ -52,7 +52,7 @@ void recvTCP(char * buffer, socketStruct socketCFG)
       buffer += nreceived;
       if(nreceived == -1)
       {
-          printf("erro a enviar com sendTCP\n");
+          printf("erro a receber com sendTCP\n");
           exit(-1);
       }
       else if(nreceived == 0) // acabou de receber
