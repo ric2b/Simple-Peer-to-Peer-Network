@@ -107,7 +107,7 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 	if(ringData->myID ==-1)
 	{
 		printf("You already don't belong to a ring.\n");
-		reprintf("You removed your node from the current ring.\n\n");turn;
+		return;
 	}
 	else if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
 	{
