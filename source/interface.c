@@ -77,7 +77,6 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 	else if(strcmp(cmd,"leave") == 0)
 	{
 		removeNode(node,socket);
-		printf("You removed your node from the current ring.\n\n");
 		return -1;
 	}
 	else if(strcmp(cmd,"show") == 0)

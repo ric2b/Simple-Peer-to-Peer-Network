@@ -73,9 +73,19 @@ void searchNode(ringStruct * ringData, int k)
   	char msg[128];
 	if(k>=0 && k<64)
 	{
-		if(ringData->succiID == -1 && ringData->prediID == -1)
+		if(ringData->myID ==-1)
+		{
+			printf("You are not in a ring yet. Join a ring first if you want to search a node.\n");
+			return;
+		}
+		else if(ringData->succiID == -1 && ringData->prediID == -1)
 		{
 			printf("%i %s %i\n", ringData->myID, ringData->myIP, ringData->myPort);
+			return;
+		}
+		else if(responsability(ringData->prediID,ringData->myID,k) == 1)
+		{
+			printf("%i %s %i", ringData->myID, ringData->myIP, ringData->myPort);
 			return;
 		}
 		else
@@ -94,7 +104,12 @@ void searchNode(ringStruct * ringData, int k)
 void removeNode(ringStruct * ringData, socketStruct socketCFG)
 {
 	char msg[128], buffer[128];
-	if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
+	if(ringData->myID ==-1)
+	{
+		printf("You already don't belong to a ring.\n");
+		reprintf("You removed your node from the current ring.\n\n");turn;
+	}
+	else if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
 	{
 	    sprintf(msg,"UNR %i\n",ringData->ringID);
 	    if(sendUDP(msg,socketCFG) == -1)
@@ -106,6 +121,7 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
             ringData->ringID = -1;
             ringData->myID = -1;
             ringData->starter=0;
+			printf("Your node left the ring.\n");
             return;
         }
     	else
