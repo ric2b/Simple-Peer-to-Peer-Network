@@ -122,7 +122,7 @@ int Message_RSP(ringStruct* node, char* request)
 	{
 		sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
 		printf("%s\n",msg);
-		sendTCP(msg, FDsocket);
+		sendTCP(msg, node->NEWfd);
 		printf("9\n");
 		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
