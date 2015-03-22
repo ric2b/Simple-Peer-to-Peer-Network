@@ -85,7 +85,7 @@ void searchNode(ringStruct * ringData, int k)
 		}
 		else if(responsability(ringData->prediID,ringData->myID,k) == 1)
 		{
-			printf("%i %s %i", ringData->myID, ringData->myIP, ringData->myPort);
+			printf("%i %s %i\n", ringData->myID, ringData->myIP, ringData->myPort);
 			return;
 		}
 		else

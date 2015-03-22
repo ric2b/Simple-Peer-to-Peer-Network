@@ -93,7 +93,7 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
    	}
 	else if(strcmp(cmd,"join") == 0)
 	{
-		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, &(node->ringID), &(node->myID), &(node->succiID), node->succiIP, &(node->succiPort)) ==3)
+		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, &(node->ringID), &(node->myID), &(node->succiID), node->succiIP, &(node->succiPort)) ==3 && node->myID >-1 && node->myID < 64)
 		{
 			printf("Joining ring number %i with an identifier %i.\n", (node->ringID), (node->myID));
 			return Join_Ring(node, socket);
