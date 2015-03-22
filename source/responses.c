@@ -17,7 +17,7 @@ int Message_ID(ringStruct* node,char * request)
 	{
 		node->NEWfd = FDsocket;
 		memset(msg,0,128);
-		if(node->succiID == -1 && node->prediFD == -1)
+		if((node->succiFD == -1 && node->prediFD == -1) || responsability(node->prediID,node->myID,ID))
 		{
 			sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
 			printf("%s",msg);
@@ -113,19 +113,25 @@ int Message_RSP(ringStruct* node, char* request)
 	int  Port, ID, Master, Destination;
 	char IP[128];
 
-	if(sscanf(request,"%s %d %d %d %s %d",cmd,&Master,&ID,&Destination,IP,&Port) != 4)
+	if(sscanf(request,"%s %d %d %d %s %d",cmd,&Master,&ID,&Destination,IP,&Port) != 6)
 	{
 		printf("Bad Message (NEW)\n");
 		return 1;
 	}
-	sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
-	printf("%s\n",msg);
-	sendTCP(msg, FDsocket);
-	printf("9\n");
-	printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-	printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-	printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-
+	if(Master == node->myID)
+	{
+		sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
+		printf("%s\n",msg);
+		sendTCP(msg, FDsocket);
+		printf("9\n");
+		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+		printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+	}
+	else
+	{
+		sendTCP(request,node->prediFD);
+	}
 	return 0;
 	// REVER
 }
@@ -153,22 +159,10 @@ int Message_QRY(ringStruct*node, char* request)
 		{
 			printf("My responsability\n");
 			memset(msg,0,128);
-
-			if(node->starter == 1){
-				memset(msg,0,128);
-				sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
-				printf("Socket %d with %s",node->NEWfd,msg);
-				sendTCP(msg, node->NEWfd);
-				printf("7\n");
-
-			}
-			else
-			{
-				sprintf(msg,"RSP %d %d %d %s %d \n",Master, ID,node->myID,node->myIP,node->myPort);
-				printf("Sending to Master %s",msg);
-				sendTCP(msg, node->prediFD);
-				printf("8\n");
-			}
+			sprintf(msg,"RSP %d %d %d %s %d \n",Master, ID,node->myID,node->myIP,node->myPort);
+			printf("Sending to Master %s",msg);
+			sendTCP(msg, node->prediFD);
+			printf("8\n");
 		}
 		else
 		{
@@ -176,7 +170,6 @@ int Message_QRY(ringStruct*node, char* request)
 			sendTCP(request, node->succiFD);
 			printf("5\n");
 		}
-
 		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
 		printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);

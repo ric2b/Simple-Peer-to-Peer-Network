@@ -155,7 +155,7 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 
 void showNode(ringStruct * ringData)
 {
-	printf("ring: %i myID: %i succi: %i predi:%i\n", ringData->ringID, ringData->myID, ringData->succiID, ringData->prediID);
+	printf("ring: %i predi:%i myID: %i succi: %i\n", ringData->ringID, ringData->prediID,ringData->myID, ringData->succiID);
 	return;
 }
 

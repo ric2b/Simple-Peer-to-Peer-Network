@@ -110,7 +110,6 @@ int main(int argc, char **argv)
 			if(FD_ISSET(master_socket,&fds))
 			{
 				read(master_socket, buffer, 128);
-
 				printf("Add Node Funct\n");
 				if(JR_Message(buffer,&node,master_socket) == 1)
 				{
