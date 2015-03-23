@@ -12,13 +12,13 @@
 
 int main(int argc, char **argv)
 {
-	char  	bootIP[1024];
-	char  	clientIP[128];
-	int		bootport, ringport;
-	char 	buffer[128];
-	char	option;
-	int 	listenFD = 8080;
-	int  	master_socket = -1;
+	char    bootIP[1024];
+	char    clientIP[128];
+	int     bootport, ringport;
+	char    buffer[128];
+	char    option;
+	int     listenFD = 8080;
+	int     master_socket = -1;
 	int     refreshSocket = -1;
 	socketStruct socketCFG_UDP;
 	ringStruct node;
@@ -33,10 +33,10 @@ int main(int argc, char **argv)
 	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
 	GetIP(&node);
 
-	fd_set fds;	// isto são tretas para o select
+	fd_set fds; // isto são tretas para o select
 	int maxfd;
 	while(1)
-	{	//bloqueia no select até haver algo para ler num dos sockets que estão em fds
+	{   //bloqueia no select até haver algo para ler num dos sockets que estão em fds
 
 		FD_ZERO(&fds);
 		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
@@ -82,30 +82,49 @@ int main(int argc, char **argv)
 			/* Mensagem do Predi*/
 			if(FD_ISSET(node.prediFD,&fds))
 			{
-				read(node.prediFD, buffer, 128);
-				printf("Predi Funct\n");
-				if(JR_Message(buffer,&node,node.prediFD) == 1)
+				if(read(node.prediFD, buffer, 128) == 0)
 				{
-					printf("A fechar predi socket!\n");
-					close(node.prediFD); // fecha o file descriptor do nó cliente
+					node.prediID = -1;
+					strcpy(node.prediIP,"\0");
+					node.prediPort = -1;
+					node.prediFD = -1;
+					printf("connection with predi was closed\n");
 				}
-				printf("Finished processing predi\n");
+				else
+				{
+					printf("Predi Funct\n");
+					if(JR_Message(buffer,&node,node.prediFD) == 1)
+					{
+						printf("A fechar predi socket!\n");
+						close(node.prediFD); // fecha o file descriptor do nó cliente
+					}
+					printf("Finished processing predi\n");
+				}
 			}
 
 			/* Mensagem do Succi*/
 			if(FD_ISSET(node.succiFD,&fds))
 			{
-				read(node.succiFD, buffer, 128);
-
-				printf("Succi Funct\n");
-				if(JR_Message(buffer,&node,node.succiFD) == 1)
+				if(read(node.succiFD, buffer, 128) == 0)
 				{
-					printf("A fechar succi socket!\n");
-					close(node.succiFD); // fecha o file descriptor do nó cliente
+					node.succiID = -1;
+					strcpy(node.succiIP,"\0");
+					node.succiPort = -1;
+					node.succiFD = -1;
+					printf("connection with succi was closed\n");
 				}
-				printf("Finished processing succi\n");
-
+				else
+				{
+					printf("Succi Funct\n");
+					if(JR_Message(buffer,&node,node.succiFD) == 1)
+					{
+						printf("A fechar succi socket!\n");
+						close(node.succiFD); // fecha o file descriptor do nó cliente
+					}
+					printf("Finished processing succi\n");                  
+				}
 			}
+
 			/* Mensagem para No Mestre - Comunicaçao inicial */
 			if(FD_ISSET(master_socket,&fds))
 			{
