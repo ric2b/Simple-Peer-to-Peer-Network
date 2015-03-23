@@ -8,6 +8,7 @@
 #include "ringOps.h"
 #include "network.h"
 #include "triggers.h"
+#include "responses.h"
 
 int Join_Ring(ringStruct* node, socketStruct start)
 {
@@ -80,18 +81,19 @@ void searchNode(ringStruct * ringData, int k)
 		}
 		else if(ringData->succiID == -1 && ringData->prediID == -1)
 		{
-			printf("%i %s %i\n", ringData->myID, ringData->myIP, ringData->myPort);
+			printf("Search Result: %i %s %i\n", ringData->myID, ringData->myIP, ringData->myPort);
 			return;
 		}
 		else if(responsability(ringData->prediID,ringData->myID,k) == 1)
 		{
-			printf("%i %s %i\n", ringData->myID, ringData->myIP, ringData->myPort);
+			printf("Search Result: %i %s %i\n", ringData->myID, ringData->myIP, ringData->myPort);
 			return;
 		}
 		else
 		{
 			sprintf(msg,"QRY %i %i\n", ringData->myID, k);
-			sendTCP(msg, ringData->succiFD);
+			Message_QRY(ringData, msg);
+			ringData->search_status = 1;
 			return;
 		}
 	}

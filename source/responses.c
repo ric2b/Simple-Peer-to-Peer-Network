@@ -115,22 +115,36 @@ int Message_RSP(ringStruct* node, char* request)
 
 	if(sscanf(request,"%s %d %d %d %s %d",cmd,&Master,&ID,&Destination,IP,&Port) != 6)
 	{
-		printf("Bad Message (NEW)\n");
+		printf("Bad Message (RSP)\n");
 		return 1;
 	}
-	if(Master == node->myID)
+	
+	if(node->search_status == 0)
 	{
-		sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
-		printf("%s\n",msg);
-		sendTCP(msg, node->NEWfd);
-		printf("9\n");
-		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-		printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+		if(Master == node->myID)
+		{
+			sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
+			printf("%s\n",msg);
+			sendTCP(msg, node->NEWfd);
+			printf("9\n");
+			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
+			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
+			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+		}
+		else
+		{
+			sendTCP(request,node->prediFD);
+		}
 	}
 	else
 	{
-		sendTCP(request,node->prediFD);
+		if(node->myID == Master)
+		{
+				printf("Search Result: %i %s %i\n", Destination, IP, Port);
+				node->search_status = 0;
+		}
+		else
+			sendTCP(request,node->prediFD);
 	}
 	return 0;
 	// REVER

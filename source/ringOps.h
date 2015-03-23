@@ -22,7 +22,7 @@ typedef struct ringStruct
   int prediFD;
 
   int starter;
-
+  int search_status;
   int NEWfd;
 
 } ringStruct;
