@@ -41,6 +41,7 @@ void Node_Initialization(ringStruct* node)
 	node->prediPort = -1;
 	node->prediFD = -1;
 	node->search_status = 0;
+	strcpy(node->externalIP,"\0");
 }
 
 int distance(int k, int l)

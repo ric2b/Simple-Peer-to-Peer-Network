@@ -34,6 +34,7 @@ typedef struct ringStruct
   int starter;
   int search_status;
   int NEWfd;
+  char externalIP[128];
 
 } ringStruct;
 

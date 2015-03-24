@@ -5,7 +5,7 @@
 #include "ringOps.h"
 #include "triggers.h"
 
-int check_arguments(int , char **, char* , int * , int* , char * );
+int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * externalIP, char * option);
 
 int run_commands(ringStruct* , socketStruct);
 // nao e necessario meter o nome das variaveis apenas o tipo

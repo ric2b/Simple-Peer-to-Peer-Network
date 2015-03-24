@@ -136,6 +136,13 @@ void GetIP(ringStruct* node)
 {
     char addr[128];
     
+    if(strlen(node->externalIP) != 0)
+    {
+        printf("Using IP adress provided by the user: %s\n", node->externalIP);
+        strcpy(node->myIP, node->externalIP);
+        return;
+    }
+
     struct ifaddrs *interfaceArray;
     if(getifaddrs(&interfaceArray) != 0)
     {
