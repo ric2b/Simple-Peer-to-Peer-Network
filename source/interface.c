@@ -109,7 +109,8 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 		else
 		{
          		printf("Your joining command doesn't have the correct arguments.\n\n");
-				return -1;
+         		nodeReset(node);
+			return -1;
   		}
 	}
 	else if(strcmp(cmd,"help") == 0)
