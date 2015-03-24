@@ -20,6 +20,7 @@ int Message_ID(ringStruct* node,char * request, int senderSocket)
 		if((node->succiFD == -1 && node->prediFD == -1) || responsability(node->prediID,node->myID,ID))
 		{
 			sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
+			node->succ_status = 1;
 			printf("%s",msg);
 			sendTCP(msg, senderSocket);
 			printf("1\n");
@@ -192,7 +193,7 @@ int Message_QRY(ringStruct*node, char* request)
 	 return 1;
 }
 
-int Message_SUCC(ringStruct*node, char* request)
+int Message_SUCC(ringStruct*node, char* request, int senderSocket)
 {
 	char cmd[128], msg[128];
 	int dest_ID, dest_Port;
@@ -205,10 +206,19 @@ int Message_SUCC(ringStruct*node, char* request)
 		return 1;
 	}
 	while(dest_ID == node->myID)
-	{
-		printf("Can't use identifier %d, please choose a different one: ",node->myID);
-        scanf("%d",&(node->myID));
-	}
+    {
+        memset(msg,0,128);
+        printf("Can't use identifier %d, please choose a different one: ",node->myID);
+    	scanf("%d",&(node->myID));
+        if(dest_ID != node->myID)
+        {
+            memset(msg,0,128);
+            sprintf(msg,"ID %d\n",node->myID);
+            printf("sending %s after bad id\n",msg);
+            sendTCP(msg,senderSocket);
+            return 0;
+        }
+    }
 
 	Succi_Node = setupSocket(dest_IP,dest_Port,'T');
 
@@ -292,7 +302,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	}
 	if(strcmp(cmd,"SUCC") == 0)
 	{
-		tmp = Message_SUCC(node,request);
+		tmp = Message_SUCC(node,request,nodeFD);
 		return (tmp == 0) ? tmp : 1;
 	}
 	if(strcmp(cmd,"CON") == 0)

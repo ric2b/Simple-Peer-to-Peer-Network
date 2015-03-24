@@ -32,6 +32,7 @@ typedef struct ringStruct
   int prediFD;
 
   int starter;
+  int succ_status;
   int search_status;
   int NEWfd;
 

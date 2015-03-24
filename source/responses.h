@@ -19,7 +19,7 @@ int Message_RSP(ringStruct* node, char* request);
 
 int Message_QRY(ringStruct* node, char* request);
 
-int Message_SUCC(ringStruct* node, char* request);
+int Message_SUCC(ringStruct* node, char* request, int nodeFD);
 
 int Message_CON(ringStruct* node, char* request);
 

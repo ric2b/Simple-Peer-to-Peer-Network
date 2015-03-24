@@ -20,6 +20,7 @@ int main(int argc, char **argv)
 	int     listenFD = 8080;
 	int     master_socket = -1;
 	int     refreshSocket = -1;
+	int 	nodeFD = -1;
 	socketStruct socketCFG_UDP;
 	ringStruct node;
 
@@ -44,10 +45,13 @@ int main(int argc, char **argv)
 		if (node.prediFD != -1) FD_SET(node.prediFD,&fds);
 		if (node.succiFD != -1) FD_SET(node.succiFD,&fds);
 		if (master_socket != -1) FD_SET(master_socket,&fds);
+		if (nodeFD != -1) FD_SET(nodeFD,&fds);
+
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 		maxfd = (node.prediFD > maxfd) ? node.prediFD : maxfd; //calcular maxfd
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
 		maxfd = (master_socket > maxfd) ? master_socket : maxfd; //calcular maxfd
+		maxfd = (nodeFD > maxfd) ? nodeFD : maxfd; //calcular maxfd
 		//printf("Waiting to select...\n");
 		printf("\n> ");
 		fflush(stdout);
@@ -61,7 +65,7 @@ int main(int argc, char **argv)
 				refreshSocket = run_commands(&node, socketCFG_UDP, &node);
 				if(refreshSocket!=-1)
 				{
-					master_socket=refreshSocket;
+					master_socket = refreshSocket;
 				}
 			}
 
@@ -69,7 +73,7 @@ int main(int argc, char **argv)
 			if(FD_ISSET(listenFD, &fds))
 			{
 				printf("Servidor: %d\n",listenFD);
-				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
+				nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
 				read(nodeFD, buffer, 128);
 				if(JR_Message(buffer,&node,nodeFD) == 1)
 				{
@@ -78,7 +82,23 @@ int main(int argc, char **argv)
 				}
 				printf("Finished processing\n");
 			}
-
+			/* Mensagem de desconhecido - caso em que ID pedido ja esta ocupado */
+			if(FD_ISSET(nodeFD, &fds))
+			{
+				if(node.succ_status == 1)
+				{
+					read(nodeFD, buffer, 128);
+					printf("Novo ID: %s",buffer);
+					if(JR_Message(buffer,&node,nodeFD) == 1)
+					{
+						printf("A fechar socket de reenvio!\n");
+						close(nodeFD); // fecha o file descriptor do nó cliente
+						nodeFD = -1;
+					}
+					printf("Finished processing - reenvio\n");
+					node.succ_status = 0;
+				}
+			}
 			/* Mensagem do Predi*/
 			if(FD_ISSET(node.prediFD,&fds))
 			{
@@ -130,7 +150,7 @@ int main(int argc, char **argv)
 			{
 				read(master_socket, buffer, 128);
 				printf("Add Node Funct\n");
-				if(JR_Message(buffer,&node,master_socket) == 1)
+				if(JR_Message(buffer, &node, master_socket) == 1)
 				{
 					printf("A fechar master socket!\n");
 					close(master_socket); // fecha o file descriptor do nó cliente
