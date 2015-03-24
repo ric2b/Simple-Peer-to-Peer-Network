@@ -54,10 +54,11 @@ int Join_Ring(ringStruct* node, socketStruct start)
 		exit(-1);
 	}
 
-	while(startid == node->myID)
+	if(startid == node->myID)
 	{
-	    printf("Can't use identifier %d, please choose a different one: ",node->myID);
-		scanf("%d",&(node->myID));
+	    printf("Can't use identifier %d, please choose a different one and try again\n",node->myID);
+		node->myID = -1;
+		return 1;
 	}
 
 	printf("IP: %s\nPort: %d\n",idIP,startTCP);
@@ -146,10 +147,14 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 	            ringData->starter=0;
 		    }
 		}
-		close(ringData->succiFD); //meter include relativo ao close
-		memset(msg,0,128);
-		sprintf(msg,"CON %d %s %d\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
-		sendTCP(msg, ringData->prediFD);
+		close(ringData->succiFD);
+		if(ringData->prediID != ringData->succiID) // há mais que 2 nós
+		{
+			memset(msg,0,128);
+			sprintf(msg,"CON %d %s %d\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
+			sendTCP(msg, ringData->prediFD);
+		}
+		close(ringData->prediFD);		
 		nodeReset(ringData);
 		return;
 	}

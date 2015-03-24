@@ -206,8 +206,9 @@ int Message_SUCC(ringStruct*node, char* request)
 	}
 	while(dest_ID == node->myID)
 	{
-		printf("Can't use identifier %d, please choose a different one: ",node->myID);
-        scanf("%d",&(node->myID));
+		printf("Can't use identifier %d, please choose a different one and try again\n",node->myID);
+        node->myID = -1;
+        return 1;
 	}
 
 	Succi_Node = setupSocket(dest_IP,dest_Port,'T');
