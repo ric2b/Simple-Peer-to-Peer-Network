@@ -166,6 +166,10 @@ void showNode(ringStruct * ringData)
 	{
 		printf("You don't belong to a ring yet.\n");
 	}
+	else if(ringData->prediID==-1 && ringData->succiID==-1)
+	{
+		printf("Your node with ID %d, is the master and the only node in the ring %d.\n",ringData->myID,ringData->ringID);
+	}
 	else
 		printf("ring: %i predi:%i myID: %i succi: %i\n", ringData->ringID, ringData->prediID,ringData->myID, ringData->succiID);
 	return;
