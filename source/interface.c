@@ -9,7 +9,7 @@
 #include "interface.h"
 #include "ringOps.h"
 
-int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * option)
+int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ringport, char * externalIP, char * option)
 {
 	//bootIP and bootport are the IP adress e UDP port of the starting server
 	strcpy(bootIP,"tejo.tecnico.ulisboa.pt");
@@ -27,7 +27,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 		}
 	}
 
-	while((*option = getopt(argc,argv,"t:i:p:")) != -1) // Checking the various options received on the console application
+	while((*option = getopt(argc,argv,"t:i:p:e:")) != -1) // Checking the various options received on the console application
 	{
 		 switch(* option)
 		 {
@@ -41,6 +41,10 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 
 			case 'p':
 				*bootport = atoi(optarg);
+				break;
+
+			case 'e':
+				strcpy(externalIP, optarg); // se o utilizador quiser usar um IP público
 				break;
 
 			default:

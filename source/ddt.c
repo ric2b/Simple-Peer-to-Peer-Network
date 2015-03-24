@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
 	Node_Initialization(&node);
 
-	check_arguments(argc, argv, bootIP, & bootport, & ringport, & option);
+	check_arguments(argc, argv, bootIP, & bootport, & ringport, node.externalIP, & option);
 
 	listenFD = listenSocket(&ringport);
 	node.myPort = ringport;
