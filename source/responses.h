@@ -11,9 +11,9 @@
 
 int JR_Message(char*,ringStruct*,int);
 
-int Message_ID(ringStruct* node, char* request);
+int Message_ID(ringStruct* node, char* request, int senderSocket);
 
-int Message_NEW(ringStruct* node, char* request);
+int Message_NEW(ringStruct* node, char* request, int senderSocket);
 
 int Message_RSP(ringStruct* node, char* request);
 

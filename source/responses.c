@@ -2,7 +2,7 @@
 
 int FDsocket;
 
-int Message_ID(ringStruct* node,char * request)
+int Message_ID(ringStruct* node,char * request, int senderSocket)
 {
 	char msg[128], cmd[128];
 	int ID;
@@ -15,13 +15,13 @@ int Message_ID(ringStruct* node,char * request)
 
 	if(strcmp(cmd,"ID") == 0)
 	{
-		node->NEWfd = FDsocket;
+		node->NEWfd = senderSocket;
 		memset(msg,0,128);
 		if((node->succiFD == -1 && node->prediFD == -1) || responsability(node->prediID,node->myID,ID))
 		{
 			sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
 			printf("%s",msg);
-			sendTCP(msg, FDsocket);
+			sendTCP(msg, senderSocket);
 			printf("1\n");
 		}
 		else
@@ -40,7 +40,7 @@ int Message_ID(ringStruct* node,char * request)
 	return 1;
 }
 
-int Message_NEW(ringStruct* node, char* request)
+int Message_NEW(ringStruct* node, char* request, int senderSocket)
 {
 	char  cmd[128], msg[128];
 	int  Port, ID;
@@ -59,7 +59,7 @@ int Message_NEW(ringStruct* node, char* request)
 			node->prediID = ID;
 			strcpy(node->prediIP,IP);
 			node->prediPort = Port;
-			node->prediFD = FDsocket;
+			node->prediFD = senderSocket;
 			
 			tmp = setupSocket(IP,Port,'T');
 			node->succiID = ID;
@@ -83,7 +83,7 @@ int Message_NEW(ringStruct* node, char* request)
 				node->prediID = ID;
 				strcpy(node->prediIP,IP);
 				node->prediPort = Port;
-				node->prediFD = FDsocket;
+				node->prediFD = senderSocket;
 				printf("3\n");
 			}
 			else
@@ -273,12 +273,12 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	sscanf(request,"%s",cmd);
 	if(strcmp(cmd,"NEW") == 0)
 	{
-		tmp = Message_NEW(node,request);
+		tmp = Message_NEW(node,request,nodeFD);
 		return (tmp == 1) ? tmp : 0;
 	}
 	if(strcmp(cmd,"ID") == 0)
 	{
-		tmp = Message_ID(node,request);
+		tmp = Message_ID(node,request,nodeFD);
 		return (tmp == 1) ? tmp : 0;
 	}
 	if(strcmp(cmd,"RSP") == 0)
