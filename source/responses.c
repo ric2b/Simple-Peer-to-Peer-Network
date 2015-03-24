@@ -89,7 +89,7 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 			else
 			{
 				memset(msg,0,128);
-				sprintf(msg,"CON %d %s %d",ID, IP, Port);
+				sprintf(msg,"CON %d %s %d\n",ID, IP, Port);
 				sendTCP(msg,node->prediFD);
 				close(node->prediFD);
 				node->prediID = ID;
@@ -258,9 +258,8 @@ int Message_CON(ringStruct* node, char* request)
 
 int Message_BOOT(ringStruct* node, char* request)
 {
-        if(strcmp(request,"BOOT")==0)
-                node->starter=1;
-        return 0;
+    node->starter=1;
+    return 0;
 }
 
 int JR_Message(char* request,ringStruct* node, int nodeFD)
@@ -300,6 +299,11 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	{
 		tmp = Message_CON(node,request);
 		return (tmp == 1) ? tmp : 0;
+	}
+	if(strcmp(cmd,"BOOT") == 0)
+	{
+		tmp = Message_BOOT(node,request);
+		return (tmp == 0) ? tmp : 1;
 	}
 	return 1;
 }

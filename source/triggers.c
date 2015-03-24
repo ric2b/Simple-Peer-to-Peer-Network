@@ -111,29 +111,29 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 		printf("You already don't belong to a ring.\n");
 		return;
 	}
-	else if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
-	{
-	    sprintf(msg,"UNR %i\n",ringData->ringID);
-	    if(sendUDP(msg,socketCFG) == -1)
-	        return;
-	    if(recvUDP(buffer,socketCFG) == -1)
-	        return;
-	    else if(strcmp(buffer,"OK")==0)
-	    {
-            ringData->ringID = -1;
-            ringData->myID = -1;
-            ringData->starter=0;
-			printf("Your node left the ring.\n");
-            return;
-        }
-    	else
-			return;
+	else 
+		if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
+		{
+		    sprintf(msg,"UNR %d\n",ringData->ringID);
+		    if(sendUDP(msg,socketCFG) == -1)
+		        return;
+		    if(recvUDP(buffer,socketCFG) == -1)
+		        return;
+	    else 
+	    	if(strcmp(buffer,"OK")==0)
+		    {
+	            ringData->ringID = -1;
+	            ringData->myID = -1;
+	            ringData->starter=0;
+				printf("Your node left the ring.\n");
+	            return;
+	        }
 	}
 	else
 	{
 		if(ringData->starter == 1) // Test to check if the current node is the starter node. If it is, put the next node as the starter one
 		{
-		    sprintf(msg,"REG %i %i %s %i\n", ringData->ringID, ringData->succiID, ringData->succiIP, ringData->succiPort);
+		    sprintf(msg,"REG %d %d %s %d\n", ringData->ringID, ringData->succiID, ringData->succiIP, ringData->succiPort);
 		    if(sendUDP(msg,socketCFG) == -1)
 		        return;
 		    if(recvUDP(buffer,socketCFG) == -1)
@@ -147,8 +147,8 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 		    }
 		}
 		close(ringData->succiFD); //meter include relativo ao close
-		memset(msg,0,strlen(msg));
-		sprintf(msg,"CON %i %s %i\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
+		memset(msg,0,128);
+		sprintf(msg,"CON %d %s %d\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
 		sendTCP(msg, ringData->prediFD);
 		nodeReset(ringData);
 		return;
