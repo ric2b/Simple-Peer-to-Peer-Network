@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <net/if.h>
 
 #include "structs.h"
 #include "network.h"
@@ -133,9 +134,8 @@ int aceita_cliente(int server_socket, char * remote_address)
 
 void GetIP(ringStruct* node)
 {
-   /* char addr[128];
+    char addr[128];
     
-    char addressOutputBuffer[INET6_ADDRSTRLEN];
     struct ifaddrs *interfaceArray;
     if(getifaddrs(&interfaceArray) != 0)
     {
@@ -149,42 +149,15 @@ void GetIP(ringStruct* node)
     
         if(aux->ifa_addr->sa_family == AF_INET && strcmp(aux->ifa_name, "lo") != 0)
         {
-            strcpy(addr, inet_ntop(aux->ifa_addr->sa_family, aux, addressOutputBuffer, sizeof(addressOutputBuffer))); 
-            printf("Self Address on %s:  %s \n",aux->ifa_name, addr);
-            break;
+            if (getnameinfo(aux->ifa_addr, sizeof(struct sockaddr_in), addr, 128, NULL, 0, NI_NUMERICHOST) == 0)
+            {
+                printf("Self Address on %s:  %s \n",aux->ifa_name, addr);
+                strcpy(node->myIP, addr);
+                break;
+            }           
         }
-    }
-    strcpy(node->myIP, addr);
-
+    }    
     freeifaddrs(interfaceArray);
-   */ 
-
-    char localmachine[128];
-    struct hostent *h;
-    struct in_addr *a;
-
-    if(gethostname(localmachine,128) == -1)
-    {
-      printf("\nError during hostname query\n\n");
-      exit(1);
-    }
-    if((h=gethostbyname(localmachine))==NULL)
-    {
-      printf("\nError during hostname query\n\n");
-      exit(1);//error
-    }
-
-    printf("Hostname: %s\n",localmachine);
-  
-    for (int i=0; h->h_addr_list[i] != 0; i++)
-    {
-        a = (struct in_addr*)h->h_addr_list[i];
-        if((strcmp(inet_ntoa(*a), "127.0.0.1") != 0) && (strcmp(inet_ntoa(*a), "127.0.1.1") != 0)) break;
-
-    }
-    printf("internet address: %s (%08lX)\n", inet_ntoa(*a), (long unsigned int)ntohl(a->s_addr));
-    strcpy(node->myIP,inet_ntoa(*a));
-
 }
 
 /* --------------------------< Tejo Communication >--------------------------------- */
