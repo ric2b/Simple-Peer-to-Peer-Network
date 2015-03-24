@@ -157,7 +157,12 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 
 void showNode(ringStruct * ringData)
 {
-	printf("ring: %i predi:%i myID: %i succi: %i\n", ringData->ringID, ringData->prediID,ringData->myID, ringData->succiID);
+	if(ringData->ringID==-1)
+	{
+		printf("You don't belong to a ring yet.\n");
+	}
+	else
+		printf("ring: %i predi:%i myID: %i succi: %i\n", ringData->ringID, ringData->prediID,ringData->myID, ringData->succiID);
 	return;
 }
 
