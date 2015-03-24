@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 		FD_SET(STDIN, &fds);  // stdin
 		if (node.prediFD != -1) FD_SET(node.prediFD,&fds);
 		if (node.succiFD != -1) FD_SET(node.succiFD,&fds);
-		FD_SET(master_socket,&fds);
+		if (master_socket != -1) FD_SET(master_socket,&fds);
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 		maxfd = (node.prediFD > maxfd) ? node.prediFD : maxfd; //calcular maxfd
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
@@ -134,6 +134,7 @@ int main(int argc, char **argv)
 				{
 					printf("A fechar master socket!\n");
 					close(master_socket); // fecha o file descriptor do nó cliente
+					master_socket = -1;
 				}
 				printf("Finished processing Add Node\n");
 
