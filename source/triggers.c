@@ -107,21 +107,15 @@ void searchNode(ringStruct * ringData, int k)
 void removeNode(ringStruct * ringData, socketStruct socketCFG)
 {
 	char msg[128], buffer[128];
-	if(ringData->myID ==-1)
-	{
-		printf("You already don't belong to a ring.\n");
-		return;
-	}
-	else 
-		if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
+
+	if(ringData->succiID == -1 && ringData->prediID == -1) // If the node is unique remove the ring from the server
 		{
 		    sprintf(msg,"UNR %d\n",ringData->ringID);
 		    if(sendUDP(msg,socketCFG) == -1)
 		        return;
 		    if(recvUDP(buffer,socketCFG) == -1)
 		        return;
-	    else 
-	    	if(strcmp(buffer,"OK")==0)
+	    	else if(strcmp(buffer,"OK")==0)
 		    {
 	            ringData->ringID = -1;
 	            ringData->myID = -1;
@@ -129,7 +123,7 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 				printf("Your node left the ring.\n");
 	            return;
 	        }
-	}
+		}
 	else
 	{
 		if(ringData->starter == 1) // Test to check if the current node is the starter node. If it is, put the next node as the starter one
@@ -154,7 +148,7 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 			sprintf(msg,"CON %d %s %d\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
 			sendTCP(msg, ringData->prediFD);
 		}
-		close(ringData->prediFD);		
+		close(ringData->prediFD);
 		nodeReset(ringData);
 		return;
 	}
@@ -169,6 +163,18 @@ void showNode(ringStruct * ringData)
 	else if(ringData->prediID==-1 && ringData->succiID==-1)
 	{
 		printf("Your node with ID %d, is the master and the only node in the ring %d.\n",ringData->myID,ringData->ringID);
+	}
+	else if(ringData->starter==1 && ringData->prediID==ringData->succiID)
+	{
+		printf("Your node of ID %d is the master of ring %d which has only one other node on ID %d.\n",ringData->myID, ringData->ringID, ringData->prediID);
+	}
+	else if(ringData->starter==0 && ringData->prediID==ringData->succiID)
+	{
+		printf("Your node of ID %d is on ring %d which has only one other node on ID %d.\n",ringData->myID, ringData->ringID, ringData->prediID);
+	}
+	else if(ringData->starter==1)
+	{
+		printf("Your node of ID %d is the master of ring %d with predi ID %d and succi ID %d.\n",ringData->myID, ringData->ringID, ringData->prediID, ringData->succiID);
 	}
 	else
 		printf("ring: %i predi:%i myID: %i succi: %i\n", ringData->ringID, ringData->prediID,ringData->myID, ringData->succiID);

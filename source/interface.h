@@ -7,6 +7,6 @@
 
 int check_arguments(int , char **, char* , int * , int* , char * );
 
-int run_commands(ringStruct* , socketStruct, ringStruct *);
+int run_commands(ringStruct* , socketStruct);
 // nao e necessario meter o nome das variaveis apenas o tipo
 #endif

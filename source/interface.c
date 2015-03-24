@@ -58,7 +58,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 	return 0;
 }
 
-int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
+int run_commands(ringStruct* node, socketStruct socket)
 {
 	int qryNode;
 	char userInput[64], cmd[20];
@@ -71,12 +71,20 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 
 	if(strcmp(cmd,"exit") == 0)
 	{
+		if(node->myID!=-1)
+			removeNode(node,socket);
 		printf("You have closed the application.\n\n");
 		exit(0);
 	}
 	else if(strcmp(cmd,"leave") == 0)
 	{
-		printf("Left ring %d\n", ringData->ringID);
+		if(node->myID==-1)
+		{
+			printf("You already don't belong to a ring.\n");
+			return -1;
+		}
+		else
+			printf("Your node that had an ID %d left the ring %d.\n", node->myID,node->ringID);
 		removeNode(node,socket);
 		return -1;
 	}
@@ -102,7 +110,7 @@ int run_commands(ringStruct* node, socketStruct socket, ringStruct * ringData)
 
 		else if((node->ringID) > 0 && (node->myID) > -1 && (node->myID) < 64 && (node->succiID) > -1 && (node->succiID) < 64 && (node->succiPort) > -1)
 		{
-			joinRing_KnownSucci(ringData, node->succiID, node->succiIP, node->succiPort);
+			joinRing_KnownSucci(node, node->succiID, node->succiIP, node->succiPort);
 			printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
 			return -1;
   		}

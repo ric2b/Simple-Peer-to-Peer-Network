@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 			/* Comando do Utilizador*/
 			if(FD_ISSET(STDIN, &fds))
 			{
-				refreshSocket = run_commands(&node, socketCFG_UDP, &node);
+				refreshSocket = run_commands(&node, socketCFG_UDP);
 				if(refreshSocket!=-1)
 				{
 					master_socket=refreshSocket;
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 						printf("A fechar succi socket!\n");
 						close(node.succiFD); // fecha o file descriptor do nó cliente
 					}
-					printf("Finished processing succi\n");                  
+					printf("Finished processing succi\n");
 				}
 			}
 
