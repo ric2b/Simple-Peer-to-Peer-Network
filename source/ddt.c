@@ -41,8 +41,8 @@ int main(int argc, char **argv)
 		FD_ZERO(&fds);
 		FD_SET(listenFD, &fds); //adiciona o socket de escuta a fds
 		FD_SET(STDIN, &fds);  // stdin
-		FD_SET(node.prediFD,&fds);
-		FD_SET(node.succiFD,&fds);
+		if (node.prediFD != -1) FD_SET(node.prediFD,&fds);
+		if (node.succiFD != -1) FD_SET(node.succiFD,&fds);
 		FD_SET(master_socket,&fds);
 		maxfd = (listenFD > STDIN) ? listenFD : STDIN; //calcular maxfd
 		maxfd = (node.prediFD > maxfd) ? node.prediFD : maxfd; //calcular maxfd

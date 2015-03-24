@@ -5,7 +5,9 @@
 #include <fcntl.h>
 #include <assert.h>
 
+#include "structs.h"
 #include "network.h"
+#include "ringOps.h"
 
 
 /* --------------------------< UDP >--------------------------------- */
@@ -17,7 +19,22 @@ int sendUDP(char * msg, socketStruct socketCFG)
 
 int recvUDP(char * buffer,socketStruct socketCFG)
 {
+  
   memset(buffer,0,128);
+
+  /*
+  int i;
+  for(i=0; i<128; i++)
+  {
+    recvfrom(socketCFG.socketFD,buffer + i,1,0,(struct sockaddr*)socketCFG.addr,&(socketCFG.addrlen));
+    if(*(buffer + i) == '\n')
+    {
+        return 0; // acabou de receber uma mensagem 
+    }
+  }
+  return 1; // aviso de que a mensagem não chegou completa
+  */ 
+  
   return recvfrom(socketCFG.socketFD,buffer,128,0,(struct sockaddr*)socketCFG.addr,&(socketCFG.addrlen));
 }
 
@@ -41,24 +58,21 @@ void sendTCP(char * msg, int socket)
 
 void recvTCP(char * buffer, socketStruct socketCFG)
 {
-  int nreceived;
-  int nleft = 128;
+  int i, nreceived;
 
   memset(buffer,0,128);
-  while(nleft > 0)
+  for(i=0; i<128; i++)
   {
-      nreceived = read(socketCFG.socketFD, buffer, nleft);
-      nleft -= nreceived;
-      buffer += nreceived;
-      if(nreceived == -1)
-      {
-          printf("erro a receber com sendTCP\n");
-          exit(-1);
-      }
-      else if(nreceived == 0) // acabou de receber
-      {
-          break;
-      }
+    nreceived = read(socketCFG.socketFD, buffer + i, 1);
+    if(nreceived == -1)
+    {
+      printf("erro a receber com sendTCP\n");
+      exit(-1);
+    }
+    if(nreceived == 0 || (*(buffer + i) == '\n')) // acabou de receber
+    {
+      return ;
+    }
   }
 }
 
@@ -115,6 +129,62 @@ int aceita_cliente(int server_socket, char * remote_address)
   }
   sprintf(remote_address, "%s", inet_ntoa(client_addr.sin_addr));
   return client_socket; // função devolve o file descriptor da socket do cliente
+}
+
+void GetIP(ringStruct* node)
+{
+   /* char addr[128];
+    
+    char addressOutputBuffer[INET6_ADDRSTRLEN];
+    struct ifaddrs *interfaceArray;
+    if(getifaddrs(&interfaceArray) != 0)
+    {
+        printf("erro na getifaddrs\n");
+        exit(-1);
+    }
+    
+    struct ifaddrs * aux;   
+    for(aux = interfaceArray; aux != NULL; aux = aux->ifa_next)
+    {
+    
+        if(aux->ifa_addr->sa_family == AF_INET && strcmp(aux->ifa_name, "lo") != 0)
+        {
+            strcpy(addr, inet_ntop(aux->ifa_addr->sa_family, aux, addressOutputBuffer, sizeof(addressOutputBuffer))); 
+            printf("Self Address on %s:  %s \n",aux->ifa_name, addr);
+            break;
+        }
+    }
+    strcpy(node->myIP, addr);
+
+    freeifaddrs(interfaceArray);
+   */ 
+
+    char localmachine[128];
+    struct hostent *h;
+    struct in_addr *a;
+
+    if(gethostname(localmachine,128) == -1)
+    {
+      printf("\nError during hostname query\n\n");
+      exit(1);
+    }
+    if((h=gethostbyname(localmachine))==NULL)
+    {
+      printf("\nError during hostname query\n\n");
+      exit(1);//error
+    }
+
+    printf("Hostname: %s\n",localmachine);
+  
+    for (int i=0; h->h_addr_list[i] != 0; i++)
+    {
+        a = (struct in_addr*)h->h_addr_list[i];
+        if((strcmp(inet_ntoa(*a), "127.0.0.1") != 0) && (strcmp(inet_ntoa(*a), "127.0.1.1") != 0)) break;
+
+    }
+    printf("internet address: %s (%08lX)\n", inet_ntoa(*a), (long unsigned int)ntohl(a->s_addr));
+    strcpy(node->myIP,inet_ntoa(*a));
+
 }
 
 /* --------------------------< Tejo Communication >--------------------------------- */

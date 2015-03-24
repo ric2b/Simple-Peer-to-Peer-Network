@@ -5,8 +5,10 @@
 //
 #include <ifaddrs.h>
 //
+#include "structs.h"
 #include "ringOps.h"
 #include "network.h"
+
 
 
 void nodeReset(ringStruct * node)
@@ -22,28 +24,6 @@ void nodeReset(ringStruct * node)
     node->prediPort = -1;
     node->prediFD = -1;
     node->search_status = 0;
-}
-
-void GetIP(ringStruct* node)
-{
-	char localmachine[128];
-	struct hostent *h;
-	struct in_addr *a;
-
-	if(gethostname(localmachine,128) == -1)
-	{
-		printf("\nError during hostname query\n\n");
-		exit(1);
-	}
-
-	if((h=gethostbyname(localmachine))==NULL)
-	{
-		exit(1);//error
-	}
-
-	printf("Hostname: %s\n",localmachine);
-	a = (struct in_addr*)h->h_addr_list[0];
-	strcpy(node->myIP,inet_ntoa(*a));
 }
 
 void Node_Initialization(ringStruct* node)

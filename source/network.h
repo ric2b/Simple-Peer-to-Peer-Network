@@ -6,17 +6,11 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <net/if.h>
+
+#include "structs.h"
 
 #define MAX_PENDING 10
-
-
-typedef struct socketStruct
-{
-  int socketFD;
-  struct sockaddr_in * addr;
-  socklen_t addrlen;
-} socketStruct;
-
 
 int sendUDP(char * msg, socketStruct socketCFG);
 int recvUDP(char * buffer,socketStruct socketCFG);
@@ -27,6 +21,7 @@ void recvTCP(char * ,socketStruct );
 
 int listenSocket(int* );
 int aceita_cliente(int , char * );
+void GetIP(ringStruct* node);
 
 socketStruct setupSocket(char * , int , char );
 void closeSocket(socketStruct );
