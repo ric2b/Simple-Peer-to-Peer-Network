@@ -54,13 +54,13 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 
 	if(strcmp(cmd,"NEW") == 0)
 	{
-		if(node->succiID == -1 && node->prediFD == -1)
+		if(node->succiID == -1 && node->prediID == -1)
 		{
 			node->prediID = ID;
 			strcpy(node->prediIP,IP);
 			node->prediPort = Port;
 			node->prediFD = senderSocket;
-			
+
 			tmp = setupSocket(IP,Port,'T');
 			node->succiID = ID;
 			strcpy(node->succiIP,IP);
@@ -78,7 +78,7 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 		}
 		else
 		{
-			if(node->prediFD == -1)
+			if(node->prediID == -1)
 			{
 				node->prediID = ID;
 				strcpy(node->prediIP,IP);
@@ -118,7 +118,7 @@ int Message_RSP(ringStruct* node, char* request)
 		printf("Bad Message (RSP)\n");
 		return 1;
 	}
-	
+
 	if(node->search_status == 0)
 	{
 		if(Master == node->myID)
@@ -221,7 +221,7 @@ int Message_SUCC(ringStruct*node, char* request)
 	memset(msg,0,128);
 	sprintf(msg,"NEW %d %s %d\n",node->myID,node->myIP,node->myPort);
 	sendTCP(msg,Succi_Node.socketFD);
-	
+
 	printf("9\n");
 	printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
 	printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);

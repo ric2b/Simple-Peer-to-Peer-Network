@@ -64,8 +64,8 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 
 int run_commands(ringStruct* node, socketStruct socket)
 {
-	int qryNode;
-	char userInput[64], cmd[20];
+	int qryNode,joinargs, myID, ringID,succiID,succiPort;
+	char userInput[64], cmd[20], succiIP[20];
 
 	memset(userInput, 0, 64);
 	strcpy(cmd,"help"); //default to help
@@ -106,21 +106,34 @@ int run_commands(ringStruct* node, socketStruct socket)
    	}
 	else if(strcmp(cmd,"join") == 0)
 	{
-		if(sscanf(userInput,"%s %i %i %i %s %i",cmd, &(node->ringID), &(node->myID), &(node->succiID), node->succiIP, &(node->succiPort)) ==3 && node->myID >-1 && node->myID < 64)
+		joinargs=sscanf(userInput,"%s %i %i %i %s %i",cmd, &ringID, &myID, &succiID, succiIP, &succiPort);
+		if(node->myID!=-1)
 		{
+			printf("Your node already belongs to a ring.\n");
+			return -1;
+		}
+		else if(joinargs == 3 && myID >-1 && myID < 64 && ringID > 0)
+		{
+			node->myID=myID;
+			node->ringID=ringID;
 			printf("Joining ring number %i with an identifier %i.\n", (node->ringID), (node->myID));
 			return Join_Ring(node, socket);
 		}
-
-		else if((node->ringID) > 0 && (node->myID) > -1 && (node->myID) < 64 && (node->succiID) > -1 && (node->succiID) < 64 && (node->succiPort) > -1)
+		else if(joinargs==6 && ringID > 0 && myID > -1 && myID < 64 && succiID > -1 && succiID < 64 && succiPort > -1)
 		{
+			node->myID=myID;
+			node->ringID=ringID;
+			node->succiID=succiID;
+			memset(node->succiIP,0,strlen(node->succiIP));
+			strcpy(node->succiIP,succiIP);
+			node->succiPort=succiPort;
 			joinRing_KnownSucci(node, node->succiID, node->succiIP, node->succiPort);
-			printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
+			printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
 			return -1;
   		}
 		else
 		{
-         		printf("Your joining command doesn't have the correct arguments.\n\n");
+         		printf("Your joining command doesn't have the correct arguments.\n");
          		nodeReset(node);
 			return -1;
   		}

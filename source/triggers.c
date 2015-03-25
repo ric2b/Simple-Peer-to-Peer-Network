@@ -177,12 +177,13 @@ void showNode(ringStruct * ringData)
 		printf("Your node of ID %d is the master of ring %d with predi ID %d and succi ID %d.\n",ringData->myID, ringData->ringID, ringData->prediID, ringData->succiID);
 	}
 	else
-		printf("ring: %i predi:%i myID: %i succi: %i\n", ringData->ringID, ringData->prediID,ringData->myID, ringData->succiID);
+		printf("ring: %i predi:%i myID: %i succi: %i\n",ringData->ringID, ringData->prediID,ringData->myID, ringData->succiID);
 	return;
 }
 
 int joinRing_KnownSucci(ringStruct * ringData, int succiID, char * succiIP, int succiPort)
 {
+	ringData->starter=0;
   	ringData->succiID = succiID;
   	strcpy(ringData->succiIP, succiIP);
   	ringData->succiPort = succiPort;
