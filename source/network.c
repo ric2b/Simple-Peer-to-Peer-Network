@@ -15,19 +15,50 @@
 
 int sendUDP(char * msg, socketStruct socketCFG)
 {
-  return sendto(socketCFG.socketFD,msg, strlen(msg),0,(struct sockaddr*)socketCFG.addr,socketCFG.addrlen);
+    int tries = 5;
+    int returnValue;
+    while(tries > 0)
+    {
+        returnValue = sendto(socketCFG.socketFD,msg, strlen(msg),0,(struct sockaddr*)socketCFG.addr,socketCFG.addrlen);
+        if (returnValue == -1)
+        {
+            printf("error sending with sendUDP\n");
+            tries--;
+        }
+        else 
+            return returnValue;
+    }
+    printf("too many failed attempts, exiting\n");
+    closeSocket(socketCFG);
+    exit(-1);
 }
 
 int recvUDP(char * buffer,socketStruct socketCFG)
 {
-  memset(buffer,0,128);
-  return recvfrom(socketCFG.socketFD,buffer,128,0,(struct sockaddr*)socketCFG.addr,&(socketCFG.addrlen));
+    int tries = 5;
+    int returnValue;
+    while(tries > 0)
+    {
+        memset(buffer,0,128);
+        returnValue = recvfrom(socketCFG.socketFD,buffer,128,0,(struct sockaddr*)socketCFG.addr,&(socketCFG.addrlen));
+        if (returnValue == -1)
+        {
+            printf("error sending with sendUDP\n");
+            tries--;
+        }
+        else 
+            return returnValue;
+    }
+    printf("too many failed attempts, exiting\n");
+    closeSocket(socketCFG);
+    exit(-1);
 }
 
 /* --------------------------< TCP >--------------------------------- */
 void sendTCP(char * msg, int socket)
 {
   int nwritten;
+  int tries = 5;
   int nleft = strlen(msg);
   while(nleft > 0)
   {
@@ -37,7 +68,16 @@ void sendTCP(char * msg, int socket)
 
     if(nwritten == -1)
     {
-      printf("erro a enviar com sendTCP\n");
+        if(tries > 0)
+        {
+            printf("error sending with sendTCP\n");
+            tries--;
+        }
+        else
+        {
+            printf("too many failed attempts, exiting\n");
+            exit(-1);
+        }      
     }
   }
 }
@@ -45,6 +85,7 @@ void sendTCP(char * msg, int socket)
 void recvTCP(char * buffer, socketStruct socketCFG)
 {
   int i, nreceived;
+  int tries = 5;
 
   memset(buffer,0,128);
   for(i=0; i<128; i++)
@@ -52,8 +93,16 @@ void recvTCP(char * buffer, socketStruct socketCFG)
     nreceived = read(socketCFG.socketFD, buffer + i, 1);
     if(nreceived == -1)
     {
-      printf("erro a receber com sendTCP\n");
-      exit(-1);
+        if(tries > 0)
+        {
+            printf("error receiving with recvTCP\n");
+            tries--;
+        }
+        else
+        {
+            printf("too many failed attempts, exiting\n");
+            exit(-1);
+        }
     }
     if(nreceived == 0 || (*(buffer + i) == '\n')) // acabou de receber
     {
@@ -215,7 +264,7 @@ socketStruct setupSocket(char * destinatario, int port, char protocol)
     int n = connect(socketFD,(struct sockaddr*)addr, sizeof(*addr));
     if(n==-1)
     {
-      printf("Erro no connect a %c\n", protocol);
+      printf("Error connecting with %s\n", destinatario);
       exit(1);
     }
     free(socketCFG.addr); //não é usado nas ligações TCP
