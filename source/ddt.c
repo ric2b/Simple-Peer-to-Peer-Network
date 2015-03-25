@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "interface.h"
-//#include "network.h"
-#include "ringOps.h"
 #include "responses.h"
 
 #define STDIN 0
@@ -32,6 +31,8 @@ int main(int argc, char **argv)
 
 	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
 	GetIP(&node);
+
+	signal(SIGPIPE, SIG_IGN); // ignorar sigpipes
 
 	fd_set fds; // isto são tretas para o select
 	int maxfd;
@@ -84,11 +85,13 @@ int main(int argc, char **argv)
 			{
 				if(read(node.prediFD, buffer, 128) == 0)
 				{
+					close(node.prediFD);
 					node.prediID = -1;
 					strcpy(node.prediIP,"\0");
 					node.prediPort = -1;
 					node.prediFD = -1;
-					printf("connection with predi was closed\n");
+					printf("\n[SYSTEM]: connection with predi was closed\n");
+					fflush(stdout);
 				}
 				else
 				{
@@ -107,11 +110,13 @@ int main(int argc, char **argv)
 			{
 				if(read(node.succiFD, buffer, 128) == 0)
 				{
+					close(node.succiFD);
 					node.succiID = -1;
 					strcpy(node.succiIP,"\0");
 					node.succiPort = -1;
 					node.succiFD = -1;
-					printf("connection with succi was closed\n");
+					printf("\n[SYSTEM]: connection with succi was closed\n");
+					fflush(stdout);
 				}
 				else
 				{

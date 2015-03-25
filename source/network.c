@@ -20,22 +20,7 @@ int sendUDP(char * msg, socketStruct socketCFG)
 
 int recvUDP(char * buffer,socketStruct socketCFG)
 {
-  
   memset(buffer,0,128);
-
-  /*
-  int i;
-  for(i=0; i<128; i++)
-  {
-    recvfrom(socketCFG.socketFD,buffer + i,1,0,(struct sockaddr*)socketCFG.addr,&(socketCFG.addrlen));
-    if(*(buffer + i) == '\n')
-    {
-        return 0; // acabou de receber uma mensagem 
-    }
-  }
-  return 1; // aviso de que a mensagem não chegou completa
-  */ 
-  
   return recvfrom(socketCFG.socketFD,buffer,128,0,(struct sockaddr*)socketCFG.addr,&(socketCFG.addrlen));
 }
 

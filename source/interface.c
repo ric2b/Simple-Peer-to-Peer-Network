@@ -4,8 +4,6 @@
 #include <getopt.h>
 #include <unistd.h>
 
-
-//#include "network.h"
 #include "interface.h"
 #include "ringOps.h"
 
@@ -21,7 +19,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 	{
 		if((argc % 2 == 0) || (argc > 7)  || (argc <= 1))
 		{
-			printf("\nThe program doesn't have enough arguments or it has more arguments than it can handle.\n\n");
+			printf("\nProgram called with incorrect arguments.\n");
 			printf("Invoke the program as the following: ./ddt -t ringport -i bootIP -p bootport\n\n");
 			exit(1);
 		}
@@ -78,19 +76,20 @@ int run_commands(ringStruct* node, socketStruct socket)
 		if(node->myID!=-1)
 			removeNode(node,socket);
 		printf("You have closed the application.\n\n");
+		closeSocket(socket);
 		exit(0);
 	}
 	else if(strcmp(cmd,"leave") == 0)
 	{
 		if(node->myID==-1)
 		{
-			printf("You already don't belong to a ring.\n");
+			printf("Node is already not connected to a ring.\n");
 			return -1;
 		}
 		else
-			printf("Your node that had an ID %d left the ring %d.\n", node->myID,node->ringID);
-		removeNode(node,socket);
-		return -1;
+			printf("This node (with ID %d) left ring %d.\n", node->myID,node->ringID);
+			removeNode(node,socket);
+			return -1;
 	}
 	else if(strcmp(cmd,"show") == 0)
 	{
@@ -109,7 +108,7 @@ int run_commands(ringStruct* node, socketStruct socket)
 		joinargs=sscanf(userInput,"%s %i %i %i %s %i",cmd, &ringID, &myID, &succiID, succiIP, &succiPort);
 		if(node->myID!=-1)
 		{
-			printf("Your node already belongs to a ring.\n");
+			printf("Node already connected to a ring.\n");
 			return -1;
 		}
 		else if(joinargs == 3 && myID >-1 && myID < 64 && ringID > 0)
@@ -133,7 +132,7 @@ int run_commands(ringStruct* node, socketStruct socket)
   		}
 		else
 		{
-         		printf("Your joining command doesn't have the correct arguments.\n");
+         		printf("Your join command doesn't have the correct arguments.\n");
          		nodeReset(node);
 			return -1;
   		}
