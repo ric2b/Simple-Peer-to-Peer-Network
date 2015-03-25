@@ -158,26 +158,19 @@ void showNode(ringStruct * ringData)
 {
 	if(ringData->ringID==-1)
 	{
-		printf("You don't belong to a ring yet.\n");
-	}
-	else if(ringData->prediID==-1 && ringData->succiID==-1)
-	{
-		printf("Your node with ID %d, is the master and the only node in the ring %d.\n",ringData->myID,ringData->ringID);
-	}
-	else if(ringData->starter==1 && ringData->prediID==ringData->succiID)
-	{
-		printf("Your node of ID %d is the master of ring %d which has only one other node on ID %d.\n",ringData->myID, ringData->ringID, ringData->prediID);
-	}
-	else if(ringData->starter==0 && ringData->prediID==ringData->succiID)
-	{
-		printf("Your node of ID %d is on ring %d which has only one other node on ID %d.\n",ringData->myID, ringData->ringID, ringData->prediID);
-	}
-	else if(ringData->starter==1)
-	{
-		printf("Your node of ID %d is the master of ring %d with predi ID %d and succi ID %d.\n",ringData->myID, ringData->ringID, ringData->prediID, ringData->succiID);
+		printf("Not connected to a ring.\n");
 	}
 	else
-		printf("ring: %i predi:%i myID: %i succi: %i\n",ringData->ringID, ringData->prediID,ringData->myID, ringData->succiID);
+	{
+		printf("ring: %i predi:", ringData->ringID);
+		(ringData->prediID == -1) ? printf("None ") : printf("%i ", ringData->prediID);
+		printf("myID:");
+		(ringData->myID == -1) ? printf("None ") : printf("%i ", ringData->myID);
+		printf("succi:");
+		(ringData->succiID == -1) ? printf("None.") : printf("%i.", ringData->succiID);
+		if(ringData->starter == 1) printf(" Your node is the started node of the ring.");
+		printf("\n");
+	}
 	return;
 }
 
