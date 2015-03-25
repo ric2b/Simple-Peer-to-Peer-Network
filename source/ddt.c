@@ -9,6 +9,13 @@
 
 #define STDIN 0
 
+int keepRunning = 1;
+
+void intHandler()
+{
+	keepRunning = 0;
+}
+
 int main(int argc, char **argv)
 {
 	char    bootIP[1024];
@@ -33,10 +40,11 @@ int main(int argc, char **argv)
 	GetIP(&node);
 
 	signal(SIGPIPE, SIG_IGN); // ignorar sigpipes
+	signal(SIGINT, intHandler);
 
 	fd_set fds; // isto são tretas para o select
 	int maxfd;
-	while(1)
+	while(keepRunning)
 	{   //bloqueia no select até haver algo para ler num dos sockets que estão em fds
 
 		FD_ZERO(&fds);
@@ -146,5 +154,10 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-  exit(0);
+
+	if(node.myID!=-1)
+		removeNode(&node, socketCFG_UDP);
+	printf("\nYou have closed the application.\n\n");
+	closeSocket(socketCFG_UDP);
+  	exit(0);
 }
