@@ -218,6 +218,7 @@ socketStruct setupSocket(char * destinatario, int port, char protocol)
       printf("Erro no connect a %c\n", protocol);
       exit(1);
     }
+    free(socketCFG.addr); //não é usado nas ligações TCP
   }
 
   return socketCFG;
