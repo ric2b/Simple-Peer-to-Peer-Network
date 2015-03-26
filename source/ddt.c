@@ -6,17 +6,22 @@
 
 #include "interface.h"
 #include "responses.h"
+#include "network.h"
 #include "print_messages.h"
 
 #define STDIN 0
+#define timeout 7
 
 int keepRunning = 1;
+int startTimer = 0;
+int brokenLink = 0;
 int DEBUG_MODE = 0;
 
 void intHandler()
 {
 	keepRunning = 0;
 }
+
 
 int main(int argc, char **argv)
 {
@@ -28,6 +33,7 @@ int main(int argc, char **argv)
 	int     listenFD = 8080;
 	int     master_socket = -1;
 	int     refreshSocket = -1;
+	int 	readyToRead;
 	socketStruct socketCFG_UDP;
 	ringStruct node;
 
@@ -43,6 +49,9 @@ int main(int argc, char **argv)
 
 	signal(SIGPIPE, SIG_IGN); // ignorar sigpipes
 	signal(SIGINT, intHandler);
+
+	struct timeval tv = {timeout, 0}; // to use select as a timer
+	struct timeval * timer;
 
 	fd_set fds; // isto são tretas para o select
 	int maxfd;
@@ -60,12 +69,24 @@ int main(int argc, char **argv)
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
 		maxfd = (master_socket > maxfd) ? master_socket : maxfd; //calcular maxfd
 		//printf("Waiting to select...\n");
+		if(startTimer != 0) // suspicion of broken ring
+		{
+			timer = &tv;
+		}
+		else timer = NULL;
+
 		printf("\n> ");
 		fflush(stdout);
-		if (select(maxfd+1, &fds, NULL, NULL, NULL) > 0)
+		readyToRead = select(maxfd+1, &fds, NULL, NULL, timer);
+		
+		if(readyToRead <= 0) // timed out
+		{
+			searchNode(&node, startTimer);
+			startTimer = 0;
+		}
+		else
 		{
 			memset(buffer,0,128);
-
 			/* Comando do Utilizador*/
 			if(FD_ISSET(STDIN, &fds))
 			{
@@ -74,78 +95,80 @@ int main(int argc, char **argv)
 					master_socket=refreshSocket;
 			}
 
-			/* Mensagem de desconhecido */
-			if(FD_ISSET(listenFD, &fds))
-			{
-				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
-				read(nodeFD, buffer, 128);
-				if(JR_Message(buffer,&node,nodeFD) == 1)
+				/* Mensagem de desconhecido */
+				if(FD_ISSET(listenFD, &fds))
 				{
-					printf("A fechar socket!\n");
-					close(nodeFD); // fecha o file descriptor do nó cliente
-				}
-				message_handler(DEBUG_MODE,1,NULL,NULL,0);
-			}
-
-			/* Mensagem do Predi*/
-			if(FD_ISSET(node.prediFD,&fds))
-			{
-				if(read(node.prediFD, buffer, 128) == 0)
-				{
-					close(node.prediFD);
-					node.prediID = -1;
-					strcpy(node.prediIP,"\0");
-					node.prediPort = -1;
-					node.prediFD = -1;
-					printf("\n[SYSTEM]: connection with predi was closed\n");
-					fflush(stdout);
-				}
-				else
-				{
-					if(JR_Message(buffer,&node,node.prediFD) == 1)
+					int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
+					read(nodeFD, buffer, 128);
+					if(JR_Message(buffer,&node,nodeFD) == 1)
 					{
-						printf("A fechar predi socket!\n");
-						close(node.prediFD); // fecha o file descriptor do nó cliente
+						printf("A fechar socket!\n");
+						close(nodeFD); // fecha o file descriptor do nó cliente
+					}
+					message_handler(DEBUG_MODE,1,NULL,NULL,0);
+				}
+
+				/* Mensagem do Predi*/
+				if(FD_ISSET(node.prediFD,&fds))
+				{
+					if(read(node.prediFD, buffer, 128) == 0)
+					{
+						startTimer = node.prediID; // store the prediID in startTimer
+
+						close(node.prediFD);
+						node.prediID = -1;
+						strcpy(node.prediIP,"\0");
+						node.prediPort = -1;
+						node.prediFD = -1;
+						printf("\n[SYSTEM]: connection with predi was closed\n");
+						fflush(stdout);
+					}
+					else
+					{
+						if(JR_Message(buffer,&node,node.prediFD) == 1)
+						{
+							printf("A fechar predi socket!\n");
+							close(node.prediFD); // fecha o file descriptor do nó cliente
+						}
+					}
+					message_handler(DEBUG_MODE,2,NULL,NULL,0);
+				}
+
+				/* Mensagem do Succi*/
+				if(FD_ISSET(node.succiFD,&fds))
+				{
+					if(read(node.succiFD, buffer, 128) == 0)
+					{
+						close(node.succiFD);
+						node.succiID = -1;
+						strcpy(node.succiIP,"\0");
+						node.succiPort = -1;
+						node.succiFD = -1;
+						printf("\n[SYSTEM]: connection with succi was closed\n");
+						fflush(stdout);
+					}
+					else
+					{
+						if(JR_Message(buffer,&node,node.succiFD) == 1)
+						{
+							printf("A fechar succi socket!\n");
+							close(node.succiFD); // fecha o file descriptor do nó cliente
+						}
+						message_handler(DEBUG_MODE,3,NULL,NULL,0);
 					}
 				}
-				message_handler(DEBUG_MODE,2,NULL,NULL,0);
-			}
 
-			/* Mensagem do Succi*/
-			if(FD_ISSET(node.succiFD,&fds))
-			{
-				if(read(node.succiFD, buffer, 128) == 0)
+				/* Mensagem para No Mestre - Comunicaçao inicial */
+				if(FD_ISSET(master_socket,&fds))
 				{
-					close(node.succiFD);
-					node.succiID = -1;
-					strcpy(node.succiIP,"\0");
-					node.succiPort = -1;
-					node.succiFD = -1;
-					printf("\n[SYSTEM]: connection with succi was closed\n");
-					fflush(stdout);
-				}
-				else
-				{
-					if(JR_Message(buffer,&node,node.succiFD) == 1)
+					read(master_socket, buffer, 128);				
+					if(JR_Message(buffer,&node,master_socket) == 1)
 					{
-						printf("A fechar succi socket!\n");
-						close(node.succiFD); // fecha o file descriptor do nó cliente
+						printf("A fechar master socket!\n");
+						close(master_socket); // fecha o file descriptor do nó cliente
+						master_socket = -1;
 					}
-					message_handler(DEBUG_MODE,3,NULL,NULL,0);
-				}
-			}
-
-			/* Mensagem para No Mestre - Comunicaçao inicial */
-			if(FD_ISSET(master_socket,&fds))
-			{
-				read(master_socket, buffer, 128);				
-				if(JR_Message(buffer,&node,master_socket) == 1)
-				{
-					printf("A fechar master socket!\n");
-					close(master_socket); // fecha o file descriptor do nó cliente
-					master_socket = -1;
-				}
-				message_handler(DEBUG_MODE,4,NULL,NULL,0);
+					message_handler(DEBUG_MODE,4,NULL,NULL,0);
 			}
 		}
 	}
