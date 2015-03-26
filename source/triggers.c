@@ -73,6 +73,16 @@ int Join_Ring(ringStruct* node, socketStruct start)
 void searchNode(ringStruct * ringData, int k)
 { // returns 0 if everything went as expected
   	char msg[128];
+  	extern int startTimer;
+
+  	if(startTimer != 0)
+  	{
+  		sprintf(msg,"QRY %i %i\n", ringData->myID, k);
+		sendTCP(msg, ringData->succiFD);
+		ringData->search_status = 1;
+		return;
+  	}
+
 	if(k>=0 && k<64)
 	{
 		if(ringData->myID ==-1)
@@ -168,7 +178,7 @@ void showNode(ringStruct * ringData)
 		(ringData->myID == -1) ? printf("None ") : printf("%i ", ringData->myID);
 		printf("succi:");
 		(ringData->succiID == -1) ? printf("None.") : printf("%i.", ringData->succiID);
-		if(ringData->starter == 1) printf(" Your node is the started node of the ring.");
+		if(ringData->starter == 1) printf(" Your node is the starter node of the ring.");
 		printf("\n");
 	}
 	return;

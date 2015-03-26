@@ -1,5 +1,6 @@
 #include "responses.h"
 #include "triggers.h"
+#include "network.h"
 
 int FDsocket;
 
@@ -39,6 +40,7 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 	char  cmd[128], msg[128];
 	int  Port, ID;
 	char IP[128];
+	extern int startTimer;
 	socketStruct tmp;
 	if(sscanf(request,"%s %d %s %d",cmd,&ID,IP,&Port) != 4)
 	{
@@ -73,6 +75,7 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 				strcpy(node->prediIP,IP);
 				node->prediPort = Port;
 				node->prediFD = senderSocket;
+				startTimer = 0;
 			}
 			else
 			{
@@ -95,13 +98,36 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 int Message_RSP(ringStruct* node, char* request)
 {
 	char cmd[128], msg[128];
-	int  Port, ID, Master, Destination;
+	int  Port, ID, Master, Destination, n;
 	char IP[128];
+	char trailing_message[20];
 
-	if(sscanf(request,"%s %d %d %d %s %d",cmd,&Master,&ID,&Destination,IP,&Port) != 6)
+	n = sscanf(request,"%s %d %d %d %s %d %s",cmd,&Master,&ID,&Destination,IP,&Port,trailing_message);
+	//printf("RSP. n=%d\n", n);
+	if(n != 6)
 	{
+		//printf("%s", trailing_message);
+		if(n == 7 && strcmp(trailing_message, "FAILED") == 0)
+		{
+			if(node->myID == Master)
+			{
+				socketStruct tmp = setupSocket(IP, Port, 'T');
+				sprintf(msg,"CON %d %s %d\n",node->myID, node->myIP, node->myPort);
+				sendTCP(msg, tmp.socketFD);
+				close(tmp.socketFD);
+				return 0;
+			}
+			else
+			{
+				sendTCP(request,node->prediFD);
+				return 0;
+			}
+		}
+		else
+		{
 		printf("Bad Message (RSP)\n");
 		return 1;
+		}
 	}
 
 	if(node->search_status == 0)
@@ -149,7 +175,15 @@ int Message_QRY(ringStruct*node, char* request)
 	}
 	else
 	{
-		if(responsability(node->prediID,node->myID,ID))
+		if(node->succiID == -1) // broken ring
+		{
+			memset(msg,0,128);
+			sprintf(msg,"RSP %d %d %d %s %d FAILED\n",Master, ID,node->myID,node->myIP,node->myPort);
+			sendTCP(msg, node->prediFD);
+			printf("Ring is broken, dealing with it.\n");
+		}
+
+		else if(responsability(node->prediID,node->myID,ID))
 		{
 			memset(msg,0,128);
 			sprintf(msg,"RSP %d %d %d %s %d \n",Master, ID,node->myID,node->myIP,node->myPort);
@@ -194,7 +228,6 @@ int Message_CON(ringStruct* node, char* request)
 	char cmd[128], msg[128];
 	int dest_ID, dest_Port;
 	char dest_IP[128];
-	socketStruct tmp;
 
 	if(sscanf(request,"%s %d %s %d",cmd, &dest_ID, dest_IP, &dest_Port) != 4)
 	{
