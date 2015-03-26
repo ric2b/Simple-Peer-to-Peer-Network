@@ -176,11 +176,11 @@ void showNode(ringStruct * ringData)
 
 int joinRing_KnownSucci(ringStruct * ringData, int succiID, char * succiIP, int succiPort)
 {
-	ringData->starter=0;
-  	ringData->succiID = succiID;
+	ringData->succiID = succiID;
   	strcpy(ringData->succiIP, succiIP);
   	ringData->succiPort = succiPort;
 	ringData->succiFD = setupSocket(succiIP, succiPort, 'T').socketFD;
+	
 	char joinCommand[128*2]; //para aguentar com os 128 do IP + extras
 	sprintf(joinCommand, "NEW %d %s %d", ringData->myID, ringData->myIP, ringData->myPort);
   	sendTCP(joinCommand, ringData->succiFD);

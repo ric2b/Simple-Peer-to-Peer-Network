@@ -1,4 +1,5 @@
 #include "responses.h"
+#include "triggers.h"
 
 int FDsocket;
 
@@ -194,10 +195,9 @@ int Message_QRY(ringStruct*node, char* request)
 
 int Message_SUCC(ringStruct*node, char* request)
 {
-	char cmd[128], msg[128];
+	char cmd[128];
 	int dest_ID, dest_Port;
 	char dest_IP[128];
-	socketStruct Succi_Node;
 
 	if(sscanf(request,"%s %d %s %d",cmd, &dest_ID, dest_IP, &dest_Port) != 4)
 	{
@@ -211,16 +211,7 @@ int Message_SUCC(ringStruct*node, char* request)
         return 1;
 	}
 
-	Succi_Node = setupSocket(dest_IP,dest_Port,'T');
-
-	node->succiFD = Succi_Node.socketFD;
-	node->succiID = dest_ID;
-	strcpy(node->succiIP,dest_IP);
-	node->succiPort = dest_Port;
-
-	memset(msg,0,128);
-	sprintf(msg,"NEW %d %s %d\n",node->myID,node->myIP,node->myPort);
-	sendTCP(msg,Succi_Node.socketFD);
+	joinRing_KnownSucci(node, dest_ID, dest_IP, dest_Port);
 
 	printf("9\n");
 	printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
