@@ -192,7 +192,7 @@ void GetIP(ringStruct* node)
         {
             if (getnameinfo(aux->ifa_addr, sizeof(struct sockaddr_in), addr, 128, NULL, 0, NI_NUMERICHOST) == 0)
             {
-                printf("Self Address on %s:  %s \n",aux->ifa_name, addr);
+                //printf("Self Address on %s:  %s \n",aux->ifa_name, addr);
                 strcpy(node->myIP, addr);
                 break;
             }           

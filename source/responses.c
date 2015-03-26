@@ -201,15 +201,10 @@ int Message_CON(ringStruct* node, char* request)
 		printf("Bad Message (CON)\n");
 		return 1;
 	}
-	memset(msg,0,128);
-	sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);
-	tmp =  setupSocket(dest_IP,dest_Port,'T');
-	sendTCP(msg,tmp.socketFD);
+
 	close(node->succiFD);
-	node->succiFD = tmp.socketFD;
-	node->succiID = dest_ID;
-	node->succiPort = dest_Port;
-	strcpy(node->succiIP,dest_IP);
+	joinRing_KnownSucci(node, dest_ID, dest_IP, dest_Port);
+
 	message_handler(DEBUG_MODE,8,msg,node,0);
 	return 0;
 }
