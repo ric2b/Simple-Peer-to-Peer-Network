@@ -67,9 +67,19 @@ int run_commands(ringStruct* node, socketStruct socket)
 
 	memset(userInput, 0, 64);
 	strcpy(cmd,"help"); //default to help
-	read(0,userInput,63); // stdin
+
+	if(read(0,userInput,63) < 0) // stdin
+	{
+		printf("Error while reading from \"STDIN\"\n");
+		exit(-1);
+	}
 	printf("[SYSTEM]: ");
-	sscanf(userInput,"%s",cmd);
+	if(sscanf(userInput,"%s",cmd) != 1)
+	{
+		printf("Error while scanning input from \"STDIN\"\n");
+		exit(-1);
+	}
+
 
 	if(strcmp(cmd,"exit") == 0)
 	{
@@ -99,7 +109,11 @@ int run_commands(ringStruct* node, socketStruct socket)
 	}
 	else if(strcmp(cmd,"search") == 0)
 	{
-		sscanf(userInput,"%s %i",cmd,&qryNode);
+		if(sscanf(userInput,"%s %i",cmd,&qryNode) != 2)
+		{
+			printf("Search format not allowed.\nPlease use : \"search node_number\"\n");
+			return -1;
+		}
        	searchNode(node,qryNode);
 		return -1;
    	}
@@ -113,17 +127,17 @@ int run_commands(ringStruct* node, socketStruct socket)
 		}
 		else if(joinargs == 3 && myID >-1 && myID < 64 && ringID > 0)
 		{
-			node->myID=myID;
-			node->ringID=ringID;
+			node->myID = myID;
+			node->ringID = ringID;
 			printf("Joining ring number %i with an identifier %i.\n", (node->ringID), (node->myID));
-			return Join_Ring(node, socket);
+			return Join_Ring(node,socket);
 		}
 		else if(joinargs==6 && ringID > 0 && myID > -1 && myID < 64 && succiID > -1 && succiID < 64 && succiPort > -1)
 		{
-			node->myID=myID;
-			node->ringID=ringID;
-			node->starter=0;
-			joinRing_KnownSucci(node, node->succiID, node->succiIP, node->succiPort);
+			node->myID = myID;
+			node->ringID = ringID;
+			node->starter = 0;
+			joinRing_KnownSucci(node,node->succiID,node->succiIP,node->succiPort);
 			printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
 			return -1;
   		}

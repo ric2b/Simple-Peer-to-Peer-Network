@@ -8,7 +8,7 @@ int Message_ID(ringStruct* node,char * request, int senderSocket)
 	char msg[128], cmd[128];
 	int ID;
 
-	if(sscanf(request,"%s %d",cmd,&ID)!=2)
+	if(sscanf(request,"%s %d",cmd,&ID) != 2)
 	{
 		printf("Bad Message (ID)\n");
 		return 1;

@@ -230,7 +230,7 @@ socketStruct setupSocket(char * destinatario, int port, char protocol)
     socketFD = socket(AF_INET,SOCK_STREAM,0);
   else
   {
-    printf("protocolo é U (USP) ou T (TCP)\n");
+    printf("protocolo é U (UDP) ou T (TCP)\n");
     exit(-1);
   }
 
@@ -244,7 +244,7 @@ socketStruct setupSocket(char * destinatario, int port, char protocol)
 
   setsockopt(socketFD, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
 
-  if(ignoreAddr != 1) // se gethostbyname falhou, dnão mexer no endereco
+  if(ignoreAddr != 1) // se gethostbyname falhou, não mexer no endereco
   {
     a=(struct in_addr*)h->h_addr_list[0];
 
@@ -256,8 +256,6 @@ socketStruct setupSocket(char * destinatario, int port, char protocol)
     socketCFG.addr = addr;
     socketCFG.addrlen = sizeof(*addr);
   }
-
-  
 
   if(protocol == 'T')
   {
