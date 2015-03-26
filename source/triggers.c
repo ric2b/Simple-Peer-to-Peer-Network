@@ -20,15 +20,15 @@ int Join_Ring(ringStruct* node, socketStruct start)
 	socketStruct MasterNode;
 
 	sprintf(msg,"BQRY %d",node->ringID);
-	printf("Command sent: %s\n",msg);
-	printf("Socket: %d\n",start.socketFD);
+	//printf("Command sent: %s\n",msg);
+	//printf("Socket: %d\n",start.socketFD);
 
 	if((temp = sendUDP(msg, start)) == -1)
 		exit(1);
 	if((temp = recvUDP(buffer,start)) == -1)
 		exit(1);
 
-	printf("Command recieved: %s\n",buffer);
+	//printf("Command recieved: %s\n",buffer);
 
 	if(strcmp(buffer,"EMPTY") == 0)
 	{
@@ -41,7 +41,7 @@ int Join_Ring(ringStruct* node, socketStruct start)
 	    if((temp = recvUDP(buffer,start)) == -1)
 	      exit(1);
 
-	    printf("Temp: %s\n",buffer);
+	    //printf("Temp: %s\n",buffer);
 	    node->starter = 1;
 
 	    if(strcmp(buffer,"OK") == 0)
@@ -61,7 +61,7 @@ int Join_Ring(ringStruct* node, socketStruct start)
 		return 1;
 	}
 
-	printf("IP: %s\nPort: %d\n",idIP,startTCP);
+	//printf("IP: %s\nPort: %d\n",idIP,startTCP);
 	sprintf(msg,"ID %d\n",node->myID);
 	node->starter = 0;
 	MasterNode = setupSocket(idIP,startTCP,'T');

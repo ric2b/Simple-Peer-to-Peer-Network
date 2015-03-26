@@ -6,6 +6,8 @@
 #include <string.h>
 #include <ifaddrs.h>
 
+extern int DEBUG_MODE;
+
 typedef struct socketStruct
 {
   int socketFD;
@@ -36,6 +38,6 @@ typedef struct ringStruct
   int NEWfd;
   char externalIP[128];
 
-} ringStruct;
+}ringStruct;
 
 #endif

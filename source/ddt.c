@@ -6,10 +6,12 @@
 
 #include "interface.h"
 #include "responses.h"
+#include "print_messages.h"
 
 #define STDIN 0
 
 int keepRunning = 1;
+int DEBUG_MODE = 0;
 
 void intHandler()
 {
@@ -31,7 +33,7 @@ int main(int argc, char **argv)
 
 	Node_Initialization(&node);
 
-	check_arguments(argc, argv, bootIP, & bootport, & ringport, node.externalIP, & option);
+	check_arguments(argc, argv, bootIP, & bootport, & ringport, node.externalIP, & option, &DEBUG_MODE);
 
 	listenFD = listenSocket(&ringport);
 	node.myPort = ringport;
@@ -69,15 +71,12 @@ int main(int argc, char **argv)
 			{
 				refreshSocket = run_commands(&node, socketCFG_UDP);
 				if(refreshSocket!=-1)
-				{
 					master_socket=refreshSocket;
-				}
 			}
 
 			/* Mensagem de desconhecido */
 			if(FD_ISSET(listenFD, &fds))
 			{
-				printf("Servidor: %d\n",listenFD);
 				int nodeFD = aceita_cliente(listenFD, clientIP); // cria um novo socket de comunicação para o nó cliente
 				read(nodeFD, buffer, 128);
 				if(JR_Message(buffer,&node,nodeFD) == 1)
@@ -85,7 +84,7 @@ int main(int argc, char **argv)
 					printf("A fechar socket!\n");
 					close(nodeFD); // fecha o file descriptor do nó cliente
 				}
-				printf("Finished processing\n");
+				message_handler(DEBUG_MODE,1,NULL,NULL,0);
 			}
 
 			/* Mensagem do Predi*/
@@ -103,14 +102,13 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					printf("Predi Funct\n");
 					if(JR_Message(buffer,&node,node.prediFD) == 1)
 					{
 						printf("A fechar predi socket!\n");
 						close(node.prediFD); // fecha o file descriptor do nó cliente
 					}
-					printf("Finished processing predi\n");
 				}
+				message_handler(DEBUG_MODE,2,NULL,NULL,0);
 			}
 
 			/* Mensagem do Succi*/
@@ -128,29 +126,26 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					printf("Succi Funct\n");
 					if(JR_Message(buffer,&node,node.succiFD) == 1)
 					{
 						printf("A fechar succi socket!\n");
 						close(node.succiFD); // fecha o file descriptor do nó cliente
 					}
-					printf("Finished processing succi\n");
+					message_handler(DEBUG_MODE,3,NULL,NULL,0);
 				}
 			}
 
 			/* Mensagem para No Mestre - Comunicaçao inicial */
 			if(FD_ISSET(master_socket,&fds))
 			{
-				read(master_socket, buffer, 128);
-				printf("Add Node Funct\n");
+				read(master_socket, buffer, 128);				
 				if(JR_Message(buffer,&node,master_socket) == 1)
 				{
 					printf("A fechar master socket!\n");
 					close(master_socket); // fecha o file descriptor do nó cliente
 					master_socket = -1;
 				}
-				printf("Finished processing Add Node\n");
-
+				message_handler(DEBUG_MODE,4,NULL,NULL,0);
 			}
 		}
 	}

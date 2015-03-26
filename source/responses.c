@@ -21,21 +21,14 @@ int Message_ID(ringStruct* node,char * request, int senderSocket)
 		if((node->succiFD == -1 && node->prediFD == -1) || responsability(node->prediID,node->myID,ID))
 		{
 			sprintf(msg,"SUCC %d %s %d\n",node->myID, node->myIP, node->myPort);
-			printf("%s",msg);
 			sendTCP(msg, senderSocket);
-			printf("1\n");
 		}
 		else
 		{
-			sprintf(msg,"QRY %d %d\n",node->myID,ID);
-			printf("%s",msg);
+			sprintf(msg,"QRY %d %d\n",node->myID,ID);			
 			sendTCP(msg, node->succiFD);
-			printf("2\n");
 		}
-		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-		printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
-
+		message_handler(DEBUG_MODE,5,msg,node,0);
 		return 0;
 	}
 	return 1;
@@ -61,7 +54,6 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 			strcpy(node->prediIP,IP);
 			node->prediPort = Port;
 			node->prediFD = senderSocket;
-
 			tmp = setupSocket(IP,Port,'T');
 			node->succiID = ID;
 			strcpy(node->succiIP,IP);
@@ -70,11 +62,7 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 			memset(msg,0,128);
 			sprintf(msg,"NEW %d %s %d\n", node->myID, node->myIP, node->myPort);
 			sendTCP(msg,node->succiFD);
-
-			printf("3\n");
-			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+			message_handler(DEBUG_MODE,6,NULL,node,0);
 		    return 0;
 		}
 		else
@@ -85,7 +73,6 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 				strcpy(node->prediIP,IP);
 				node->prediPort = Port;
 				node->prediFD = senderSocket;
-				printf("3\n");
 			}
 			else
 			{
@@ -97,11 +84,8 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 				strcpy(node->prediIP,IP);
 				node->prediPort = Port;
 				node->prediFD = FDsocket;
-				printf("4\n");
 			}
-			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+			message_handler(DEBUG_MODE,7,NULL,node,0);
 			return 0;
 		}
 	}
@@ -125,12 +109,8 @@ int Message_RSP(ringStruct* node, char* request)
 		if(Master == node->myID)
 		{
 			sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
-			printf("%s\n",msg);
 			sendTCP(msg, node->NEWfd);
-			printf("9\n");
-			printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-			printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-			printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+			message_handler(DEBUG_MODE,8,msg,node,0);
 		}
 		else
 		{
@@ -147,8 +127,7 @@ int Message_RSP(ringStruct* node, char* request)
 		else
 			sendTCP(request,node->prediFD);
 	}
-	return 0;
-	// REVER
+	return 0; //REVER
 }
 
 int Message_QRY(ringStruct*node, char* request)
@@ -165,29 +144,24 @@ int Message_QRY(ringStruct*node, char* request)
 
 	if(node->succiFD == -1 && node->prediFD == -1)
 	{
-		printf("Big Shet I Guess\n");
+		printf("Something went wrong with socket creation\n");
 		return 1;
 	}
 	else
 	{
 		if(responsability(node->prediID,node->myID,ID))
 		{
-			printf("My responsability\n");
 			memset(msg,0,128);
 			sprintf(msg,"RSP %d %d %d %s %d \n",Master, ID,node->myID,node->myIP,node->myPort);
-			printf("Sending to Master %s",msg);
 			sendTCP(msg, node->prediFD);
-			printf("8\n");
+			message_handler(DEBUG_MODE,9,msg,node,0);
 		}
 		else
 		{
-			printf("Sending to Succi %s",request);
 			sendTCP(request, node->succiFD);
-			printf("5\n");
+			message_handler(DEBUG_MODE,10,request,node,0);
 		}
-		printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-		printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-		printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+		message_handler(DEBUG_MODE,8,msg,node,0);
 		return 0;
 	 }
 	 return 1;
@@ -210,13 +184,8 @@ int Message_SUCC(ringStruct*node, char* request)
         node->myID = -1;
         return 1;
 	}
-
 	joinRing_KnownSucci(node, dest_ID, dest_IP, dest_Port);
-
-	printf("9\n");
-	printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-	printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-	printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+	message_handler(DEBUG_MODE,8,request,node,0);
 	return 0;
 }
 
@@ -241,10 +210,7 @@ int Message_CON(ringStruct* node, char* request)
 	node->succiID = dest_ID;
 	node->succiPort = dest_Port;
 	strcpy(node->succiIP,dest_IP);
-	printf("10\n");
-	printf("Succi: %d \t Predi: %d\n",node->succiID,node->prediID);
-	printf("Succi FD: %d \t Predi FD: %d\n",node->succiFD,node->prediFD);
-	printf("Succi TCP: %d \t Predi TCP: %d\n",node->succiPort,node->prediPort);
+	message_handler(DEBUG_MODE,8,msg,node,0);
 	return 0;
 }
 
@@ -258,8 +224,7 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 {
 	char cmd[128];
 	int tmp;
-	printf("A analisar: %s\n",request);
-
+	message_handler(DEBUG_MODE,12,request,node,0);
 	FDsocket = nodeFD;
 	sscanf(request,"%s",cmd);
 	if(strcmp(cmd,"NEW") == 0)

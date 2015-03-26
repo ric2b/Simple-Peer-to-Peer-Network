@@ -133,7 +133,7 @@ int listenSocket(int* listen_port)
   /* associa o socket à ringport */
   while(bind(listen_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
   {
-    printf("porta %d ocupada, a tentar a próxima\n", *listen_port);
+    message_handler(DEBUG_MODE,13,NULL,NULL,(*listen_port));    
     (*listen_port)++;
     server_addr.sin_port = htons(*listen_port);
   }

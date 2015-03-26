@@ -53,7 +53,7 @@ int distance(int k, int l)
     res = 64 + l - k;
   else
     res = -1;
-  printf("DISTANCE: %d\n", res);
+  message_handler(DEBUG_MODE,11,NULL,NULL,res);
   return res;
 }
 

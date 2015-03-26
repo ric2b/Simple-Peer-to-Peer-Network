@@ -3,6 +3,8 @@
 
 #include "structs.h"
 #include "network.h"
+#include "print_messages.h"
+
 
 void Node_Initialization(ringStruct* );
 
