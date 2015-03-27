@@ -140,8 +140,8 @@ int run_commands(ringStruct* node, socketStruct socket)
 			node->myID = myID;
 			node->ringID = ringID;
 			node->starter = 0;
-			joinRing_KnownSucci(node,node->succiID,node->succiIP,node->succiPort);
-			printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
+			joinRing_KnownSucci(node,succiID,succiIP,succiPort);
+			//printf("Joining ring number %i with an identifier %i that has a succi number %i, IP adress %s and TCP number equal to %i.\n", (node->ringID), (node->myID), (node->succiID), node->succiIP, (node->succiPort));
 			return -1;
   		}
 		else
