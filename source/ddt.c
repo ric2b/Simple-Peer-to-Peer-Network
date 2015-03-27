@@ -113,7 +113,10 @@ int main(int argc, char **argv)
 				{
 					if(read(node.prediFD, buffer, 128) == 0)
 					{
-						startTimer = node.prediID; // store the prediID in startTimer
+						if(node.prediID != node.succiID && node.succiID != -1)
+						{
+							startTimer = node.prediID; // store the prediID in startTimer
+						}
 
 						close(node.prediFD);
 						node.prediID = -1;
