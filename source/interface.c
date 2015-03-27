@@ -17,7 +17,7 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 
 	if(argc != 1) // Se o utilizador não forneceu argumentos, usar defaults sem se queixar
 	{
-		if((argc % 2 == 0) || (argc > 7)  || (argc <= 1))
+		if((argc > 8)  || (argc <= 1))
 		{
 			printf("\nProgram called with incorrect arguments.\n");
 			printf("Invoke the program as the following: ./ddt -t ringport -i bootIP -p bootport\n\n");
@@ -45,7 +45,8 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 				strcpy(externalIP, optarg); // se o utilizador quiser usar um IP público
 				break;
 			case 'h':
-				*DEBUG_MODE = 1;
+				*DEBUG_MODE = atoi(optarg);
+				break;
 			default:
 				printf("The expected arguments don't have the proper format. Application Aborted.\n");
 				exit(2);
