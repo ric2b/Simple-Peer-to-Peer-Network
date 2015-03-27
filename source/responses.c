@@ -194,14 +194,12 @@ int Message_CON(ringStruct* node, char* request)
 	char cmd[128], msg[128];
 	int dest_ID, dest_Port;
 	char dest_IP[128];
-	socketStruct tmp;
 
 	if(sscanf(request,"%s %d %s %d",cmd, &dest_ID, dest_IP, &dest_Port) != 4)
 	{
 		printf("Bad Message (CON)\n");
 		return 1;
 	}
-
 	close(node->succiFD);
 	joinRing_KnownSucci(node, dest_ID, dest_IP, dest_Port);
 
@@ -225,36 +223,43 @@ int JR_Message(char* request,ringStruct* node, int nodeFD)
 	if(strcmp(cmd,"NEW") == 0)
 	{
 		tmp = Message_NEW(node,request,nodeFD);
+		printf("[SYSTEM]: New predi connected.\n");
 		return (tmp == 1) ? tmp : 0;
 	}
 	if(strcmp(cmd,"ID") == 0)
 	{
 		tmp = Message_ID(node,request,nodeFD);
+		printf("[SYSTEM]: Request from node received.\n");		
 		return (tmp == 1) ? tmp : 0;
 	}
 	if(strcmp(cmd,"RSP") == 0)
 	{
 		tmp = Message_RSP(node,request);
+		printf("[SYSTEM]: Responding to Query.\n");
 		return (tmp == 1) ? tmp : 0;
 	}
 	if(strcmp(cmd,"QRY") == 0)
 	{
 		tmp = Message_QRY(node,request);
+		printf("[SYSTEM]: Transmitting query.\n");
 		return (tmp == 1) ? tmp : 0;
 	}
 	if(strcmp(cmd,"SUCC") == 0)
 	{
 		tmp = Message_SUCC(node,request);
+		printf("[SYSTEM]: Node added to the ring.\n");
 		return (tmp == 0) ? tmp : 1;
 	}
 	if(strcmp(cmd,"CON") == 0)
 	{
 		tmp = Message_CON(node,request);
+		printf("[SYSTEM]: Succi Node disconnected.\n");
 		return (tmp == 1) ? tmp : 0;
 	}
 	if(strcmp(cmd,"BOOT") == 0)
 	{
 		tmp = Message_BOOT(node,request);
+		printf("[SYSTEM]: This node is now the master node.\n");
 		return (tmp == 0) ? tmp : 1;
 	}
 	return 1;

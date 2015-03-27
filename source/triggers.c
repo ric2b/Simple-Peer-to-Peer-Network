@@ -34,8 +34,6 @@ int Join_Ring(ringStruct* node, socketStruct start)
 	{
 	    GetIP(node);
 	    sprintf(msg,"REG %d %d %s %d\n",node->ringID, node->myID, node->myIP, node->myPort);
-	    printf("%s\n",msg);
-
 	    if((temp = sendUDP(msg,start)) == -1)
 	      exit(1);
 	    if((temp = recvUDP(buffer,start)) == -1)

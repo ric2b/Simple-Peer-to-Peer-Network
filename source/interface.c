@@ -17,10 +17,11 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 
 	if(argc != 1) // Se o utilizador não forneceu argumentos, usar defaults sem se queixar
 	{
-		if((argc > 8)  || (argc <= 1))
+		if((argc > 8)  || (argc <= 1) || argc % 2 == 0)
 		{
 			printf("\nProgram called with incorrect arguments.\n");
 			printf("Invoke the program as the following: ./ddt -t ringport -i bootIP -p bootport\n\n");
+			printf("From debug mode use: -h 1\n");
 			exit(1);
 		}
 	}
