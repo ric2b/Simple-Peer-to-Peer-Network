@@ -19,9 +19,8 @@ socketStruct server;
 
 void intHandler()
 {
-	signal(SIGALRM, SIG_IGN);
 	keepRunning = 0;
-	signal(SIGINT, intHandler);
+	signal(SIGINT, SIG_DFL); // if pressed twice, kill the program
 }
 
 
