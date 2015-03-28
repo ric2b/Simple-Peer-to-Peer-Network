@@ -51,13 +51,6 @@ int Join_Ring(ringStruct* node, socketStruct start)
 		exit(-1);
 	}
 
-	if(startid == node->myID)
-	{
-	    printf("Can't use identifier %d, please choose a different one and try again\n",node->myID);
-		node->myID = -1;
-		return 1;
-	}
-
 	//printf("IP: %s\nPort: %d\n",idIP,startTCP);
 	sprintf(msg,"ID %d\n",node->myID);
 	node->starter = 0;

@@ -159,7 +159,7 @@ int main(int argc, char **argv)
 					read(master_socket, buffer, 128);				
 					if(JR_Message(buffer,&node,master_socket) == 1)
 					{
-						printf("A fechar master socket!\n");
+						printf("Connection with starter node closed\n");
 						close(master_socket); // fecha o file descriptor do nó cliente
 						master_socket = -1;
 					}

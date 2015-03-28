@@ -227,7 +227,7 @@ int Message_SUCC(ringStruct*node, char* request)
 		printf("Bad Message (SUCC)\n");
 		return 1;
 	}
-	while(dest_ID == node->myID)
+	if(dest_ID == node->myID)
 	{
 		printf("Can't use identifier %d, please choose a different one and try again\n",node->myID);
         node->myID = -1;
