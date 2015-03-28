@@ -57,13 +57,25 @@ void print_ring(int valores[])
     int k = 0;
     int m = 0;
     int ordem = 0;
-    int i,j,n,p;
+    int i,j=0,n,p;
     n = 0;
+    //int valore[]={0,1,2,4,7,15,23,31,36,45,56,62};
     p = 0;
     int size = 64;
     printf("%d\n",size);
     for(i=0;i<64;i++)
-        printf("Print %d: %d\n",i,valores[i]);
+    {
+        /*if(valore[j] == i)
+        {
+            valores[i] = valore[j];
+            j++;
+        }*/
+        if(i % 3 == 0)
+            valores[i] = i;
+        else
+            valores[i] = -1;
+        printf("Print %d : %d\n",i,valores[i]);
+    }    
 
     for (i=0; i<=2*raio; i++)
     {
@@ -93,7 +105,7 @@ void print_ring(int valores[])
                         p = 0;
                         ordem = 2;
                     }
-                //printf("c%d=%d@%d",i,valores[m],ordem);
+                //printf("c%d=%d@%d-%d",i,valores[m],ordem,m);
                 if(i == valores[m] && m <= 32)
                 { 
                     if(ordem == 3)
@@ -129,7 +141,7 @@ void print_ring(int valores[])
         ordem = 0;
         if(p == 0)
             k++;
-        if(n == 0)
+        if((n == 0 && i != 0) || (n == 0 && i == 0 && m == 0))
             m++;
  
     }
