@@ -13,8 +13,6 @@
 #define timeout 7
 
 int keepRunning = 1;
-int startTimer = 0;
-int brokenLink = 0;
 int DEBUG_MODE = 0;
 
 socketStruct server;
@@ -35,7 +33,6 @@ int main(int argc, char **argv)
 	int     listenFD = 8080;
 	int     master_socket = -1;
 	int     refreshSocket = -1;
-	int 	readyToRead;
 	socketStruct socketCFG_UDP;
 	ringStruct node;
 
@@ -53,9 +50,6 @@ int main(int argc, char **argv)
 	signal(SIGPIPE, SIG_IGN); // ignorar sigpipes
 	signal(SIGINT, intHandler);
 
-	struct timeval tv = {timeout, 0}; // to use select as a timer
-	struct timeval * timer;
-
 	fd_set fds; // isto são tretas para o select
 	int maxfd;
 	while(keepRunning)
@@ -72,23 +66,11 @@ int main(int argc, char **argv)
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
 		maxfd = (master_socket > maxfd) ? master_socket : maxfd; //calcular maxfd
 		//printf("Waiting to select...\n");
-		if(startTimer != 0) // suspicion of broken ring
-		{
-			timer = &tv;
-		}
-		else timer = NULL;
 
 		printf("\n> ");
 		fflush(stdout);
-		readyToRead = select(maxfd+1, &fds, NULL, NULL, timer);
-		
-		if(readyToRead <= 0) // timed out
-		{
-			searchNode(&node, startTimer);
-			startTimer = 0;
-		}
-		else
-		{
+		if(select(maxfd+1, &fds, NULL, NULL, NULL))
+		{		
 			memset(buffer,0,128);
 			/* Comando do Utilizador*/
 			if(FD_ISSET(STDIN, &fds))
@@ -116,11 +98,6 @@ int main(int argc, char **argv)
 				{
 					if(read(node.prediFD, buffer, 128) == 0)
 					{
-						if(node.prediID != node.succiID && node.succiID != -1)
-						{
-							startTimer = node.prediID; // store the prediID in startTimer
-						}
-
 						close(node.prediFD);
 						node.prediID = -1;
 						strcpy(node.prediIP,"\0");
@@ -143,8 +120,20 @@ int main(int argc, char **argv)
 				/* Mensagem do Succi*/
 				if(FD_ISSET(node.succiFD,&fds))
 				{
-					if(read(node.succiFD, buffer, 128) == 0)
+					if(read(node.succiFD, buffer, 128) == 0) // recuperar o anel
 					{
+						printf("RING IS BROKEN, TRYING TO FIX IT\n");
+						if(node.prediID != node.succiID && node.succiID != -1)
+						{
+							memset(buffer,0,128);
+							if(node.starter == 1)
+								sprintf(buffer,"RSP 0 71 %d %s %d\n", node.myID,node.myIP,node.myPort);
+							else
+								sprintf(buffer,"RSP 0 70 %d %s %d\n", node.myID,node.myIP,node.myPort);
+							
+							sendTCP(buffer, node.prediFD);
+						}
+
 						close(node.succiFD);
 						node.succiID = -1;
 						strcpy(node.succiIP,"\0");
@@ -177,7 +166,7 @@ int main(int argc, char **argv)
 					message_handler(DEBUG_MODE,4,NULL,NULL,0);
 			}
 		}
-	}
+	}	
 
 	if(node.myID!=-1)
 		removeNode(&node, socketCFG_UDP);

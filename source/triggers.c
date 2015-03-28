@@ -70,14 +70,6 @@ int Join_Ring(ringStruct* node, socketStruct start)
 void searchNode(ringStruct * ringData, int k)
 { // returns 0 if everything went as expected
   	char msg[128];
-  	extern int startTimer;
-
-  	if(startTimer != 0)
-  	{
-  		sprintf(msg,"QRY %i %i\n", ringData->myID, k);
-		sendTCP(msg, ringData->succiFD);
-		return;
-  	}
 
 	if(k>=0 && k<64)
 	{

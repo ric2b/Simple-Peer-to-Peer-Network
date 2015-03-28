@@ -40,7 +40,6 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 	char  cmd[128], msg[128];
 	int  Port, ID;
 	char IP[128];
-	extern int startTimer;
 	socketStruct tmp;
 	if(sscanf(request,"%s %d %s %d",cmd,&ID,IP,&Port) != 4)
 	{
@@ -75,7 +74,6 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 				strcpy(node->prediIP,IP);
 				node->prediPort = Port;
 				node->prediFD = senderSocket;
-				startTimer = 0;
 			}
 			else
 			{
@@ -114,8 +112,9 @@ int Message_RSP(ringStruct* node, char* request)
 	{
 		printf("received broken ring message: %s\n", request);
 		
-		if(node->myID == Master)
+		if(node->prediFD == -1)
 		{
+			printf("BROKEN RING IS NOW HOPEFULLY FIXED!\n");
 			socketStruct tmp = setupSocket(IP, Port, 'T');
 			sprintf(msg,"CON %d %s %d\n",node->myID, node->myIP, node->myPort);
 			sendTCP(msg, tmp.socketFD);
@@ -138,7 +137,7 @@ int Message_RSP(ringStruct* node, char* request)
 					keepRunning = 0;
 				}
 			}
-			return 0;
+			
 		}
 		else
 		{
@@ -149,8 +148,8 @@ int Message_RSP(ringStruct* node, char* request)
 			}
 			else
 				sendTCP(request,node->prediFD);
-			return 0;
 		}
+		return 0;
 	}
 
 
@@ -199,19 +198,7 @@ int Message_QRY(ringStruct*node, char* request)
 	}
 	else
 	{
-		if(node->succiID == -1) // broken ring
-		{
-			memset(msg,0,128);
-			if(node->starter == 1)
-				sprintf(msg,"RSP %d 71 %d %s %d\n",Master, node->myID,node->myIP,node->myPort);
-			else
-				sprintf(msg,"RSP %d 70 %d %s %d\n",Master, node->myID,node->myIP,node->myPort);
-			
-			sendTCP(msg, node->prediFD);
-			printf("Ring is broken, dealing with it.\n");
-		}
-
-		else if(responsability(node->prediID,node->myID,ID))
+		if(responsability(node->prediID,node->myID,ID))
 		{
 			memset(msg,0,128);
 			sprintf(msg,"RSP %d %d %d %s %d \n",Master, ID,node->myID,node->myIP,node->myPort);
