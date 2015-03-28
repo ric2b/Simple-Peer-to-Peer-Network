@@ -133,12 +133,11 @@ void removeNode(ringStruct * ringData, socketStruct socketCFG)
 		    }
 		}
 		close(ringData->succiFD);
-		if(ringData->prediID != ringData->succiID) // há mais que 2 nós
-		{
-			memset(msg,0,128);
-			sprintf(msg,"CON %d %s %d\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
-			sendTCP(msg, ringData->prediFD);
-		}
+
+		memset(msg,0,128);
+		sprintf(msg,"CON %d %s %d\n", ringData->succiID, ringData->succiIP, ringData->succiPort);
+		sendTCP(msg, ringData->prediFD);
+
 		close(ringData->prediFD);
 		nodeReset(ringData);
 		return;

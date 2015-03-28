@@ -250,6 +250,24 @@ int Message_CON(ringStruct* node, char* request)
 		return 1;
 	}
 	close(node->succiFD);
+
+	if(dest_ID == node->myID)
+	{
+		strcpy(node->succiIP,"\0");
+    	node->succiPort = -1;
+    	node->succiFD = -1;
+    	node->succiID = -1;
+    	
+    	close(node->prediFD);
+    	strcpy(node->prediIP,"\0");
+    	node->prediPort = -1;
+    	node->prediFD = -1;
+    	node->prediID = -1;
+
+		printf("This node is now alone on the ring.\n");
+		return 0;
+	}
+
 	joinRing_KnownSucci(node, dest_ID, dest_IP, dest_Port);
 
 	message_handler(DEBUG_MODE,8,msg,node,0);

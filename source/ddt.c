@@ -126,18 +126,21 @@ int main(int argc, char **argv)
 				{
 					if(read(node.succiFD, buffer, 128) == 0) // recuperar o anel
 					{
-						printf("RING IS BROKEN, TRYING TO FIX IT\n");
-						if(node.prediID != node.succiID && node.succiID != -1)
+						if(node.succiID != node.prediID)
 						{
-							memset(buffer,0,128);
-							if(node.starter == 1)
-								sprintf(buffer,"RSP 0 71 %d %s %d\n", node.myID,node.myIP,node.myPort);
-							else
-								sprintf(buffer,"RSP 0 70 %d %s %d\n", node.myID,node.myIP,node.myPort);
-							
-							sendTCP(buffer, node.prediFD);
+							printf("RING IS BROKEN, TRYING TO FIX IT\n");
+							if(node.prediID != node.succiID && node.succiID != -1)
+							{
+								memset(buffer,0,128);
+								if(node.starter == 1)
+									sprintf(buffer,"RSP 0 71 %d %s %d\n", node.myID,node.myIP,node.myPort);
+								else
+									sprintf(buffer,"RSP 0 70 %d %s %d\n", node.myID,node.myIP,node.myPort);
+								
+								sendTCP(buffer, node.prediFD);
+							}
 						}
-
+						
 						close(node.succiFD);
 						node.succiID = -1;
 						strcpy(node.succiIP,"\0");

@@ -19,7 +19,7 @@ void nodeReset(ringStruct * node)
     strcpy(node->succiIP,"\0");
     node->succiPort = -1;
     node->succiFD = -1;
-     node->prediID = -1;
+    node->prediID = -1;
     strcpy(node->prediIP,"\0");
     node->prediPort = -1;
     node->prediFD = -1;
