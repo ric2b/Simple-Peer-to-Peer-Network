@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <math.h>
 
 #include "print_messages.h"
 
@@ -48,4 +49,89 @@ void message_handler(int debug_mode, int message_id,char* message,ringStruct* no
 			printf("porta %d ocupada, a tentar a próxima\n", nb);
 	}
 	return;
+}
+
+void print_ring(int valores[]) 
+{
+    int raio = 16;
+    int k = 0;
+    int m = 0;
+    int ordem = 0;
+    int i,j,n,p;
+    n = 0;
+    p = 0;
+    int size = 64;
+    printf("%d\n",size);
+    for(i=0;i<64;i++)
+        printf("Print %d: %d\n",i,valores[i]);
+
+    for (i=0; i<=2*raio; i++)
+    {
+        for (j=0; j<=2*raio; j++)
+        {
+            double long distancia = sqrt((double long)(i-raio)*(i-raio) + (j-raio)*(j-raio));
+            if (distancia>raio-0.5 && distancia<raio+0.5)
+            {
+                if(j == 0)
+                    ordem = 1;
+                if(i == 0 || i == 32)
+                    ordem = 3; 
+                //printf("c%d=%d@%d",(64-i + 1),valores[size-k-1],ordem);
+                if(valores[size-k] == (64 - i) && size-k >= 31)
+                {
+                    if(ordem == 1)
+                    {
+                        printf("%d",valores[size-k]);
+                        k++;
+                        ordem = 2;
+                        p = 1;
+                    }
+                }
+                else
+                    if(ordem == 1)
+                    {
+                        p = 0;
+                        ordem = 2;
+                    }
+                //printf("c%d=%d@%d",i,valores[m],ordem);
+                if(i == valores[m] && m <= 32)
+                { 
+                    if(ordem == 3)
+                    {
+                        printf("%d",valores[m]);
+                        m++;
+                        ordem = 4;
+                        n = 1;
+                    }    
+                }
+                else
+                    if(ordem == 3)
+                    {
+                        ordem = 4;
+                        n = 0;
+                    } 
+                printf("...");
+            }
+            else
+            { 
+                printf("  ");
+                if(ordem == 0)
+                    ordem = 1;
+                else
+                    if(ordem == 2)
+                        ordem = 3;
+                    else
+                        if(ordem == 4)
+                            ordem = 0;
+            }
+        }
+        printf("\n");
+        ordem = 0;
+        if(p == 0)
+            k++;
+        if(n == 0)
+            m++;
+ 
+    }
+    return;
 }

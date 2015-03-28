@@ -14,4 +14,6 @@ int responsability(int predi, int i, int k);
 
 void nodeReset(ringStruct * ringData);
 
+void print_ring_query(ringStruct* node);
+
 #endif

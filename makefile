@@ -1,16 +1,16 @@
 SOURCES = $(shell ls source/*.c)
 TEMP = $(subst source/, obj/, $(SOURCES))
 OBJECTS = $(subst .c,.o, $(TEMP))
-CFLAGS = -Wall -ansi -std=gnu99 -g
+CFLAGS = -Wall -ansi -std=gnu99 -g 
 
 
 all: makefolders ddt
 
 ddt: $(OBJECTS)
-	$(CC) $^ -o $@
+	$(CC) $^ -o $@ -lm
 
 obj/%.o: source/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ 
 
 #makefolders
 makefolders:

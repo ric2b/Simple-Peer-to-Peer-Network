@@ -64,3 +64,59 @@ int responsability(int predi, int i, int k)
   else
     return 0;
 }
+
+void print_ring_query(ringStruct* node)
+{
+    int valores[64];
+    char msg[128],buffer[128];
+    char cmd[128], IP[128];
+    int Master,ID,Destination,Port;
+    int i = 0;
+    int dest = node->succiID;
+
+    for(i=0;i<64;i++)
+        valores[i] = -1;
+
+    valores[node->myID] = node->myID;
+
+    if(node->succiID == node->myID && node->prediID == node->myID)
+        valores[node->myID] = node->myID;
+    else
+    {
+        for(i=0;i<64;i++)
+        {
+            printf("%d\n",i);
+            memset(msg,0,128);
+            memset(buffer,0,128);
+            sprintf(msg,"QRY %d %d\n",node->myID,dest);
+            printf("%s",msg);
+            sendTCP(msg,node->succiFD);
+            read(node->succiFD,buffer,128);
+
+            if(sscanf(buffer,"%s %d %d %d %s %d",cmd,&Master,&ID,&Destination,IP,&Port) != 6)
+            {
+                printf("Bad Message (RSP - in print ring)\n");
+                return;
+            }
+            if(ID == Destination)
+            {    
+                valores[ID] = ID;
+                dest++;
+            }
+            else
+                dest = Destination;
+
+            if(Destination == node->prediID)
+            {
+                valores[Destination] = Destination;    
+                break;
+            }
+        }
+    }
+    for(i=0;i<64;i++)
+        printf("Valores %d: %d\n",i,valores[i]);
+
+    print_ring(valores);
+
+    return;
+}
