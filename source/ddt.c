@@ -17,6 +17,8 @@ int startTimer = 0;
 int brokenLink = 0;
 int DEBUG_MODE = 0;
 
+socketStruct server;
+
 void intHandler()
 {
 	keepRunning = 0;
@@ -45,6 +47,7 @@ int main(int argc, char **argv)
 	node.myPort = ringport;
 
 	socketCFG_UDP = setupSocket(bootIP, bootport,'U');
+	server = socketCFG_UDP;
 	GetIP(&node);
 
 	signal(SIGPIPE, SIG_IGN); // ignorar sigpipes

@@ -98,41 +98,65 @@ int Message_NEW(ringStruct* node, char* request, int senderSocket)
 int Message_RSP(ringStruct* node, char* request)
 {
 	char cmd[128], msg[128];
-	int  Port, ID, Master, Destination, n;
+	int  Port, ID, Master, Destination;
 	char IP[128];
-	char trailing_message[20];
+	extern int keepRunning;
+	extern socketStruct server;
 
-	n = sscanf(request,"%s %d %d %d %s %d %s",cmd,&Master,&ID,&Destination,IP,&Port,trailing_message);
 	//printf("RSP. n=%d\n", n);
-	if(n != 6)
+	if(sscanf(request,"%s %d %d %d %s %d",cmd,&Master,&ID,&Destination,IP,&Port) != 6)
 	{
-		//printf("%s", trailing_message);
-		if(n == 7 && strcmp(trailing_message, "FAILED") == 0)
+		printf("Bad Message (RSP)\n");
+		return 1;
+	}
+
+	if(ID == 70 || ID == 71)
+	{
+		printf("received broken ring message: %s\n", request);
+		
+		if(node->myID == Master)
 		{
-			if(node->myID == Master)
+			socketStruct tmp = setupSocket(IP, Port, 'T');
+			sprintf(msg,"CON %d %s %d\n",node->myID, node->myIP, node->myPort);
+			sendTCP(msg, tmp.socketFD);
+			close(tmp.socketFD);
+			
+			if(ID == 70 && node->starter == 0) // The starter node wasn't found during traversal, so it was the failed node 
 			{
-				socketStruct tmp = setupSocket(IP, Port, 'T');
-				sprintf(msg,"CON %d %s %d\n",node->myID, node->myIP, node->myPort);
-				sendTCP(msg, tmp.socketFD);
-				close(tmp.socketFD);
-				return 0;
+				sprintf(msg,"REG %d %d %s %d\n",node->ringID, node->myID, node->myIP, node->myPort);
+				
+				if((sendUDP(msg, server)) == -1)
+					exit(1);
+				if((recvUDP(msg, server)) == -1)
+					exit(1);				
+
+				if(strcmp(msg,"OK") == 0)
+					node->starter = 1;
+				else
+				{
+					printf("Bad response from server\n");
+					keepRunning = 0;
+				}
 			}
-			else
-			{
-				sendTCP(request,node->prediFD);
-				return 0;
-			}
+			return 0;
 		}
 		else
 		{
-		printf("Bad Message (RSP)\n");
-		return 1;
+			if(node->starter == 1) // This is the starter node, mark on the message that the starter node is still on the ring
+			{
+				sprintf(msg,"RSP %d 71 %d %s %d\n",Master, Destination, IP, Port);
+				sendTCP(msg,node->prediFD);
+			}
+			else
+				sendTCP(request,node->prediFD);
+			return 0;
 		}
 	}
 
+
 	if(node->search_status == 0)
 	{
-		if(Master == node->myID)
+		if(node->myID == Master)
 		{
 			sprintf(msg,"SUCC %d %s %d\n",Destination, IP, Port);
 			sendTCP(msg, node->NEWfd);
@@ -178,7 +202,11 @@ int Message_QRY(ringStruct*node, char* request)
 		if(node->succiID == -1) // broken ring
 		{
 			memset(msg,0,128);
-			sprintf(msg,"RSP %d %d %d %s %d FAILED\n",Master, ID,node->myID,node->myIP,node->myPort);
+			if(node->starter == 1)
+				sprintf(msg,"RSP %d 71 %d %s %d\n",Master, node->myID,node->myIP,node->myPort);
+			else
+				sprintf(msg,"RSP %d 70 %d %s %d\n",Master, node->myID,node->myIP,node->myPort);
+			
 			sendTCP(msg, node->prediFD);
 			printf("Ring is broken, dealing with it.\n");
 		}

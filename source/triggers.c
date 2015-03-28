@@ -32,7 +32,6 @@ int Join_Ring(ringStruct* node, socketStruct start)
 
 	if(strcmp(buffer,"EMPTY") == 0)
 	{
-	    GetIP(node);
 	    sprintf(msg,"REG %d %d %s %d\n",node->ringID, node->myID, node->myIP, node->myPort);
 	    if((temp = sendUDP(msg,start)) == -1)
 	      exit(1);
@@ -77,7 +76,6 @@ void searchNode(ringStruct * ringData, int k)
   	{
   		sprintf(msg,"QRY %i %i\n", ringData->myID, k);
 		sendTCP(msg, ringData->succiFD);
-		ringData->search_status = 1;
 		return;
   	}
 
