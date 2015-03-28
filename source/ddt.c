@@ -67,11 +67,14 @@ int main(int argc, char **argv)
 		maxfd = (node.succiFD > maxfd) ? node.succiFD : maxfd; //calcular maxfd
 		maxfd = (master_socket > maxfd) ? master_socket : maxfd; //calcular maxfd
 		//printf("Waiting to select...\n");
-
 		printf("\n> ");
 		fflush(stdout);
+
 		if(select(maxfd+1, &fds, NULL, NULL, NULL))
 		{		
+			if(keepRunning == 0) //necessary so it doesn't block reading from stdin
+				break;
+
 			memset(buffer,0,128);
 			/* Comando do Utilizador*/
 			if(FD_ISSET(STDIN, &fds))
@@ -171,7 +174,7 @@ int main(int argc, char **argv)
 
 	if(node.myID!=-1)
 		removeNode(&node, socketCFG_UDP);
-	printf("\nYou have closed the application.\n\n");
+	printf("\nYou have interrupted the application.\n\n");
 	closeSocket(socketCFG_UDP);
   	exit(0);
 }
