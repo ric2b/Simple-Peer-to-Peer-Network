@@ -119,7 +119,12 @@ int run_commands(ringStruct* node, socketStruct socket)
 		}
 		searchNode(node,qryNode);
 		return -1;
-	}
+   	}
+   	else if(strcmp(cmd,"print") == 0)
+	{
+       	print_ring_query(node);
+		return -1;
+   	}
 	else if(strcmp(cmd,"join") == 0)
 	{
 		joinargs=sscanf(userInput,"%s %i %i %i %s %i",cmd, &ringID, &myID, &succiID, succiIP, &succiPort);
