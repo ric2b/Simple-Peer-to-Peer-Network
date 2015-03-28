@@ -113,8 +113,8 @@ void print_ring_query(ringStruct* node)
             }
         }
     }
-    for(i=0;i<64;i++)
-        printf("Valores %d: %d\n",i,valores[i]);
+    //for(i=0;i<64;i++)
+        //printf("Valores %d: %d\n",i,valores[i]);
 
     print_ring(valores);
 

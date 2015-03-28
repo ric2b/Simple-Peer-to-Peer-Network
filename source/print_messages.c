@@ -63,19 +63,20 @@ void print_ring(int valores[])
     p = 0;
     int size = 64;
     printf("%d\n",size);
-    for(i=0;i<64;i++)
+    /*for(i=0;i<64;i++)
     {
-        /*if(valore[j] == i)
+        if(valore[j] == i)
         {
             valores[i] = valore[j];
             j++;
-        }*/
-        if(i % 3 == 0)
+        }
+        if(i % 4 == 0)
             valores[i] = i;
         else
             valores[i] = -1;
+
         printf("Print %d : %d\n",i,valores[i]);
-    }    
+    }*/   
 
     for (i=0; i<=2*raio; i++)
     {
