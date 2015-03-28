@@ -19,7 +19,9 @@ socketStruct server;
 
 void intHandler()
 {
+	signal(SIGALRM, SIG_IGN);
 	keepRunning = 0;
+	signal(SIGINT, intHandler);
 }
 
 
