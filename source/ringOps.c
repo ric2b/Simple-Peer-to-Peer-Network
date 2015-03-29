@@ -77,10 +77,11 @@ void print_ring_query(ringStruct* node)
     for(i=0;i<64;i++)
         valores[i] = -1;
 
-    valores[node->myID] = node->myID;
-
     if(node->succiID == -1 && node->prediID == -1)
-        valores[node->myID] = node->myID;
+    {    
+        if(node->myID !=-1)
+            valores[node->myID] = node->myID;
+    }
     else
     {
         for(i=0;i<64;i++)
