@@ -79,8 +79,6 @@ void print_ring_query(ringStruct* node)
 
     valores[node->myID] = node->myID;
 
-    if(node->succiID == node->myID && node->prediID == node->myID)
-        valores[node->myID] = node->myID;
     if(node->succiID == -1 && node->prediID == -1)
         valores[node->myID] = node->myID;
     else

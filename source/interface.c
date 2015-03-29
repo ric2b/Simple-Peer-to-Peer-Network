@@ -70,20 +70,22 @@ int run_commands(ringStruct* node, socketStruct socket)
 
 	memset(userInput, 0, 64);
 	strcpy(cmd,"help"); //default to help
-
-	if(read(0,userInput,63) < 0) // stdin
-	{
-		printf("Error while reading from \"STDIN\"\n");
-		exit(-1);
-	}
-	printf("[SYSTEM]: ");
-	if(sscanf(userInput,"%s",cmd) != 1)
+	memset(userInput,0,64);
+	if(fgets(userInput,20,stdin) == NULL)
 	{
 		printf("Error while scanning input from \"STDIN\"\n");
 		exit(-1);
 	}
 
-
+	if(userInput[0] == '\n')
+		return -1;
+	else
+		if(sscanf(userInput,"%s",cmd) != 1)
+		{
+			printf("Error while scanning input from \"STDIN\"\n");
+			exit(-1);
+		}
+	printf("[SYSTEM]: ");
 	if(strcmp(cmd,"exit") == 0)
 	{
 		if(node->myID!=-1)
