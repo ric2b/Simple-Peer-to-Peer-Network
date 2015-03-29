@@ -77,6 +77,9 @@ void print_ring_query(ringStruct* node)
     for(i=0;i<64;i++)
         valores[i] = -1;
 
+    if(node->myID !=-1)
+            valores[node->myID] = node->myID;
+
     if(node->succiID == -1 && node->prediID == -1)
     {    
         if(node->myID !=-1)
@@ -86,11 +89,11 @@ void print_ring_query(ringStruct* node)
     {
         for(i=0;i<64;i++)
         {
-            printf("%d\n",i);
+            //printf("%d\n",i);
             memset(msg,0,128);
             memset(buffer,0,128);
             sprintf(msg,"QRY %d %d\n",node->myID,dest);
-            printf("%s",msg);
+           // printf("%s",msg);
             sendTCP(msg,node->succiFD);
             read(node->succiFD,buffer,128);
 
