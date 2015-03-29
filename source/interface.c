@@ -163,6 +163,7 @@ int run_commands(ringStruct* node, socketStruct socket)
 		 printf("\t- leave\n");
 		 printf("\t- show \n");
 		 printf("\t- search [k]\n");
+		 printf("\t- print\n");
 		 printf("\t- exit\n\n");
 		 return -1;
 	}
