@@ -66,12 +66,10 @@ int check_arguments(int argc, char **argv, char* bootIP, int * bootport, int* ri
 int run_commands(ringStruct* node, socketStruct socket)
 {
 	int qryNode,joinargs, myID, ringID,succiID,succiPort;
-	char userInput[64], cmd[20], succiIP[20];
+	char userInput[128], cmd[20], succiIP[20];
 
-	memset(userInput, 0, 64);
-	strcpy(cmd,"help"); //default to help
-	memset(userInput,0,64);
-	if(fgets(userInput,20,stdin) == NULL)
+	memset(userInput,0,128);
+	if(fgets(userInput,128,stdin) == NULL)
 	{
 		printf("Error while scanning input from \"STDIN\"\n");
 		exit(-1);
